@@ -72,35 +72,6 @@ class AudioCrystalCavePulse extends BaseThreeJsModule {
     if (!this.audioReady) this.startStreamPolling();
   }
 
-  async tryInitializeAudio() {
-    if (this.audioReady || this.destroyed) return;
-    const sdk = globalThis.nwWrldSdk;
-    const stream = sdk?.audio?.getStream?.();
-    if (stream) {
-      this.analyzer = new AudioAnalyzer();
-      const initialized = await this.analyzer.init(stream);
-      if (initialized) {
-        this.audioReady = true;
-        if (this.pollInterval) {
-          clearInterval(this.pollInterval);
-          this.pollInterval = null;
-        }
-      }
-    }
-  }
-
-  startStreamPolling() {
-    if (this.pollInterval) return;
-    this.pollInterval = setInterval(() => {
-      if (this.destroyed) {
-        clearInterval(this.pollInterval);
-        this.pollInterval = null;
-        return;
-      }
-      this.tryInitializeAudio();
-    }, 1000);
-  }
-
   init() {
     if (!this.renderer || !this.scene || !this.camera || this.destroyed) return;
 
@@ -238,7 +209,11 @@ class AudioCrystalCavePulse extends BaseThreeJsModule {
       for (let i = 0; i < positions.count; i++) {
         const i3 = i * 3;
         positions.array[i3 + 1] += 0.01 * (1 + this.treble * 0.5);
-        if (positions.array[i3 + 1] > 10) positions.array[i3 + 1] = -10;
+        if (positions.array[i3 + 1] > 10) {
+          positions.array[i3 + 1] = -10;
+          positions.array[i3] = (Math.random() - 0.5) * 20;
+          positions.array[i3 + 2] = (Math.random() - 0.5) * 20;
+        }
 
         const brightness = 0.5 + this.treble * 0.5 * this.dustIntensity;
         colors.array[i3] *= brightness;
@@ -289,15 +264,6 @@ class AudioCrystalCavePulse extends BaseThreeJsModule {
   destroy() {
     this.destroyed = true;
 
-    if (this.pollInterval) {
-      clearInterval(this.pollInterval);
-      this.pollInterval = null;
-    }
-
-    if (this.analyzer) {
-      this.analyzer.destroy();
-      this.analyzer = null;
-    }
 
     if (this.crystals) {
       this.crystals.forEach((crystal) => {

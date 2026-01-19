@@ -164,10 +164,6 @@ class Video extends ModuleBase {
     this.show();
   }
 
-  setVideo(options = {}) {
-    return this.video(options);
-  }
-
   play() {
     if (this.video) {
       this.video.play().catch(() => {});
@@ -191,12 +187,6 @@ class Video extends ModuleBase {
     }
   }
 
-  normalizeRelAssetPath(value) {
-    const raw = String(value ?? "").trim();
-    if (!raw) return null;
-    const withoutPrefix = raw.replace(/^assets\//, "");
-    return withoutPrefix;
-  }
 
   setUrls(urls) {
     const list = Array.isArray(urls) ? urls : [];
@@ -231,10 +221,7 @@ class Video extends ModuleBase {
       return;
     }
 
-    let base = this.normalizeRelAssetPath(raw);
-    if (!base) {
-      base = raw.replace(/^assets\//, "");
-    }
+    let base = raw.replace(/^assets\//, "");
     if (!base) {
       this.setUrls([]);
       return;
@@ -283,10 +270,6 @@ class Video extends ModuleBase {
         this.video.play().catch(() => {});
       }
     }
-  }
-
-  setVideoDirectory(options = {}) {
-    return this.videoDirectory(options);
   }
 
   setIndex({ index = 0 } = {}) {

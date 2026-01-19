@@ -85,34 +85,6 @@ class AudioLiquid extends BaseThreeJsModule {
     if (!this.audioReady) this.startStreamPolling();
   }
 
-  async tryInitializeAudio() {
-    if (this.audioReady || this.destroyed) return;
-    const sdk = globalThis.nwWrldSdk;
-    const stream = sdk?.audio?.getStream?.();
-    if (stream) {
-      this.analyzer = new AudioAnalyzer();
-      const initialized = await this.analyzer.init(stream);
-      if (initialized) {
-        this.audioReady = true;
-        if (this.pollInterval) {
-          clearInterval(this.pollInterval);
-          this.pollInterval = null;
-        }
-      }
-    }
-  }
-
-  startStreamPolling() {
-    if (this.pollInterval) return;
-    this.pollInterval = setInterval(() => {
-      if (this.destroyed) {
-        clearInterval(this.pollInterval);
-        this.pollInterval = null;
-        return;
-      }
-      this.tryInitializeAudio();
-    }, 1000);
-  }
 
   init() {
     if (!this.renderer || !this.scene || !this.camera || this.destroyed) return;
@@ -396,16 +368,6 @@ class AudioLiquid extends BaseThreeJsModule {
 
   destroy() {
     this.destroyed = true;
-
-    if (this.pollInterval) {
-      clearInterval(this.pollInterval);
-      this.pollInterval = null;
-    }
-
-    if (this.analyzer) {
-      this.analyzer.destroy();
-      this.analyzer = null;
-    }
 
     if (this.lights) {
       this.lights.forEach((light) => this.scene.remove(light));

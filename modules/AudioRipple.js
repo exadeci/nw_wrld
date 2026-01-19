@@ -69,35 +69,6 @@ class AudioRipple extends ModuleBase {
     if (!this.audioReady) this.startStreamPolling();
   }
 
-  async tryInitializeAudio() {
-    if (this.audioReady || this.destroyed) return;
-    const sdk = globalThis.nwWrldSdk;
-    const stream = sdk?.audio?.getStream?.();
-    if (stream) {
-      this.analyzer = new AudioAnalyzer();
-      const initialized = await this.analyzer.init(stream);
-      if (initialized) {
-        this.audioReady = true;
-        if (this.pollInterval) {
-          clearInterval(this.pollInterval);
-          this.pollInterval = null;
-        }
-      }
-    }
-  }
-
-  startStreamPolling() {
-    if (this.pollInterval) return;
-    this.pollInterval = setInterval(() => {
-      if (this.destroyed) {
-        clearInterval(this.pollInterval);
-        this.pollInterval = null;
-        return;
-      }
-      this.tryInitializeAudio();
-    }, 1000);
-  }
-
   init() {
     const sketch = (p) => {
       this.myp5 = p;
@@ -211,14 +182,6 @@ class AudioRipple extends ModuleBase {
 
   destroy() {
     this.destroyed = true;
-    if (this.pollInterval) {
-      clearInterval(this.pollInterval);
-      this.pollInterval = null;
-    }
-    if (this.analyzer) {
-      this.analyzer.destroy();
-      this.analyzer = null;
-    }
     if (this.myp5) {
       this.myp5.remove();
       this.myp5 = null;

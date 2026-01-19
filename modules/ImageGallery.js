@@ -174,10 +174,6 @@ class ImageGallery extends ModuleBase {
     this.setUrls(urls);
   }
 
-  setImageDirectory(options = {}) {
-    return this.imageDirectory(options);
-  }
-
   draw() {
     if (!this.img) return;
     if (!this.urls.length) {

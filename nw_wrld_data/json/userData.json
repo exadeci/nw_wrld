@@ -1447,20 +1447,12 @@
           "channelMappings": {},
           "modules": [
             {
-              "id": "inst_1768816460289_co9mb2qu6",
-              "type": "Cloud"
-            },
-            {
-              "id": "inst_1768817170606_l8hjtb77q",
-              "type": "Corners"
-            },
-            {
-              "id": "inst_1768817194460_w57lkzswf",
-              "type": "AudioFractalMandalaEngine"
+              "id": "inst_1768825781929_zh33vekkm",
+              "type": "UnifiedShipibo"
             }
           ],
           "modulesData": {
-            "inst_1768816460289_co9mb2qu6": {
+            "inst_1768825781929_zh33vekkm": {
               "constructor": [
                 {
                   "name": "matrix",
@@ -1476,15 +1468,6 @@
                     {
                       "name": "border",
                       "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
                     }
                   ]
                 },
@@ -1519,70 +1502,16 @@
                   "name": "start",
                   "options": [
                     {
-                      "name": "sensitivity",
-                      "value": 2
-                    },
-                    {
                       "name": "speed",
                       "value": 1
                     },
                     {
-                      "name": "cloudCount",
-                      "value": 8000
+                      "name": "iterations",
+                      "value": 4
                     },
                     {
-                      "name": "fogColor",
-                      "value": "#4584b4"
-                    },
-                    {
-                      "name": "showBackground",
-                      "value": false
-                    },
-                    {
-                      "name": "cameraVerticalPosition",
-                      "value": 9
-                    }
-                  ]
-                },
-                {
-                  "name": "setAudioReactive",
-                  "options": [
-                    {
-                      "name": "enabled",
-                      "value": false,
-                      "defaultVal": true
-                    }
-                  ]
-                },
-                {
-                  "name": "setCloudColor",
-                  "options": [
-                    {
-                      "name": "color",
-                      "value": "#d2bb79",
-                      "defaultVal": "#ffffff"
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1768817170606_l8hjtb77q": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
+                      "name": "intensity",
+                      "value": 1
                     }
                   ]
                 },
@@ -1592,80 +1521,6 @@
                     {
                       "name": "duration",
                       "value": 0
-                    }
-                  ]
-                },
-                {
-                  "name": "color",
-                  "options": [
-                    {
-                      "name": "color",
-                      "value": "#ffffff"
-                    }
-                  ]
-                },
-                {
-                  "name": "size",
-                  "options": [
-                    {
-                      "name": "size",
-                      "value": 20
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1768817194460_w57lkzswf": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                },
-                {
-                  "name": "start",
-                  "options": [
-                    {
-                      "name": "sensitivity",
-                      "value": 2
-                    },
-                    {
-                      "name": "layers",
-                      "value": 8
-                    },
-                    {
-                      "name": "baseHue",
-                      "value": 0
-                    },
-                    {
-                      "name": "backgroundColor",
-                      "value": "#000000"
-                    },
-                    {
-                      "name": "removeBackground",
-                      "value": true
                     }
                   ]
                 }

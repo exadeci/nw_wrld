@@ -175,45 +175,66 @@ const AUDIO_METHOD_DEFINITIONS = {
     const viscVal = Number(viscosity);
     this.sensitivity = Math.max(0.1, Math.min(5.0, Number.isFinite(sensVal) ? sensVal : 2.0));
     this.viscosity = Math.max(0.1, Math.min(1.0, Number.isFinite(viscVal) ? viscVal : 0.5));
+    // Audio initialization methods are now built into ModuleBase/BaseThreeJsModule
     await this.tryInitializeAudio();
     if (!this.audioReady) this.startStreamPolling();
   }
 */
 
 // ============================================================================
-// AUDIO ANALYZER SETUP (copy into your class)
+// AUDIO ANALYZER SETUP
 // ============================================================================
 
 /*
-  async tryInitializeAudio() {
-    if (this.audioReady || this.destroyed) return;
-    const sdk = globalThis.nwWrldSdk;
-    const stream = sdk?.audio?.getStream?.();
-    if (stream) {
-      this.analyzer = new AudioAnalyzer();
-      const initialized = await this.analyzer.init(stream);
-      if (initialized) {
-        this.audioReady = true;
-        if (this.pollInterval) {
-          clearInterval(this.pollInterval);
-          this.pollInterval = null;
-        }
-      }
-    }
-  }
-
-  startStreamPolling() {
-    if (this.pollInterval) return;
-    this.pollInterval = setInterval(() => {
-      if (this.destroyed) {
-        clearInterval(this.pollInterval);
-        this.pollInterval = null;
-        return;
-      }
-      this.tryInitializeAudio();
-    }, 1000);
-  }
-*/
+ * ⚠️ UPDATE: Audio initialization methods are now built into ModuleBase and BaseThreeJsModule!
+ * 
+ * You no longer need to copy these methods - they're available automatically:
+ * - tryInitializeAudio() - Attempts to initialize audio analyzer
+ * - startStreamPolling() - Starts polling for audio stream if not immediately available
+ * 
+ * Just initialize these properties in your constructor:
+ *   this.analyzer = null;
+ *   this.audioReady = false;
+ *   this.pollInterval = null;
+ * 
+ * Then call them in your start() method:
+ *   await this.tryInitializeAudio();
+ *   if (!this.audioReady) this.startStreamPolling();
+ * 
+ * The destroy() method in both base classes will automatically clean up
+ * the analyzer and pollInterval for you.
+ * 
+ * OLD TEMPLATE (for reference - no longer needed):
+ * 
+ * async tryInitializeAudio() {
+ *   if (this.audioReady || this.destroyed) return;
+ *   const sdk = globalThis.nwWrldSdk;
+ *   const stream = sdk?.audio?.getStream?.();
+ *   if (stream) {
+ *     this.analyzer = new AudioAnalyzer();
+ *     const initialized = await this.analyzer.init(stream);
+ *     if (initialized) {
+ *       this.audioReady = true;
+ *       if (this.pollInterval) {
+ *         clearInterval(this.pollInterval);
+ *         this.pollInterval = null;
+ *       }
+ *     }
+ *   }
+ * }
+ * 
+ * startStreamPolling() {
+ *   if (this.pollInterval) return;
+ *   this.pollInterval = setInterval(() => {
+ *     if (this.destroyed) {
+ *       clearInterval(this.pollInterval);
+ *       this.pollInterval = null;
+ *       return;
+ *     }
+ *     this.tryInitializeAudio();
+ *   }, 1000);
+ * }
+ */
 
 // ============================================================================
 // RANGE MODES FOR FADER METHODS
@@ -298,34 +319,8 @@ class MyAudioModule extends BaseThreeJsModule {
     if (!this.audioReady) this.startStreamPolling();
   }
 
-  async tryInitializeAudio() {
-    if (this.audioReady || this.destroyed) return;
-    const sdk = globalThis.nwWrldSdk;
-    const stream = sdk?.audio?.getStream?.();
-    if (stream) {
-      this.analyzer = new AudioAnalyzer();
-      const initialized = await this.analyzer.init(stream);
-      if (initialized) {
-        this.audioReady = true;
-        if (this.pollInterval) {
-          clearInterval(this.pollInterval);
-          this.pollInterval = null;
-        }
-      }
-    }
-  }
-
-  startStreamPolling() {
-    if (this.pollInterval) return;
-    this.pollInterval = setInterval(() => {
-      if (this.destroyed) {
-        clearInterval(this.pollInterval);
-        this.pollInterval = null;
-        return;
-      }
-      this.tryInitializeAudio();
-    }, 1000);
-  }
+  // Audio initialization methods are now built into ModuleBase/BaseThreeJsModule!
+  // No need to copy them - just call this.tryInitializeAudio() and this.startStreamPolling()
 
   init() {
     // Your init code here
@@ -353,15 +348,8 @@ class MyAudioModule extends BaseThreeJsModule {
   destroy() {
     this.destroyed = true;
     
-    if (this.pollInterval) {
-      clearInterval(this.pollInterval);
-      this.pollInterval = null;
-    }
-    
-    if (this.analyzer) {
-      this.analyzer.destroy();
-      this.analyzer = null;
-    }
+    // Audio cleanup (analyzer and pollInterval) is handled automatically by ModuleBase/BaseThreeJsModule
+    // You only need to clean up module-specific resources here
     
     super.destroy();
   }

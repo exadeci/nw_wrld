@@ -15,6 +15,26 @@ class PlanetSkeleton extends BaseThreeJsModule {
         { name: "gradientEnd", defaultVal: "#8200c9", type: "color" },
         { name: "planetColor", defaultVal: "#ffffff", type: "color" },
         { name: "skeletonColor", defaultVal: "#ffffff", type: "color" },
+        {
+          name: "particleShape",
+          defaultVal: "stars",
+          type: "select",
+          values: [
+            "stars",
+            "diamonds",
+            "balls",
+            "triangles",
+            "cubes",
+            "octahedrons",
+            "icosahedrons",
+            "dodecahedrons",
+            "toruses",
+            "cones",
+            "cylinders",
+            "rings",
+            "crosses",
+          ],
+        },
       ],
     },
     {
@@ -47,6 +67,32 @@ class PlanetSkeleton extends BaseThreeJsModule {
       executeOnLoad: false,
       options: [{ name: "enabled", defaultVal: true, type: "boolean" }],
     },
+    {
+      name: "setParticleShape",
+      executeOnLoad: false,
+      options: [
+        {
+          name: "shape",
+          defaultVal: "stars",
+          type: "select",
+          values: [
+            "stars",
+            "diamonds",
+            "balls",
+            "triangles",
+            "cubes",
+            "octahedrons",
+            "icosahedrons",
+            "dodecahedrons",
+            "toruses",
+            "cones",
+            "cylinders",
+            "rings",
+            "crosses",
+          ],
+        },
+      ],
+    },
   ];
 
   constructor(container) {
@@ -67,6 +113,8 @@ class PlanetSkeleton extends BaseThreeJsModule {
     this.pollInterval = null;
     this.sensitivity = 2.0;
     this.audioReactive = true;
+    this.particleShape = "stars";
+    this.particleGeometry = null;
     this.volume = 0;
     this.bass = 0;
     this.mid = 0;
@@ -111,6 +159,117 @@ class PlanetSkeleton extends BaseThreeJsModule {
     }
   }
 
+  createParticleGeometry(shapeType) {
+    const size = 2;
+    
+    switch (shapeType) {
+      case "stars":
+        return this.createStarGeometry(size, size * 0.5, 5);
+      case "diamonds":
+        return new THREE.OctahedronGeometry(size, 0);
+      case "balls":
+        return new THREE.SphereGeometry(size, 16, 16);
+      case "triangles":
+        return new THREE.TetrahedronGeometry(size, 0);
+      case "cubes":
+        return new THREE.BoxGeometry(size, size, size);
+      case "octahedrons":
+        return new THREE.OctahedronGeometry(size, 1);
+      case "icosahedrons":
+        return new THREE.IcosahedronGeometry(size, 0);
+      case "dodecahedrons":
+        return new THREE.DodecahedronGeometry(size, 0);
+      case "toruses":
+        return new THREE.TorusGeometry(size * 0.6, size * 0.3, 8, 16);
+      case "cones":
+        return new THREE.ConeGeometry(size, size * 1.5, 8);
+      case "cylinders":
+        return new THREE.CylinderGeometry(size * 0.6, size * 0.6, size * 1.2, 8);
+      case "rings":
+        return new THREE.RingGeometry(size * 0.5, size, 16);
+      case "crosses":
+        return this.createCrossGeometry(size);
+      default:
+        return this.createStarGeometry(size, size * 0.5, 5);
+    }
+  }
+
+  createCrossGeometry(size) {
+    const halfSize = size * 0.5;
+    const thickness = size * 0.25;
+    const depth = thickness * 0.5;
+    
+    const positions = [];
+    const indices = [];
+    let vertexIndex = 0;
+    
+    const addBox = (x, y, z, width, height, depth) => {
+      const w = width * 0.5;
+      const h = height * 0.5;
+      const d = depth * 0.5;
+      
+      const vertices = [
+        [x - w, y - h, z - d], [x + w, y - h, z - d], [x + w, y + h, z - d], [x - w, y + h, z - d],
+        [x - w, y - h, z + d], [x + w, y - h, z + d], [x + w, y + h, z + d], [x - w, y + h, z + d],
+      ];
+      
+      const boxIndices = [
+        0, 1, 2, 0, 2, 3,
+        4, 7, 6, 4, 6, 5,
+        0, 4, 5, 0, 5, 1,
+        2, 6, 7, 2, 7, 3,
+        0, 3, 7, 0, 7, 4,
+        1, 5, 6, 1, 6, 2,
+      ];
+      
+      vertices.forEach((v) => {
+        positions.push(...v);
+      });
+      
+      boxIndices.forEach((idx) => {
+        indices.push(vertexIndex + idx);
+      });
+      
+      vertexIndex += 8;
+    };
+    
+    addBox(0, 0, 0, halfSize * 2, thickness, depth);
+    addBox(0, 0, 0, thickness, halfSize * 2, depth);
+    
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+    
+    return geometry;
+  }
+
+  createStarGeometry(outerRadius = 1, innerRadius = 0.5, points = 5) {
+    const shape = new THREE.Shape();
+    const angleStep = (Math.PI * 2) / (points * 2);
+    
+    for (let i = 0; i < points * 2; i++) {
+      const angle = i * angleStep - Math.PI / 2;
+      const radius = i % 2 === 0 ? outerRadius : innerRadius;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      
+      if (i === 0) {
+        shape.moveTo(x, y);
+      } else {
+        shape.lineTo(x, y);
+      }
+    }
+    shape.lineTo(outerRadius, 0);
+    
+    const extrudeSettings = {
+      depth: 0.1,
+      bevelEnabled: false,
+    };
+    
+    return new THREE.ExtrudeGeometry(shape, extrudeSettings);
+  }
+
   init() {
     if (!this.renderer || !this.scene || !this.camera || this.destroyed) return;
 
@@ -120,17 +279,17 @@ class PlanetSkeleton extends BaseThreeJsModule {
     this.customGroup.add(this.skelet);
     this.customGroup.add(this.particle);
 
-    const geometry = new THREE.TetrahedronGeometry(2, 0);
+    this.particleGeometry = this.createParticleGeometry(this.particleShape);
     const geom = new THREE.IcosahedronGeometry(7, 1);
     const geom2 = new THREE.IcosahedronGeometry(15, 1);
 
     const material = new THREE.MeshPhongMaterial({
       color: this.hexToThreeColor(this.planetColor),
-      flatShading: true,
+      flatShading: this.particleShape === "balls" ? false : true,
     });
 
     for (let i = 0; i < 1000; i++) {
-      const mesh = new THREE.Mesh(geometry, material);
+      const mesh = new THREE.Mesh(this.particleGeometry, material);
       mesh.position.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
       mesh.position.multiplyScalar(90 + (Math.random() * 700));
       mesh.rotation.set(Math.random() * 2, Math.random() * 2, Math.random() * 2);
@@ -257,7 +416,7 @@ class PlanetSkeleton extends BaseThreeJsModule {
     }
   }
 
-  async start({ sensitivity = 2.0, gradientStart = "#11e8bb", gradientEnd = "#8200c9", planetColor = "#ffffff", skeletonColor = "#ffffff" } = {}) {
+  async start({ sensitivity = 2.0, gradientStart = "#11e8bb", gradientEnd = "#8200c9", planetColor = "#ffffff", skeletonColor = "#ffffff", particleShape = "stars" } = {}) {
     const sensVal = Number(sensitivity);
     this.sensitivity = Math.max(0.1, Math.min(5.0, Number.isFinite(sensVal) ? sensVal : 2.0));
     this.gradientStart = String(gradientStart);
@@ -267,6 +426,7 @@ class PlanetSkeleton extends BaseThreeJsModule {
     this.updateGradient();
     this.updatePlanetColor();
     this.updateSkeletonColor();
+    this.setParticleShape({ shape: particleShape });
     await this.tryInitializeAudio();
     if (!this.audioReady) this.startStreamPolling();
   }
@@ -298,6 +458,59 @@ class PlanetSkeleton extends BaseThreeJsModule {
 
   setAudioReactive({ enabled = true } = {}) {
     this.audioReactive = Boolean(enabled);
+  }
+
+  setParticleShape({ shape = "stars" } = {}) {
+    if (this.destroyed || !this.particle) return;
+    
+    const shapeType = String(shape).toLowerCase();
+    const validShapes = [
+      "stars",
+      "diamonds",
+      "balls",
+      "triangles",
+      "cubes",
+      "octahedrons",
+      "icosahedrons",
+      "dodecahedrons",
+      "toruses",
+      "cones",
+      "cylinders",
+      "rings",
+      "crosses",
+    ];
+    
+    if (!validShapes.includes(shapeType)) {
+      console.warn(`[PlanetSkeleton] Invalid particle shape: ${shape}. Using "stars" instead.`);
+      return;
+    }
+    
+    if (this.particleShape === shapeType) return;
+    
+    this.particleShape = shapeType;
+    
+    const oldMaterial = this.particle.children.length > 0 ? this.particle.children[0].material : null;
+    
+    if (this.particleGeometry) {
+      this.particleGeometry.dispose();
+    }
+    
+    this.particleGeometry = this.createParticleGeometry(shapeType);
+    
+    const smoothShadingShapes = ["balls", "toruses", "cones", "cylinders", "rings"];
+    const material = new THREE.MeshPhongMaterial({
+      color: this.hexToThreeColor(this.planetColor),
+      flatShading: smoothShadingShapes.includes(shapeType) ? false : true,
+    });
+    
+    if (oldMaterial && oldMaterial !== material) {
+      oldMaterial.dispose();
+    }
+    
+    this.particle.children.forEach((child) => {
+      child.geometry = this.particleGeometry;
+      child.material = material;
+    });
   }
 
   destroy() {

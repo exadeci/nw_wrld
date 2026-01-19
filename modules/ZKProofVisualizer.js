@@ -136,27 +136,36 @@ class ZKProofVisualizer extends ModuleBase {
 
       if (currentTime - this.lastSwapTime >= 20) {
         this.columns.forEach((column) => {
-          for (let i = 0; i < 5; i++) {
-            const words = Array.from(column.children);
-            const idx1 = Math.floor(Math.random() * words.length);
-            const idx2 = Math.floor(Math.random() * words.length);
+          const words = Array.from(column.children);
+          if (words.length < 2) return;
 
-            if (idx1 !== idx2) {
-              const word1 = words[idx1];
-              const word2 = words[idx2];
+          const swaps = Math.min(3, Math.floor(words.length / 2));
+          const indices = new Set();
 
-              if (idx1 < idx2) {
-                column.insertBefore(word2, word1);
-                column.insertBefore(word1, words[idx2 + 1]);
-              } else {
-                column.insertBefore(word1, word2);
-                column.insertBefore(word2, words[idx1 + 1]);
-              }
+          for (let i = 0; i < swaps; i++) {
+            let idx1, idx2;
+            do {
+              idx1 = Math.floor(Math.random() * words.length);
+              idx2 = Math.floor(Math.random() * words.length);
+            } while (idx1 === idx2 || indices.has(idx1) || indices.has(idx2));
+
+            indices.add(idx1);
+            indices.add(idx2);
+
+            const word1 = words[idx1];
+            const word2 = words[idx2];
+
+            if (idx1 < idx2) {
+              column.insertBefore(word2, word1);
+              column.insertBefore(word1, words[idx2 + 1] || null);
+            } else {
+              column.insertBefore(word1, word2);
+              column.insertBefore(word2, words[idx1 + 1] || null);
             }
           }
-        });
 
-        this.lastSwapTime = currentTime;
+          this.lastSwapTime = currentTime;
+        });
       }
 
       if (this.isAnimating) {
