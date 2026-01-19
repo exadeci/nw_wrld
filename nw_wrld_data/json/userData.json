@@ -1447,12 +1447,16 @@
           "channelMappings": {},
           "modules": [
             {
-              "id": "inst_1768825781929_zh33vekkm",
-              "type": "UnifiedShipibo"
+              "id": "inst_1768830125721_e45bjic1m",
+              "type": "AudioCloudPointIceberg"
+            },
+            {
+              "id": "inst_1768830162309_psiby6b4v",
+              "type": "AudioOrbitalPlane"
             }
           ],
           "modulesData": {
-            "inst_1768825781929_zh33vekkm": {
+            "inst_1768830125721_e45bjic1m": {
               "constructor": [
                 {
                   "name": "matrix",
@@ -1468,6 +1472,15 @@
                     {
                       "name": "border",
                       "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
                     }
                   ]
                 },
@@ -1502,16 +1515,30 @@
                   "name": "start",
                   "options": [
                     {
-                      "name": "speed",
-                      "value": 1
+                      "name": "sensitivity",
+                      "value": 1.5
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1768830162309_psiby6b4v": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
                     },
                     {
-                      "name": "iterations",
-                      "value": 4
-                    },
-                    {
-                      "name": "intensity",
-                      "value": 1
+                      "name": "border",
+                      "value": false
                     }
                   ]
                 },
@@ -1520,6 +1547,19 @@
                   "options": [
                     {
                       "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "sensitivity",
+                      "value": 1.5
+                    },
+                    {
+                      "name": "baseHue",
                       "value": 0
                     }
                   ]
