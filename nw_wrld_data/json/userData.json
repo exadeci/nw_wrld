@@ -1448,11 +1448,33 @@
           "modules": [
             {
               "id": "inst_1768830125721_e45bjic1m",
-              "type": "AudioCloudPointIceberg"
+              "type": "AudioCloudPointIceberg",
+              "disabled": true
             },
             {
               "id": "inst_1768830162309_psiby6b4v",
-              "type": "AudioOrbitalPlane"
+              "type": "AudioOrbitalPlane",
+              "disabled": true
+            },
+            {
+              "id": "inst_1768903896211_243vxyr3m",
+              "type": "GridDots",
+              "disabled": true
+            },
+            {
+              "id": "inst_1768903900086_rezc8tf0p",
+              "type": "Corners",
+              "disabled": true
+            },
+            {
+              "id": "inst_1768904687078_ifrm1w7ok",
+              "type": "GridIcosahedron",
+              "disabled": false
+            },
+            {
+              "id": "inst_1768909985368_p7n9qmtxq",
+              "type": "AudioRainThunder",
+              "disabled": true
             }
           ],
           "modulesData": {
@@ -1560,6 +1582,288 @@
                     },
                     {
                       "name": "baseHue",
+                      "value": 0
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1768903896211_243vxyr3m": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "size",
+                  "options": [
+                    {
+                      "name": "x",
+                      "value": 10
+                    },
+                    {
+                      "name": "y",
+                      "value": 10
+                    }
+                  ]
+                },
+                {
+                  "name": "color",
+                  "options": [
+                    {
+                      "name": "color",
+                      "value": "#ffffff"
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1768903900086_rezc8tf0p": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "color",
+                  "options": [
+                    {
+                      "name": "color",
+                      "value": "#ffffff"
+                    }
+                  ]
+                },
+                {
+                  "name": "size",
+                  "options": [
+                    {
+                      "name": "size",
+                      "value": 20
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1768904687078_ifrm1w7ok": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 75
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "sensitivity",
+                      "value": 4
+                    },
+                    {
+                      "name": "refractionStrength",
+                      "value": 0.2
+                    },
+                    {
+                      "name": "edgeWidth",
+                      "value": 2
+                    },
+                    {
+                      "name": "rgbShift",
+                      "value": 0.2
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "setAudioReactive",
+                  "options": [
+                    {
+                      "name": "enabled",
+                      "value": true,
+                      "defaultVal": true
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1768909985368_p7n9qmtxq": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 75
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "sensitivity",
+                      "value": 2
+                    },
+                    {
+                      "name": "rainCount",
+                      "value": 100000
+                    },
+                    {
+                      "name": "rainSize",
+                      "value": 0.1
+                    },
+                    {
+                      "name": "cloudCount",
+                      "value": 3000
+                    },
+                    {
+                      "name": "fogColor",
+                      "value": "#11111f"
+                    },
+                    {
+                      "name": "fogDensity",
+                      "value": 0.002
+                    },
+                    {
+                      "name": "thunderSensitivity",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
                       "value": 0
                     }
                   ]
