@@ -1475,6 +1475,11 @@
               "id": "inst_1768909985368_p7n9qmtxq",
               "type": "AudioRainThunder",
               "disabled": true
+            },
+            {
+              "id": "inst_1768910399021_8ptqb3afd",
+              "type": "UnifiedShipibo",
+              "disabled": true
             }
           ],
           "modulesData": {
@@ -1742,7 +1747,7 @@
                   "options": [
                     {
                       "name": "sensitivity",
-                      "value": 4
+                      "value": 10
                     },
                     {
                       "name": "refractionStrength",
@@ -1865,6 +1870,95 @@
                     {
                       "name": "duration",
                       "value": 0
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1768910399021_8ptqb3afd": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 75
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "speed",
+                      "value": 1
+                    },
+                    {
+                      "name": "iterations",
+                      "value": 4
+                    },
+                    {
+                      "name": "intensity",
+                      "value": 1
+                    },
+                    {
+                      "name": "sensitivity",
+                      "value": 2
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "setAudioReactive",
+                  "options": [
+                    {
+                      "name": "enabled",
+                      "value": false,
+                      "defaultVal": true
                     }
                   ]
                 }

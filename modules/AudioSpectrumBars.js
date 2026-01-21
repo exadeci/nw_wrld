@@ -91,7 +91,11 @@ class AudioSpectrumBars extends ModuleBase {
 
       p.draw = () => {
         if (this.audioReactive && this.analyzer && this.audioReady) {
-          this.volume = this.analyzer.getVolume() * this.sensitivity;
+          const sensitivity = this.sensitivity || 1.0;
+          this.volume = this.analyzer.getVolume() * sensitivity;
+          this.bass = this.analyzer.getBass() * sensitivity;
+          this.mid = this.analyzer.getMid() * sensitivity;
+          this.treble = this.analyzer.getTreble() * sensitivity;
           const freqData = this.analyzer.getFrequencyDataNormalized();
           if (freqData && freqData.length > 0) {
             const binsPerBar = Math.floor(freqData.length / this.barCount);
@@ -102,15 +106,19 @@ class AudioSpectrumBars extends ModuleBase {
               for (let j = startBin; j < endBin; j++) {
                 sum += freqData[j] || 0;
               }
-              const avg = (sum / (endBin - startBin)) * this.sensitivity;
+              const avg = (sum / (endBin - startBin)) * sensitivity;
               this.smoothedData[i] = this.smoothedData[i] * 0.7 + avg * 0.3;
             }
           }
         } else if (!this.audioReactive) {
-          this.volume = 0.3;
+          const sensitivity = this.sensitivity || 1.0;
+          this.volume = 0.3 * sensitivity;
+          this.bass = 0.2 * sensitivity;
+          this.mid = 0.3 * sensitivity;
+          this.treble = 0.2 * sensitivity;
           for (let i = 0; i < this.barCount; i++) {
             const wave = Math.sin((i / this.barCount) * Math.PI * 4 + p.frameCount * 0.02) * 0.5 + 0.5;
-            this.smoothedData[i] = this.smoothedData[i] * 0.7 + wave * 0.3 * this.sensitivity;
+            this.smoothedData[i] = this.smoothedData[i] * 0.7 + wave * 0.3 * sensitivity;
           }
         }
 

@@ -197,15 +197,17 @@ class AudioLowEarthPoint extends BaseThreeJsModule {
     if (this.destroyed) return;
 
     if (this.audioReactive && this.analyzer && this.audioReady) {
-      this.volume = this.analyzer.getVolume() * this.sensitivity;
-      this.bass = this.analyzer.getBass() * this.sensitivity;
-      this.mid = this.analyzer.getMid() * this.sensitivity;
-      this.treble = this.analyzer.getTreble() * this.sensitivity;
+      const sensitivity = this.sensitivity || 1.0;
+      this.volume = this.analyzer.getVolume() * sensitivity;
+      this.bass = this.analyzer.getBass() * sensitivity;
+      this.mid = this.analyzer.getMid() * sensitivity;
+      this.treble = this.analyzer.getTreble() * sensitivity;
     } else if (!this.audioReactive) {
-      this.volume = 0.3 * this.sensitivity;
-      this.bass = 0.2 * this.sensitivity;
-      this.mid = 0.3 * this.sensitivity;
-      this.treble = 0.2 * this.sensitivity;
+      const sensitivity = this.sensitivity || 1.0;
+      this.volume = 0.3 * sensitivity;
+      this.bass = 0.2 * sensitivity;
+      this.mid = 0.3 * sensitivity;
+      this.treble = 0.2 * sensitivity;
     }
 
     const rotSpeed = 0.001 + this.volume * 0.01;

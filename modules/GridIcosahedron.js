@@ -691,17 +691,17 @@ class GridIcosahedron extends BaseThreeJsModule {
     let targetVolume, targetBass, targetMid, targetTreble;
 
     if (this.audioReactive && this.analyzer && this.audioReady) {
-      targetVolume = this.analyzer.getVolume() * this.sensitivity;
-      targetBass = this.analyzer.getBass() * this.sensitivity;
-      targetMid = this.analyzer.getMid() * this.sensitivity;
-      targetTreble = this.analyzer.getTreble() * this.sensitivity;
+      const sensitivity = this.sensitivity || 1.0;
+      targetVolume = this.analyzer.getVolume() * sensitivity;
+      targetBass = this.analyzer.getBass() * sensitivity;
+      targetMid = this.analyzer.getMid() * sensitivity;
+      targetTreble = this.analyzer.getTreble() * sensitivity;
     } else {
-      const timeVariation = Math.sin(elapsedTime * 0.8) * 0.5 + 0.5;
-      const timeVariation2 = Math.sin(elapsedTime * 1.2) * 0.5 + 0.5;
-      targetVolume = 0.25 + timeVariation * 0.2;
-      targetBass = 0.15 + timeVariation2 * 0.15;
-      targetMid = 0.25 + timeVariation * 0.2;
-      targetTreble = 0.15 + timeVariation2 * 0.15;
+      const sensitivity = this.sensitivity || 1.0;
+      targetVolume = 0.3 * sensitivity;
+      targetBass = 0.2 * sensitivity;
+      targetMid = 0.3 * sensitivity;
+      targetTreble = 0.2 * sensitivity;
     }
 
     // Lerp values to reduce jitter

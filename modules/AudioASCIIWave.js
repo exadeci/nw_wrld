@@ -70,9 +70,17 @@ class AudioASCIIWave extends ModuleBase {
 
       p.draw = () => {
         if (this.audioReactive && this.analyzer && this.audioReady) {
-          this.volume = this.analyzer.getVolume() * this.sensitivity;
+          const sensitivity = this.sensitivity || 1.0;
+          this.volume = this.analyzer.getVolume() * sensitivity;
+          this.bass = this.analyzer.getBass() * sensitivity;
+          this.mid = this.analyzer.getMid() * sensitivity;
+          this.treble = this.analyzer.getTreble() * sensitivity;
         } else if (!this.audioReactive) {
-          this.volume = 0.3 * this.sensitivity;
+          const sensitivity = this.sensitivity || 1.0;
+          this.volume = 0.3 * sensitivity;
+          this.bass = 0.2 * sensitivity;
+          this.mid = 0.3 * sensitivity;
+          this.treble = 0.2 * sensitivity;
         }
 
         p.background(0);

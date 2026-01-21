@@ -16,7 +16,7 @@ const AUDIO_METHOD_DEFINITIONS = {
     name: "setSensitivity",
     executeOnLoad: false,
     options: [
-      { name: "value", defaultVal: 1.5, type: "number", min: 0.1, max: 5.0 },
+      { name: "value", defaultVal: 1.5, type: "number", min: 0.1, max: 30.0 },
     ],
   },
 

@@ -262,3 +262,146 @@ export function createAudioStartMethod(options = {}) {
     options: methodOptions,
   };
 }
+
+export function updateAudioValuesForNonReactive(instance) {
+  const sensitivity = instance.sensitivity || 1.0;
+  instance.volume = 0.3 * sensitivity;
+  instance.bass = 0.2 * sensitivity;
+  instance.mid = 0.3 * sensitivity;
+  instance.treble = 0.2 * sensitivity;
+}
+
+export const audioReactiveMethodDefinition = {
+  name: "setAudioReactive",
+  executeOnLoad: false,
+  options: [{ name: "enabled", defaultVal: true, type: "boolean" }],
+};
+
+export const audioReactiveMethodImplementation = {
+  setAudioReactive() {
+    return function ({ enabled = true } = {}) {
+      this.audioReactive = Boolean(enabled);
+    };
+  },
+};
+
+export function createSetSensitivityMethod(defaultValue = 2.0) {
+  return {
+    name: "setSensitivity",
+    executeOnLoad: false,
+    options: [
+      {
+        name: "value",
+        defaultVal: defaultValue,
+        type: "number",
+        min: 0.1,
+        max: 5.0,
+      },
+    ],
+  };
+}
+
+export function createSetSensitivityImplementation(defaultValue = 2.0) {
+  return function ({ value = defaultValue } = {}) {
+    const val = Number(value);
+    this.sensitivity = Math.max(
+      0.1,
+      Math.min(5.0, Number.isFinite(val) ? val : defaultValue)
+    );
+  };
+}
+
+export function createSetBaseHueMethod(defaultValue = 0) {
+  return {
+    name: "setBaseHue",
+    executeOnLoad: false,
+    options: [
+      {
+        name: "value",
+        defaultVal: defaultValue,
+        type: "number",
+        min: 0,
+        max: 360,
+      },
+    ],
+  };
+}
+
+export function createSetBaseHueImplementation(defaultValue = 0) {
+  return function ({ value = defaultValue } = {}) {
+    const val = Number(value);
+    this.baseHue = Math.max(
+      0,
+      Math.min(360, Number.isFinite(val) ? val : defaultValue)
+    );
+  };
+}
+
+export function createSetSpeedMethod(defaultValue = 1.0, min = 0.1, max = 5.0) {
+  return {
+    name: "setSpeed",
+    executeOnLoad: false,
+    options: [
+      {
+        name: "value",
+        defaultVal: defaultValue,
+        type: "number",
+        min,
+        max,
+      },
+    ],
+  };
+}
+
+export function createSetSpeedImplementation(defaultValue = 1.0, min = 0.1, max = 5.0) {
+  return function ({ value = defaultValue } = {}) {
+    const val = Number(value);
+    this.speed = Math.max(
+      min,
+      Math.min(max, Number.isFinite(val) ? val : defaultValue)
+    );
+  };
+}
+
+export function updateAudioValues(instance) {
+  if (instance.audioReactive && instance.analyzer && instance.audioReady) {
+    const sensitivity = instance.sensitivity || 1.0;
+    instance.volume = instance.analyzer.getVolume() * sensitivity;
+    instance.bass = instance.analyzer.getBass() * sensitivity;
+    instance.mid = instance.analyzer.getMid() * sensitivity;
+    instance.treble = instance.analyzer.getTreble() * sensitivity;
+  } else if (!instance.audioReactive) {
+    updateAudioValuesForNonReactive(instance);
+  }
+}
+
+export const audioInitializationMethods = {
+  async tryInitializeAudio() {
+    if (this.audioReady || this.destroyed) return;
+    const sdk = globalThis.nwWrldSdk;
+    const stream = sdk?.audio?.getStream?.();
+    if (stream) {
+      this.analyzer = new AudioAnalyzer();
+      const initialized = await this.analyzer.init(stream);
+      if (initialized) {
+        this.audioReady = true;
+        if (this.pollInterval) {
+          clearInterval(this.pollInterval);
+          this.pollInterval = null;
+        }
+      }
+    }
+  },
+
+  startStreamPolling() {
+    if (this.pollInterval) return;
+    this.pollInterval = setInterval(() => {
+      if (this.destroyed) {
+        clearInterval(this.pollInterval);
+        this.pollInterval = null;
+        return;
+      }
+      this.tryInitializeAudio();
+    }, 1000);
+  },
+};

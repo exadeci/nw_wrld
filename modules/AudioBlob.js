@@ -204,17 +204,17 @@ class AudioBlob extends ModuleBase {
       if (this.destroyed || !this.analyzer) return;
 
       if (this.audioReactive) {
-        this.volume = this.analyzer.getVolume();
-        this.bass = this.analyzer.getBass();
-        this.mid = this.analyzer.getMid();
-        this.treble = this.analyzer.getTreble();
+        this.volume = this.analyzer.getVolume() * (this.sensitivity || 1.0);
+        this.bass = this.analyzer.getBass() * (this.sensitivity || 1.0);
+        this.mid = this.analyzer.getMid() * (this.sensitivity || 1.0);
+        this.treble = this.analyzer.getTreble() * (this.sensitivity || 1.0);
         this.waveform = this.analyzer.getWaveformNormalized();
         this.frequencyData = this.analyzer.getFrequencyDataNormalized();
       } else {
-        this.volume = 0.3;
-        this.bass = 0.2;
-        this.mid = 0.3;
-        this.treble = 0.2;
+        this.volume = 0.3 * (this.sensitivity || 1.0);
+        this.bass = 0.2 * (this.sensitivity || 1.0);
+        this.mid = 0.3 * (this.sensitivity || 1.0);
+        this.treble = 0.2 * (this.sensitivity || 1.0);
         this.waveform = [];
         this.frequencyData = [];
       }
