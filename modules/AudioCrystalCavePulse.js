@@ -1,7 +1,7 @@
 /*
 @nwWrld name: AudioCrystalCavePulse
 @nwWrld category: Audio
-@nwWrld imports: BaseThreeJsModule, THREE, Noise, AudioAnalyzer
+@nwWrld imports: BaseThreeJsModule, THREE, createNoise2D, AudioAnalyzer
 */
 
 class AudioCrystalCavePulse extends BaseThreeJsModule {
@@ -39,13 +39,13 @@ class AudioCrystalCavePulse extends BaseThreeJsModule {
 
   constructor(container) {
     super(container);
-    if (!THREE || !Noise) return;
+    if (!THREE || !createNoise2D) return;
 
     this.name = AudioCrystalCavePulse.name;
     this.customGroup = new THREE.Group();
     this.crystals = [];
     this.dust = null;
-    this.noise = new Noise(Math.random());
+    this.noise = createNoise2D();
     this.analyzer = null;
     this.audioReady = false;
     this.pollInterval = null;

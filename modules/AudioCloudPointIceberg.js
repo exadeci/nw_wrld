@@ -1,7 +1,7 @@
 /*
 @nwWrld name: AudioCloudPointIceberg
 @nwWrld category: Audio
-@nwWrld imports: BaseThreeJsModule, THREE, Noise, AudioAnalyzer
+@nwWrld imports: BaseThreeJsModule, THREE, createNoise3D, AudioAnalyzer
 */
 
 class AudioCloudPointIceberg extends BaseThreeJsModule {
@@ -31,13 +31,13 @@ class AudioCloudPointIceberg extends BaseThreeJsModule {
 
   constructor(container) {
     super(container);
-    if (!THREE || !Noise) return;
+    if (!THREE || !createNoise3D) return;
 
     this.name = AudioCloudPointIceberg.name;
     this.customGroup = new THREE.Group();
     this.wireMesh = null;
     this.pointCloud = null;
-    this.noise = new Noise(Math.random());
+    this.noise = createNoise3D();
     this.analyzer = null;
     this.audioReady = false;
     this.pollInterval = null;
@@ -137,8 +137,8 @@ class AudioCloudPointIceberg extends BaseThreeJsModule {
 
     const getRadiusAtPoint = (cosTheta, sinTheta, phi, normalizedY) => {
       const baseRadius = baseSize * (0.7 + normalizedY * 0.6);
-      const noise1 = this.noise.simplex3(cosTheta * 3 + noiseSeed, sinTheta * 3 + noiseSeed, normalizedY * 3 + noiseSeed);
-      const noise2 = this.noise.simplex3(sinTheta * 4.2 + noiseSeed * 1.3, cosTheta * 4.2 + noiseSeed * 1.3, normalizedY * 4.2 + noiseSeed * 1.3);
+      const noise1 = this.noise(cosTheta * 3 + noiseSeed, sinTheta * 3 + noiseSeed, normalizedY * 3 + noiseSeed);
+      const noise2 = this.noise(sinTheta * 4.2 + noiseSeed * 1.3, cosTheta * 4.2 + noiseSeed * 1.3, normalizedY * 4.2 + noiseSeed * 1.3);
       const combinedNoise = noise1 * 0.6 + noise2 * 0.4;
       return baseRadius * (0.8 + Math.abs(combinedNoise) * 0.4);
     };

@@ -1,7 +1,7 @@
 /*
 @nwWrld name: AudioDreamUnderwater
 @nwWrld category: Audio
-@nwWrld imports: BaseThreeJsModule, THREE, Noise, AudioAnalyzer
+@nwWrld imports: BaseThreeJsModule, THREE, createNoise2D, AudioAnalyzer
 */
 
 class AudioDreamUnderwater extends BaseThreeJsModule {
@@ -35,7 +35,7 @@ class AudioDreamUnderwater extends BaseThreeJsModule {
 
   constructor(container) {
     super(container);
-    if (!THREE || !Noise) return;
+    if (!THREE || !createNoise2D) return;
 
     this.name = AudioDreamUnderwater.name;
     this.customGroup = new THREE.Group();
@@ -46,7 +46,7 @@ class AudioDreamUnderwater extends BaseThreeJsModule {
     this.bubbles = null;
     this.oceanFloor = [];
     this.oceanFloorSegments = [];
-    this.noise = new Noise(Math.random());
+    this.noise = createNoise2D();
     this.analyzer = null;
     this.audioReady = false;
     this.pollInterval = null;

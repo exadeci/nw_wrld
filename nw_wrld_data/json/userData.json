@@ -1367,7 +1367,33 @@
             },
             {
               "id": "inst_1768990256027_7gyf201mm",
-              "type": "Galaxy"
+              "type": "Galaxy",
+              "disabled": true
+            },
+            {
+              "id": "inst_1768990950930_uzcbqf5t3",
+              "type": "SpaceGlobe",
+              "disabled": true
+            },
+            {
+              "id": "inst_1768991684610_fcobqm8ql",
+              "type": "AudioDreamOcean",
+              "disabled": true
+            },
+            {
+              "id": "inst_1768991768996_mbzrrxwhn",
+              "type": "AudioDreamUnderwater",
+              "disabled": true
+            },
+            {
+              "id": "inst_1768991872055_x7lwpldgz",
+              "type": "Bloom",
+              "disabled": true
+            },
+            {
+              "id": "inst_1768992705057_nmiki3ug9",
+              "type": "Ocean",
+              "disabled": false
             }
           ],
           "modulesData": {
@@ -1957,7 +1983,7 @@
                   "options": [
                     {
                       "name": "zoomLevel",
-                      "value": 1
+                      "value": 4
                     }
                   ]
                 },
@@ -2021,6 +2047,353 @@
                     {
                       "name": "rotationSpeed",
                       "value": 0.05
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1768990950930_uzcbqf5t3": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 75
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "autoRotateSpeed",
+                      "value": 4
+                    },
+                    {
+                      "name": "blobScale",
+                      "value": 2
+                    },
+                    {
+                      "name": "nucleusDetail",
+                      "value": 28
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1768991684610_fcobqm8ql": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 75
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "sensitivity",
+                      "value": 2
+                    },
+                    {
+                      "name": "waveIntensity",
+                      "value": 1
+                    },
+                    {
+                      "name": "speed",
+                      "value": 1
+                    },
+                    {
+                      "name": "cameraVerticalPosition",
+                      "value": 0
+                    },
+                    {
+                      "name": "fogColor",
+                      "value": "#0a0015"
+                    },
+                    {
+                      "name": "enableFog",
+                      "value": true
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1768991768996_mbzrrxwhn": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1768991872055_x7lwpldgz": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 30
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "speed",
+                      "value": 4
+                    },
+                    {
+                      "name": "scale",
+                      "value": 3.4
+                    },
+                    {
+                      "name": "rotationSpeed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1768992705057_nmiki3ug9": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 69
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "speed",
+                      "value": 1
+                    },
+                    {
+                      "name": "seaHeight",
+                      "value": 0.6
+                    },
+                    {
+                      "name": "seaChoppy",
+                      "value": 1
+                    },
+                    {
+                      "name": "seaFreq",
+                      "value": 0.16
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
                     }
                   ]
                 }

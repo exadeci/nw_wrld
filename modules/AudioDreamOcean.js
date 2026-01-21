@@ -1,7 +1,7 @@
 /*
 @nwWrld name: AudioDreamOcean
 @nwWrld category: Audio
-@nwWrld imports: BaseThreeJsModule, THREE, Noise, AudioAnalyzer
+@nwWrld imports: BaseThreeJsModule, THREE, createNoise2D, AudioAnalyzer
 */
 
 class AudioDreamOcean extends BaseThreeJsModule {
@@ -52,13 +52,13 @@ class AudioDreamOcean extends BaseThreeJsModule {
   
     constructor(container) {
       super(container);
-      if (!THREE || !Noise) return;
+      if (!THREE || !createNoise2D) return;
   
       this.name = AudioDreamOcean.name;
       this.customGroup = new THREE.Group();
       this.ocean = null;
       this.oceanSegments = [];
-      this.noise = new Noise(Math.random());
+      this.noise = createNoise2D();
       this.analyzer = null;
       this.audioReady = false;
       this.pollInterval = null;
@@ -363,7 +363,7 @@ class AudioDreamOcean extends BaseThreeJsModule {
   
           const wave1 = Math.sin(worldX * 0.08 + this.time * 2) * waveHeight;
           const wave2 = Math.sin((worldZ + this.time * 1.5) * 0.12 + this.time * 1.5) * waveHeight * 0.6;
-          const noise = this.noise.simplex2(worldX * 0.04 + this.time * 0.5, worldZ * 0.04) * waveHeight * 0.4;
+          const noise = this.noise(worldX * 0.04 + this.time * 0.5, worldZ * 0.04) * waveHeight * 0.4;
   
           positions.array[i3 + 1] = originalPositions[i3 + 1] + wave1 + wave2 + noise;
         }

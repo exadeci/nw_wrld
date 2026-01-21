@@ -1,7 +1,7 @@
 /*
 @nwWrld name: AudioLiquid
 @nwWrld category: Audio
-@nwWrld imports: BaseThreeJsModule, THREE, Noise, AudioAnalyzer
+@nwWrld imports: BaseThreeJsModule, THREE, createNoise3D, AudioAnalyzer
 */
 
 class AudioLiquid extends BaseThreeJsModule {
@@ -43,13 +43,13 @@ class AudioLiquid extends BaseThreeJsModule {
 
   constructor(container) {
     super(container);
-    if (!THREE || !Noise) return;
+    if (!THREE || !createNoise3D) return;
 
     this.name = AudioLiquid.name;
     this.customGroup = new THREE.Group();
     this.liquidMesh = null;
     this.innerMesh = null;
-    this.noise = new Noise(Math.random());
+    this.noise = createNoise3D();
     this.originalPositions = null;
     this.analyzer = null;
     this.audioReady = false;
@@ -263,19 +263,19 @@ class AudioLiquid extends BaseThreeJsModule {
       const ny = oy / len;
       const nz = oz / len;
 
-      const noise1 = this.noise.simplex3(
+      const noise1 = this.noise(
         nx * 2 + time * 0.5,
         ny * 2 + time * 0.3,
         nz * 2 + time * 0.4
       );
 
-      const noise2 = this.noise.simplex3(
+      const noise2 = this.noise(
         nx * 4 + time * 0.8,
         ny * 4 + time * 0.6,
         nz * 4 + time * 0.7
       );
 
-      const noise3 = this.noise.simplex3(
+      const noise3 = this.noise(
         nx * 8 + time * 1.2,
         ny * 8 + time * 1.0,
         nz * 8 + time * 1.1

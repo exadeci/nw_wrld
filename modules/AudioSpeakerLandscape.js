@@ -1,7 +1,7 @@
 /*
 @nwWrld name: AudioSpeakerLandscape
 @nwWrld category: Audio
-@nwWrld imports: BaseThreeJsModule, THREE, Noise, AudioAnalyzer
+@nwWrld imports: BaseThreeJsModule, THREE, createNoise2D, AudioAnalyzer
 */
 
 class AudioSpeakerLandscape extends BaseThreeJsModule {
@@ -44,12 +44,12 @@ class AudioSpeakerLandscape extends BaseThreeJsModule {
 
   constructor(container) {
     super(container);
-    if (!THREE || !Noise) return;
+    if (!THREE || !createNoise2D) return;
 
     this.name = AudioSpeakerLandscape.name;
     this.customGroup = new THREE.Group();
     this.landscape = null;
-    this.noise = new Noise(Math.random());
+    this.noise = createNoise2D();
     this.analyzer = null;
     this.audioReady = false;
     this.pollInterval = null;
@@ -187,8 +187,8 @@ class AudioSpeakerLandscape extends BaseThreeJsModule {
       const oy = this.originalPositions[i3 + 1];
       const oz = this.originalPositions[i3 + 2];
 
-      const noise1 = this.noise.simplex2(ox * 0.5 + this.time * 0.1, oz * 0.5 + this.time * 0.1);
-      const noise2 = this.noise.simplex2(ox * 2 + this.time * 0.2, oz * 2 + this.time * 0.2);
+      const noise1 = this.noise(ox * 0.5 + this.time * 0.1, oz * 0.5 + this.time * 0.1);
+      const noise2 = this.noise(ox * 2 + this.time * 0.2, oz * 2 + this.time * 0.2);
 
       const ripple = Math.sin(Math.sqrt(ox * ox + oz * oz) * 2 - this.time * 2) * bassDisplace;
       const dune = noise1 * 0.3 + noise2 * 0.1;
