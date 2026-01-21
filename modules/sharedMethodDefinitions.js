@@ -7,8 +7,6 @@ export const audioMethodDefinitions = {
         name: "value",
         defaultVal: 1.5,
         type: "number",
-        min: 0.1,
-        max: 5.0,
       },
     ],
   },
@@ -21,8 +19,6 @@ export const audioMethodDefinitions = {
         name: "value",
         defaultVal: 0.8,
         type: "number",
-        min: 0.0,
-        max: 1.0,
       },
     ],
   },
@@ -35,8 +31,6 @@ export const audioMethodDefinitions = {
         name: "value",
         defaultVal: 0.5,
         type: "number",
-        min: 0.1,
-        max: 1.0,
       },
     ],
   },
@@ -62,8 +56,6 @@ export const audioMethodDefinitions = {
         name: "value",
         defaultVal: 220,
         type: "number",
-        min: 0,
-        max: 360,
       },
     ],
   },
@@ -76,8 +68,6 @@ export const audioMethodDefinitions = {
         name: "value",
         defaultVal: 70,
         type: "number",
-        min: 0,
-        max: 100,
       },
     ],
   },
@@ -90,8 +80,6 @@ export const audioMethodDefinitions = {
         name: "value",
         defaultVal: 70,
         type: "number",
-        min: 0,
-        max: 100,
       },
     ],
   },
@@ -104,8 +92,6 @@ export const audioMethodDefinitions = {
         name: "value",
         defaultVal: 0,
         type: "number",
-        min: 0,
-        max: 360,
       },
     ],
   },
@@ -118,8 +104,6 @@ export const audioMethodDefinitions = {
         name: "value",
         defaultVal: 500,
         type: "number",
-        min: 100,
-        max: 2000,
       },
     ],
   },
@@ -231,8 +215,6 @@ export function createAudioStartMethod(options = {}) {
       name: "sensitivity",
       defaultVal: defaults.sensitivity || 2.0,
       type: "number",
-      min: 0.1,
-      max: 5.0,
     });
   }
   
@@ -241,8 +223,6 @@ export function createAudioStartMethod(options = {}) {
       name: "viscosity",
       defaultVal: defaults.viscosity || 0.5,
       type: "number",
-      min: 0.1,
-      max: 1.0,
     });
   }
   
@@ -251,8 +231,6 @@ export function createAudioStartMethod(options = {}) {
       name: "smoothing",
       defaultVal: defaults.smoothing || 0.8,
       type: "number",
-      min: 0.0,
-      max: 1.0,
     });
   }
 
@@ -294,8 +272,6 @@ export function createSetSensitivityMethod(defaultValue = 2.0) {
         name: "value",
         defaultVal: defaultValue,
         type: "number",
-        min: 0.1,
-        max: 5.0,
       },
     ],
   };
@@ -320,8 +296,6 @@ export function createSetBaseHueMethod(defaultValue = 0) {
         name: "value",
         defaultVal: defaultValue,
         type: "number",
-        min: 0,
-        max: 360,
       },
     ],
   };
@@ -337,7 +311,7 @@ export function createSetBaseHueImplementation(defaultValue = 0) {
   };
 }
 
-export function createSetSpeedMethod(defaultValue = 1.0, min = 0.1, max = 5.0) {
+export function createSetSpeedMethod(defaultValue = 1.0) {
   return {
     name: "setSpeed",
     executeOnLoad: false,
@@ -346,20 +320,15 @@ export function createSetSpeedMethod(defaultValue = 1.0, min = 0.1, max = 5.0) {
         name: "value",
         defaultVal: defaultValue,
         type: "number",
-        min,
-        max,
       },
     ],
   };
 }
 
-export function createSetSpeedImplementation(defaultValue = 1.0, min = 0.1, max = 5.0) {
+export function createSetSpeedImplementation(defaultValue = 1.0) {
   return function ({ value = defaultValue } = {}) {
     const val = Number(value);
-    this.speed = Math.max(
-      min,
-      Math.min(max, Number.isFinite(val) ? val : defaultValue)
-    );
+    this.speed = Number.isFinite(val) ? val : defaultValue;
   };
 }
 

@@ -166,7 +166,7 @@
     },
     "autoRefresh": true,
     "activeSetId": "set_1",
-    "sequencerMode": false,
+    "sequencerMode": true,
     "bgColor": "grey",
     "sequencerBpm": 120,
     "activeTrackId": 1762947476706,
@@ -229,15 +229,13 @@
           "modules": [
             {
               "id": "inst_1768373068815_8zgbxskzf",
-              "type": "GridDots"
+              "type": "GridDots",
+              "enabled": true,
+              "disabled": false
             },
             {
               "id": "inst_1768378930131_49exg6hb0",
               "type": "Corners"
-            },
-            {
-              "id": "inst_1768387539548_955uz3ubf",
-              "type": "AudioOrbitalPlane"
             },
             {
               "id": "inst_1768387775115_1qb02x7q2",
@@ -363,126 +361,6 @@
                 }
               ],
               "methods": {}
-            },
-            "inst_1768387539548_955uz3ubf": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                },
-                {
-                  "name": "start",
-                  "options": [
-                    {
-                      "name": "sensitivity",
-                      "value": 1.5
-                    },
-                    {
-                      "name": "baseHue",
-                      "value": 0
-                    }
-                  ]
-                },
-                {
-                  "name": "setBrightness",
-                  "options": [
-                    {
-                      "name": "value",
-                      "value": 200,
-                      "defaultVal": 100
-                    },
-                    {
-                      "name": "centerAt50",
-                      "value": false,
-                      "defaultVal": false
-                    },
-                    {
-                      "name": "maxPeak",
-                      "value": 300,
-                      "defaultVal": 300
-                    }
-                  ]
-                },
-                {
-                  "name": "setEqualizerMode",
-                  "options": [
-                    {
-                      "name": "enabled",
-                      "value": true,
-                      "defaultVal": true
-                    }
-                  ]
-                }
-              ],
-              "methods": {
-                "1": [
-                  {
-                    "name": "setBlur",
-                    "options": [
-                      {
-                        "name": "amount",
-                        "value": 100,
-                        "defaultVal": 0
-                      },
-                      {
-                        "name": "centerAt50",
-                        "value": true,
-                        "defaultVal": false
-                      },
-                      {
-                        "name": "maxPeak",
-                        "value": 5,
-                        "defaultVal": 5
-                      }
-                    ]
-                  }
-                ],
-                "2": [],
-                "9": [
-                  {
-                    "name": "rotate",
-                    "options": [
-                      {
-                        "name": "direction",
-                        "value": "clockwise",
-                        "defaultVal": "clockwise"
-                      },
-                      {
-                        "name": "speed",
-                        "value": 4,
-                        "defaultVal": 1
-                      },
-                      {
-                        "name": "duration",
-                        "value": 3000,
-                        "defaultVal": 0
-                      }
-                    ]
-                  }
-                ]
-              }
             },
             "inst_1768387775115_1qb02x7q2": {
               "constructor": [
@@ -1452,11 +1330,6 @@
               "disabled": true
             },
             {
-              "id": "inst_1768830162309_psiby6b4v",
-              "type": "AudioOrbitalPlane",
-              "disabled": true
-            },
-            {
               "id": "inst_1768903896211_243vxyr3m",
               "type": "GridDots",
               "disabled": true
@@ -1467,19 +1340,34 @@
               "disabled": true
             },
             {
-              "id": "inst_1768904687078_ifrm1w7ok",
-              "type": "GridIcosahedron",
-              "disabled": false
-            },
-            {
               "id": "inst_1768909985368_p7n9qmtxq",
               "type": "AudioRainThunder",
               "disabled": true
             },
             {
+              "id": "inst_1768904687078_ifrm1w7ok",
+              "type": "GridIcosahedron",
+              "disabled": true
+            },
+            {
+              "id": "inst_1768830162309_psiby6b4v",
+              "type": "AudioOrbitalPlane",
+              "disabled": true
+            },
+            {
               "id": "inst_1768910399021_8ptqb3afd",
               "type": "UnifiedShipibo",
+              "disabled": true,
+              "enabled": true
+            },
+            {
+              "id": "inst_1768987759066_ciblu9j54",
+              "type": "AudioLowEarthPoint",
               "disabled": true
+            },
+            {
+              "id": "inst_1768990256027_7gyf201mm",
+              "type": "Galaxy"
             }
           ],
           "modulesData": {
@@ -1747,7 +1635,7 @@
                   "options": [
                     {
                       "name": "sensitivity",
-                      "value": 10
+                      "value": 40
                     },
                     {
                       "name": "refractionStrength",
@@ -1900,7 +1788,7 @@
                   "options": [
                     {
                       "name": "zoomLevel",
-                      "value": 75
+                      "value": 10
                     }
                   ]
                 },
@@ -1927,7 +1815,7 @@
                   "options": [
                     {
                       "name": "speed",
-                      "value": 1
+                      "value": 2
                     },
                     {
                       "name": "iterations",
@@ -1959,6 +1847,180 @@
                       "name": "enabled",
                       "value": false,
                       "defaultVal": true
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1768987759066_ciblu9j54": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 75
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "sensitivity",
+                      "value": 1.5
+                    },
+                    {
+                      "name": "particleCount",
+                      "value": 500
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1768990256027_7gyf201mm": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 2
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "count",
+                      "value": 100000
+                    },
+                    {
+                      "name": "size",
+                      "value": 0.01
+                    },
+                    {
+                      "name": "radius",
+                      "value": 2.15
+                    },
+                    {
+                      "name": "branches",
+                      "value": 3
+                    },
+                    {
+                      "name": "spin",
+                      "value": 3
+                    },
+                    {
+                      "name": "randomness",
+                      "value": 5
+                    },
+                    {
+                      "name": "randomnessPower",
+                      "value": 4
+                    },
+                    {
+                      "name": "insideColor",
+                      "value": "#ff6030"
+                    },
+                    {
+                      "name": "outsideColor",
+                      "value": "#0949f0"
+                    },
+                    {
+                      "name": "rotationSpeed",
+                      "value": 0.05
                     }
                   ]
                 }

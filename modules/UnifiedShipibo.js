@@ -196,7 +196,8 @@ class UnifiedShipibo extends BaseThreeJsModule {
           vec3 finalColor = vec3(0.0);
           
           float audioInfluence = audioVolume * 0.5;
-          float timeWithAudio = time * (1.0 + audioBass * 0.3);
+          float baseTime = time;
+          float timeWithAudio = baseTime * (1.0 + audioBass * 0.3);
           float rotationSpeed = 0.1 + audioMid * 0.05;
           float waveSpeed = 0.4 + audioTreble * 0.2;
           
@@ -245,8 +246,9 @@ class UnifiedShipibo extends BaseThreeJsModule {
     });
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);
-    this.mesh.scale.set(aspect, 1, 1);
     this.mesh.position.set(0, 0, 0);
+    this.mesh.scale.set(aspect, 1, 1);
+    this.mesh.frustumCulled = false;
     this.customGroup.add(this.mesh);
   }
 
@@ -265,12 +267,11 @@ class UnifiedShipibo extends BaseThreeJsModule {
       this.bass = this.analyzer.getBass() * sensitivity;
       this.mid = this.analyzer.getMid() * sensitivity;
       this.treble = this.analyzer.getTreble() * sensitivity;
-    } else if (!this.audioReactive) {
-      const sensitivity = this.sensitivity || 1.0;
-      this.volume = 0.3 * sensitivity;
-      this.bass = 0.2 * sensitivity;
-      this.mid = 0.3 * sensitivity;
-      this.treble = 0.2 * sensitivity;
+    } else {
+      this.volume = 0;
+      this.bass = 0;
+      this.mid = 0;
+      this.treble = 0;
     }
     
     const elapsedTime = this.clock.getElapsedTime() * this.speed;
@@ -294,7 +295,9 @@ class UnifiedShipibo extends BaseThreeJsModule {
       }
     }
     
-    this.markNeedsRender();
+    if (this.renderer && this.scene && this.camera) {
+      this.renderer.render(this.scene, this.camera);
+    }
   }
 
   setSpeed({ value = 1.0 } = {}) {
