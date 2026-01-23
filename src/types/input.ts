@@ -47,6 +47,13 @@ export interface OscMethodTriggerEvent extends InputEventBase {
   address: string;
 }
 
+export interface MidiCCEvent extends InputEventBase {
+  source: "midi";
+  controller: number;
+  channel: number;
+  value: number;
+}
+
 export type TrackSelectionEventData =
   | MidiTrackSelectionEvent
   | OscTrackSelectionEvent;
@@ -56,7 +63,8 @@ export type MethodTriggerEventData =
 
 export type InputEventPayload =
   | { type: "track-selection"; data: TrackSelectionEventData }
-  | { type: "method-trigger"; data: MethodTriggerEventData };
+  | { type: "method-trigger"; data: MethodTriggerEventData }
+  | { type: "cc-control"; data: MidiCCEvent };
 
 export interface MidiDeviceInfo {
   id: string;

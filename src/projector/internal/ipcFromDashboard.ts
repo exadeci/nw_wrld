@@ -125,6 +125,7 @@ export function initDashboardIpc(this: DashboardIpcContext) {
         }
 
         if (type === "refresh-projector") {
+          console.log("🎵 [Projector] Received refresh-projector message, current config:", this.config?.audioReactive);
           return this.refreshPage();
         }
 
@@ -150,39 +151,24 @@ export function initDashboardIpc(this: DashboardIpcContext) {
             if (
               this.activeTrack &&
               this.activeTrack.name === currentTrackName &&
-              nextTrack
+              nextTrack &&
+              isEqual(
+                {
+                  name: this.activeTrack.name,
+                  modules: (this.activeTrack as { modules?: unknown }).modules,
+                  modulesData: (this.activeTrack as { modulesData?: unknown }).modulesData,
+                  channelMappings: (this.activeTrack as { channelMappings?: unknown })
+                    .channelMappings,
+                },
+                {
+                  name: (nextTrack as { name?: unknown }).name,
+                  modules: (nextTrack as { modules?: unknown }).modules,
+                  modulesData: (nextTrack as { modulesData?: unknown }).modulesData,
+                  channelMappings: (nextTrack as { channelMappings?: unknown }).channelMappings,
+                }
+              )
             ) {
-              const activeModules = Array.isArray((this.activeTrack as { modules?: unknown }).modules)
-                ? ((this.activeTrack as { modules?: unknown[] }).modules as unknown[]).filter((m: unknown) => {
-                    const mm = m as { disabled?: boolean } | null;
-                    return !mm?.disabled;
-                  })
-                : [];
-              const nextModules = Array.isArray((nextTrack as { modules?: unknown }).modules)
-                ? ((nextTrack as { modules?: unknown[] }).modules as unknown[]).filter((m: unknown) => {
-                    const mm = m as { disabled?: boolean } | null;
-                    return !mm?.disabled;
-                  })
-                : [];
-              if (
-                isEqual(
-                  {
-                    name: this.activeTrack.name,
-                    modules: activeModules,
-                    modulesData: (this.activeTrack as { modulesData?: unknown }).modulesData,
-                    channelMappings: (this.activeTrack as { channelMappings?: unknown })
-                      .channelMappings,
-                  },
-                  {
-                    name: (nextTrack as { name?: unknown }).name,
-                    modules: nextModules,
-                    modulesData: (nextTrack as { modulesData?: unknown }).modulesData,
-                    channelMappings: (nextTrack as { channelMappings?: unknown }).channelMappings,
-                  }
-                )
-              ) {
-                return;
-              }
+              return;
             }
             this.deactivateActiveTrack();
             return this.handleTrackSelection(currentTrackName);

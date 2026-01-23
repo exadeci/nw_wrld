@@ -41,22 +41,12 @@ function asNumber(value: unknown): number | null {
 
 export const validateOptionValue = (option: OptionDefinition, value: unknown): unknown => {
   const type: OptionType = typeof option.type === "string" ? option.type : "";
-  const min = asNumber(option.min);
-  const max = asNumber(option.max);
   const values = option.values;
 
   switch (type) {
     case "number":
       if (typeof value !== "number" || Number.isNaN(value)) {
         return option.defaultVal;
-      }
-
-      if (min !== null && value < min) {
-        return min;
-      }
-
-      if (max !== null && value > max) {
-        return max;
       }
 
       return value;
@@ -133,19 +123,6 @@ export const validateRandomRange = (
 
   if (min > max) {
     return [max, min];
-  }
-
-  const optMin = asNumber(option.min);
-  const optMax = asNumber(option.max);
-
-  if (optMin !== null && max < optMin) {
-    const m = optMin;
-    return [m, m];
-  }
-
-  if (optMax !== null && min > optMax) {
-    const m = optMax;
-    return [m, m];
   }
 
   return [min, max];

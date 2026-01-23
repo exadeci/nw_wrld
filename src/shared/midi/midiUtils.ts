@@ -143,6 +143,17 @@ export function noteNameToNumber(noteName: unknown): number | null {
   return (octave + 2) * 12 + semitone;
 }
 
+export function noteNumberToName(noteNumber: unknown): string | null {
+  if (typeof noteNumber !== "number" || Number.isNaN(noteNumber)) return null;
+  const n = Math.trunc(noteNumber);
+  if (n < 0 || n > 127) return null;
+  const semitone = n % 12;
+  const octave = Math.floor(n / 12) - 2;
+  const noteName = PITCH_CLASS_NAMES_SHARP[semitone];
+  if (!noteName) return null;
+  return `${noteName}${octave}`;
+}
+
 export function buildChannelNotesMap(): Record<number, string> {
   const map: Record<number, string> = {};
   Object.entries(CHANNEL_NOTES).forEach(([noteName, channelName]) => {

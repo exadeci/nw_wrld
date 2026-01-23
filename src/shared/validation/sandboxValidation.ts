@@ -154,6 +154,17 @@ export function normalizeSandboxRequestProps(
     };
   }
 
+  if (t === "audioStartCapture") {
+    const type = typeof p.type === "string" ? p.type : "input";
+    const deviceId = typeof p.deviceId === "string" ? p.deviceId : null;
+    const systemAudioId = typeof p.systemAudioId === "string" ? p.systemAudioId : null;
+    return { ok: true, props: { type, deviceId, systemAudioId } };
+  }
+
+  if (t === "audioStopCapture") {
+    return { ok: true, props: {} };
+  }
+
   return { ok: false, error: "INVALID_TYPE" };
 }
 

@@ -1,57 +1,22 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useAtom } from "jotai";
-import { FaPlus, FaCode, FaEye, FaSpinner, FaCheck, FaExclamationTriangle } from "react-icons/fa";
-import { Modal } from "../shared/Modal";
-import { useIPCListener, useIPCSend } from "../core/hooks/useIPC";
-import { ModalHeader } from "../components/ModalHeader";
-import { Button } from "../components/Button";
-import { HelpIcon } from "../components/HelpIcon";
-import { Tooltip } from "../components/Tooltip";
+import { FaPlus, FaCode, FaEye, FaSpinner, FaCheck, FaSearch } from "react-icons/fa";
+import { Modal } from "../shared/Modal.tsx";
+import { useIPCListener, useIPCSend } from "../core/hooks/useIPC.ts";
+import { ModalHeader } from "../components/ModalHeader.tsx";
+import { Button } from "../components/Button.tsx";
+import { HelpIcon } from "../components/HelpIcon.tsx";
 import { activeSetIdAtom, activeTrackIdAtom } from "../core/state.ts";
-import { updateActiveSet } from "../core/utils";
+import { updateActiveSet } from "../core/utils.ts";
 import { getActiveSetTracks } from "../../shared/utils/setUtils.ts";
 import { HELP_TEXT } from "../../shared/helpText.ts";
-
-type ModuleMethod = {
-  name: string;
-  executeOnLoad?: boolean;
-  options?: Array<{
-    name: string;
-    defaultVal?: unknown;
-  }>;
-};
-
-type PredefinedModule = {
-  id?: string;
-  name: string;
-  category: string;
-  status?: string;
-  methods?: ModuleMethod[];
-  instancesOnCurrentTrack?: number;
-};
-
-type Track = {
-  id: string | number;
-  modules: Array<{ id: string; type: string }>;
-  modulesData?: Record<string, unknown>;
-};
-
-type UserData = {
-  [key: string]: unknown;
-};
-
-type AddModuleModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  trackIndex: number | null;
-  userData: UserData;
-  setUserData: (updater: unknown) => void;
-  predefinedModules: PredefinedModule[];
-  skippedWorkspaceModules?: Array<{ file: string; reason: string }>;
-  onCreateNewModule?: () => void;
-  onEditModule: (moduleId: string) => void;
-  mode?: "add-to-track" | "manage-modules";
-};
+import { formatModuleName } from "../../shared/utils/stringUtils.js";
 
 export const AddModuleModal = ({
   isOpen,
@@ -60,23 +25,22 @@ export const AddModuleModal = ({
   userData,
   setUserData,
   predefinedModules,
-  skippedWorkspaceModules,
-  onCreateNewModule: _onCreateNewModule,
+  onCreateNewModule,
   onEditModule,
   mode = "add-to-track",
-}: AddModuleModalProps) => {
+}) => {
   const sendToProjector = useIPCSend("dashboard-to-projector");
-  const [hoveredPreviewModuleId, setHoveredPreviewModuleId] = useState<string | null>(null);
-  const [loadingPreviewModuleId, setLoadingPreviewModuleId] = useState<string | null>(null);
-  const previewRequestRef = useRef<{ moduleId: string | null; requestId: string | null }>({
-    moduleId: null,
-    requestId: null,
-  });
-  const lastAutoPreviewSentRef = useRef<string | null>(null);
+  const [hoveredPreviewModuleId, setHoveredPreviewModuleId] = useState(null);
+  const [loadingPreviewModuleId, setLoadingPreviewModuleId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const previewRequestRef = useRef({ moduleId: null, requestId: null });
+  const lastAutoPreviewSentRef = useRef(null);
+  const searchInputRef = useRef(null);
 
   const handleClose = () => {
     setHoveredPreviewModuleId(null);
     setLoadingPreviewModuleId(null);
+    setSearchQuery("");
     previewRequestRef.current = { moduleId: null, requestId: null };
     lastAutoPreviewSentRef.current = null;
     sendToProjector("clear-preview", {});
@@ -98,12 +62,12 @@ export const AddModuleModal = ({
     trackIndex !== null && trackIndex !== undefined
       ? trackIndex
       : mode === "manage-modules" && activeTrackId
-        ? tracks.findIndex((t: { id: string | number }) => t.id === activeTrackId)
-        : null;
+      ? tracks.findIndex((t) => t.id === activeTrackId)
+      : null;
 
-  const track: Track | null =
+  const track =
     effectiveTrackIndex !== null && effectiveTrackIndex !== -1
-      ? (tracks?.[effectiveTrackIndex] as Track | undefined) || null
+      ? tracks?.[effectiveTrackIndex]
       : null;
 
   const modulesWithTrackIndicator = useMemo(() => {
@@ -114,7 +78,7 @@ export const AddModuleModal = ({
       return list.map((m) => ({ ...m, instancesOnCurrentTrack: 0 }));
     }
 
-    const typeCounts = new Map<string, number>();
+    const typeCounts = new Map();
     modules.forEach((inst) => {
       const type = inst?.type ? String(inst.type) : "";
       if (!type) return;
@@ -130,24 +94,19 @@ export const AddModuleModal = ({
     });
   }, [predefinedModules, track]);
 
-  const handleAddToTrack = (module: PredefinedModule) => {
-    if (!track || effectiveTrackIndex === null || effectiveTrackIndex === -1) return;
+  const handleAddToTrack = (module) => {
+    if (!track || effectiveTrackIndex === null || effectiveTrackIndex === -1)
+      return;
     sendToProjector("clear-preview", {});
     updateActiveSet(setUserData, activeSetId, (activeSet) => {
-      const tracksUnknown = (activeSet as Record<string, unknown>).tracks;
-      if (!Array.isArray(tracksUnknown)) return;
-      const trackUnknown = tracksUnknown[effectiveTrackIndex];
-      if (typeof trackUnknown !== "object" || !trackUnknown) return;
-      const t = trackUnknown as Record<string, unknown>;
-      
-      const instanceId = `inst_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const modulesArray = Array.isArray(t.modules) ? t.modules : [];
-      modulesArray.push({
+      const track = activeSet.tracks[effectiveTrackIndex];
+      const instanceId = `inst_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+      track.modules.push({
         id: instanceId,
         type: module.id || module.name,
       });
-      t.modules = modulesArray;
-      
       const moduleMethods = Array.isArray(module.methods) ? module.methods : [];
       const hasMethodData = moduleMethods.length > 0;
       const constructorMethods = hasMethodData
@@ -179,46 +138,58 @@ export const AddModuleModal = ({
           options: [{ name: "duration", value: 0 }],
         });
       }
-      
-      const modulesData = typeof t.modulesData === "object" && t.modulesData
-        ? (t.modulesData as Record<string, unknown>)
-        : {};
-      modulesData[instanceId] = {
+      track.modulesData[instanceId] = {
         constructor: constructorMethods,
         methods: {},
       };
-      t.modulesData = modulesData;
     });
     onClose();
   };
 
-  const modulesByCategory = modulesWithTrackIndicator.reduce(
-    (acc, module) => {
+  const filteredModulesByCategory = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return modulesWithTrackIndicator.reduce((acc, module) => {
+        if (!acc[module.category]) {
+          acc[module.category] = [];
+        }
+        acc[module.category].push(module);
+        return acc;
+      }, {});
+    }
+
+    const filtered = modulesWithTrackIndicator.filter((module) => {
+      const moduleName = formatModuleName(module.name || "").toLowerCase();
+      const category = (module.category || "").toLowerCase();
+      const id = (module.id || "").toLowerCase();
+      const name = (module.name || "").toLowerCase();
+      
+      return (
+        moduleName.includes(query) ||
+        category.includes(query) ||
+        id.includes(query) ||
+        name.includes(query)
+      );
+    });
+
+    return filtered.reduce((acc, module) => {
       if (!acc[module.category]) {
         acc[module.category] = [];
       }
       acc[module.category].push(module);
       return acc;
-    },
-    {} as Record<string, PredefinedModule[]>
-  );
+    }, {});
+  }, [modulesWithTrackIndicator, searchQuery]);
 
-  const skippedList = useMemo(() => {
-    const list = Array.isArray(skippedWorkspaceModules) ? skippedWorkspaceModules : [];
-    return list
-      .map((s) => ({
-        file: s?.file ? String(s.file) : "",
-        reason: s?.reason ? String(s.reason) : "",
-      }))
-      .filter((s) => Boolean(s.file && s.reason));
-  }, [skippedWorkspaceModules]);
-
-  const handlePreviewHandshake = useCallback((event: unknown, data: unknown) => {
+  const handlePreviewHandshake = useCallback((event, data) => {
     if (!data || typeof data !== "object") return;
-    const d = data as Record<string, unknown>;
-    if (d.type !== "preview-module-ready" && d.type !== "preview-module-error") return;
+    if (
+      data.type !== "preview-module-ready" &&
+      data.type !== "preview-module-error"
+    )
+      return;
 
-    const payload = (d.props || {}) as Record<string, unknown>;
+    const payload = data.props || {};
     const requestId = payload.requestId || null;
     if (!requestId) return;
     if (previewRequestRef.current.requestId !== requestId) return;
@@ -230,25 +201,15 @@ export const AddModuleModal = ({
     };
   }, []);
 
-  useIPCListener("from-projector", handlePreviewHandshake, [handlePreviewHandshake]);
+  useIPCListener("from-projector", handlePreviewHandshake, [
+    handlePreviewHandshake,
+  ]);
 
-  useIPCListener(
-    "from-projector",
-    (_event: unknown, data: unknown) => {
-      if (!data || typeof data !== "object") return;
-      const d = data as Record<string, unknown>;
-      if (d.type !== "module-introspect-result") return;
-      const payload = (d.props || {}) as Record<string, unknown>;
-      const moduleId = payload.moduleId || null;
-      if (!moduleId) return;
-      if (payload.ok) return;
-      if (loadingPreviewModuleId !== moduleId) return;
-
-      setLoadingPreviewModuleId(null);
-      previewRequestRef.current = { moduleId: String(moduleId), requestId: null };
-    },
-    [loadingPreviewModuleId]
-  );
+  useEffect(() => {
+    if (isOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -315,14 +276,40 @@ export const AddModuleModal = ({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} onCloseHandler={handleClose} size="medium">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      onCloseHandler={handleClose}
+      size="medium"
+    >
       <ModalHeader title={modalTitle} onClose={handleClose} />
 
       <div className="px-6">
-        {Object.entries(modulesByCategory).map(([category, modules]) => (
+        <div className="mb-4">
+          <div className="relative">
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 text-xs" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search modules..."
+              className="w-full pl-8 pr-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-neutral-300 text-[11px] font-mono focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        {Object.keys(filteredModulesByCategory).length === 0 ? (
+          <div className="text-neutral-300/30 text-[11px] font-mono py-4">
+            No modules found matching "{searchQuery}"
+          </div>
+        ) : (
+          Object.entries(filteredModulesByCategory).map(([category, modules]) => (
           <div key={category} className="mb-6 font-mono">
             <div className="mb-2">
-              <div className="opacity-50 text-[11px] text-neutral-300">{category}:</div>
+              <div className="opacity-50 text-[11px] text-neutral-300">
+                {category}:
+              </div>
 
               <div className="pl-6 uppercase flex flex-col flex-wrap gap-2">
                 {modules.map((module) => {
@@ -330,7 +317,9 @@ export const AddModuleModal = ({
                     const hoveredId = module.id || module.name;
                     if (!hoveredId) return;
                     if (hoveredPreviewModuleId === hoveredId) return;
-                    const requestId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+                    const requestId = `${Date.now()}_${Math.random()
+                      .toString(36)
+                      .slice(2, 8)}`;
                     setHoveredPreviewModuleId(hoveredId);
                     setLoadingPreviewModuleId(hoveredId);
                     previewRequestRef.current = {
@@ -338,7 +327,9 @@ export const AddModuleModal = ({
                       requestId,
                     };
                     lastAutoPreviewSentRef.current = null;
-                    const moduleMethods = Array.isArray(module.methods) ? module.methods : [];
+                    const moduleMethods = Array.isArray(module.methods)
+                      ? module.methods
+                      : [];
                     const hasMethodData = moduleMethods.length > 0;
 
                     if (!hasMethodData) {
@@ -363,7 +354,9 @@ export const AddModuleModal = ({
                       : [];
 
                     const finalConstructorMethods = [...constructorMethods];
-                    if (!finalConstructorMethods.some((m) => m.name === "matrix")) {
+                    if (
+                      !finalConstructorMethods.some((m) => m.name === "matrix")
+                    ) {
                       finalConstructorMethods.unshift({
                         name: "matrix",
                         options: [
@@ -375,7 +368,9 @@ export const AddModuleModal = ({
                         ],
                       });
                     }
-                    if (!finalConstructorMethods.some((m) => m.name === "show")) {
+                    if (
+                      !finalConstructorMethods.some((m) => m.name === "show")
+                    ) {
                       finalConstructorMethods.push({
                         name: "show",
                         options: [{ name: "duration", value: 0 }],
@@ -409,43 +404,19 @@ export const AddModuleModal = ({
                     sendToProjector("clear-preview", {});
                   };
 
-                  const isHovered = hoveredPreviewModuleId === (module.id || module.name);
-                  const isLoading = loadingPreviewModuleId === (module.id || module.name);
-                  const isFailed = module?.status === "failed";
-                  const moduleId = module.id || module.name;
-                  const loadFailedText = moduleId
-                    ? `Module "${moduleId}.js" exists in your workspace but failed to load. Fix the module file (syntax/runtime error) and save to retry.`
-                    : null;
+                  const isHovered =
+                    hoveredPreviewModuleId === (module.id || module.name);
+                  const isLoading =
+                    loadingPreviewModuleId === (module.id || module.name);
 
                   return (
-                    <div key={module.id || module.name} className="flex items-center gap-1 group">
+                    <div
+                      key={module.id || module.name}
+                      className="flex items-center gap-1 group"
+                    >
                       <div className="font-mono text-[11px] text-neutral-300 uppercase flex-1 flex items-center gap-2">
-                        <div className="truncate">{module.name}</div>
-                        {isFailed ? (
-                          <span className="inline-flex items-center">
-                            <Tooltip content={loadFailedText} position="top">
-                              <span
-                                className="text-red-500/70 text-[11px] cursor-help"
-                                data-testid="module-load-failed"
-                                data-module-name={moduleId}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  try {
-                                    (
-                                      globalThis as unknown as {
-                                        nwWrldBridge?: { app?: { openProjectorDevTools?: () => void } };
-                                      }
-                                    )?.nwWrldBridge?.app?.openProjectorDevTools?.();
-                                  } catch {}
-                                }}
-                              >
-                                <FaExclamationTriangle />
-                              </span>
-                            </Tooltip>
-                          </span>
-                        ) : null}
-                        {module.instancesOnCurrentTrack && module.instancesOnCurrentTrack > 0 ? (
+                        <div className="truncate">{formatModuleName(module.name)}</div>
+                        {module.instancesOnCurrentTrack > 0 ? (
                           <div
                             className="flex items-center gap-1 text-blue-500/50"
                             title={`${module.instancesOnCurrentTrack} instance${
@@ -454,7 +425,9 @@ export const AddModuleModal = ({
                           >
                             <FaCheck />
                             {module.instancesOnCurrentTrack > 1 ? (
-                              <span className="text-[10px]">{module.instancesOnCurrentTrack}</span>
+                              <span className="text-[10px]">
+                                {module.instancesOnCurrentTrack}
+                              </span>
                             ) : null}
                           </div>
                         ) : null}
@@ -466,7 +439,11 @@ export const AddModuleModal = ({
                           className="cursor-default"
                         >
                           <div
-                            title={isHovered && isLoading ? "Loading preview..." : "Preview module"}
+                            title={
+                              isHovered && isLoading
+                                ? "Loading preview..."
+                                : "Preview module"
+                            }
                             className="cursor-help flex items-center text-neutral-400"
                           >
                             {isHovered && isLoading ? (
@@ -491,9 +468,9 @@ export const AddModuleModal = ({
                           onClick={() => handleAddToTrack(module)}
                           type="secondary"
                           icon={<FaPlus />}
-                          data-testid="add-module-to-track"
-                          data-module-name={module.id || module.name}
-                          title={track ? "Add to track" : "Select a track first"}
+                          title={
+                            track ? "Add to track" : "Select a track first"
+                          }
                           disabled={!track}
                         />
                       </div>
@@ -503,26 +480,8 @@ export const AddModuleModal = ({
               </div>
             </div>
           </div>
-        ))}
-
-        {skippedList.length > 0 ? (
-          <div className="mt-6 font-mono border-t border-neutral-800 pt-4">
-            <div className="mb-2 opacity-50 text-[11px] text-neutral-300">Skipped modules:</div>
-            <div className="pl-6 flex flex-col gap-2">
-              {skippedList.map((s) => (
-                <div key={s.file} className="flex items-start gap-2 text-[11px] text-neutral-300">
-                  <span className="text-red-500/70 mt-[1px]">
-                    <FaExclamationTriangle />
-                  </span>
-                  <div className="min-w-0">
-                    <div className="truncate">{s.file}</div>
-                    <div className="opacity-60">{s.reason}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
+        ))
+        )}
       </div>
     </Modal>
   );

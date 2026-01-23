@@ -31,7 +31,7 @@ export function normalizeInputEventPayload(
   const data = payloadObj.data;
 
   if (typeof type !== "string") return null;
-  if (type !== "track-selection" && type !== "method-trigger") return null;
+  if (type !== "track-selection" && type !== "method-trigger" && type !== "cc-control") return null;
   if (!data || typeof data !== "object") return null;
   if (!isPlainObject(data)) return null;
   const dataObj = data as DataBag;
@@ -42,6 +42,27 @@ export function normalizeInputEventPayload(
   const timestamp = isFiniteNumber(dataObj.timestamp)
     ? dataObj.timestamp
     : Date.now() / 1000;
+
+  if (type === "cc-control") {
+    if (source !== "midi") return null;
+    if (!isFiniteNumber(dataObj.controller)) return null;
+    if (!isFiniteNumber(dataObj.channel)) return null;
+    if (!isFiniteNumber(dataObj.value)) return null;
+    const controller = dataObj.controller;
+    const channel = dataObj.channel;
+    const value = dataObj.value;
+    return {
+      type: "cc-control",
+      data: {
+        ...dataObj,
+        source: "midi",
+        timestamp,
+        controller,
+        channel,
+        value,
+      },
+    };
+  }
 
   if (source === "midi") {
     if (!isFiniteNumber(dataObj.note)) return null;

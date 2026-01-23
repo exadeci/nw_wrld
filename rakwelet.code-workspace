@@ -1,0 +1,12 @@
+{
+    "folders": [
+        {
+            "name": "nw_wrld",
+            "path": "."
+        },
+        {
+            "name": "new_wrld",
+            "path": "../../Documents/new_wrld"
+        }
+    ]
+}

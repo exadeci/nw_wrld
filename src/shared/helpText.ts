@@ -36,7 +36,7 @@ export const HELP_TEXT: Record<string, string> = {
   addChannel:
     "Add a channel to trigger methods on this track's modules. For MIDI: Pitch Class mode uses C..B; Exact Note mode uses 0–127. For OSC: use /ch/name or /channel/name pattern (e.g., /ch/bass).",
   channelSlot:
-    "Choose a channel number (1-12). The actual trigger is defined in Settings → Configure Mappings. This allows consistent channel mapping across all tracks.",
+    "Choose a channel number (1-20). The actual trigger is defined in Settings → Configure Mappings. This allows consistent channel mapping across all tracks.",
   velocitySensitive:
     "When enabled, MIDI note velocity affects trigger intensity. When disabled, all triggers use maximum velocity (127).",
   oscPort:

@@ -27,7 +27,7 @@ const { ipcMain, dialog } = require("electron") as {
 const getLegacyJsonDirForMain = () =>
   path.join(srcDir, "..", "src", "shared", "json");
 
-const getFallbackJsonDirForMain = () => path.join(srcDir, "shared", "json");
+export const getFallbackJsonDirForMain = () => path.join(srcDir, "shared", "json");
 
 export const getProjectJsonDirForMain = (projectDir: string | null) => {
   if (!projectDir || typeof projectDir !== "string") return null;
@@ -365,6 +365,41 @@ export function registerWorkspaceSelectionIpc({
 }: {
   createWindow: (projectDir: string | null) => void;
 }) {
+  ipcMain.handle("workspace:set", async (event, workspacePathArg: unknown) => {
+    const workspacePathValue = typeof workspacePathArg === "string" ? workspacePathArg.trim() : null;
+    if (!workspacePathValue || !isExistingDirectory(workspacePathValue)) {
+      return { ok: false, error: "INVALID_PATH" };
+    }
+    await ensureWorkspaceScaffold(workspacePathValue);
+    maybeMigrateJsonIntoProject(workspacePathValue);
+    state.currentProjectDir = workspacePathValue;
+    
+    const wcId = typeof (event as { sender?: { id?: unknown } })?.sender?.id === "number"
+      ? ((event as { sender: { id: number } }).sender.id)
+      : null;
+    if (wcId != null) {
+      state.webContentsToProjectDir.set(wcId, workspacePathValue);
+    }
+    
+    try {
+      const fallbackJsonDir = getFallbackJsonDirForMain();
+      const appStatePath = path.join(fallbackJsonDir, "appState.json");
+      let fallbackState: Record<string, unknown> = {};
+      if (fs.existsSync(appStatePath)) {
+        try {
+          const content = await fs.promises.readFile(appStatePath, "utf-8");
+          fallbackState = JSON.parse(content);
+        } catch {}
+      }
+      fallbackState.workspacePath = workspacePathValue;
+      await fs.promises.writeFile(appStatePath, JSON.stringify(fallbackState, null, 2), "utf-8");
+    } catch (err) {
+      console.warn("[Main] Failed to save workspacePath to fallback:", err);
+    }
+    
+    return { ok: true, workspacePath: workspacePathValue };
+  });
+
   ipcMain.handle("workspace:select", async () => {
     const result = await dialog.showOpenDialog({
       properties: ["openDirectory", "createDirectory"],
@@ -376,6 +411,22 @@ export function registerWorkspaceSelectionIpc({
     await ensureWorkspaceScaffold(workspacePath);
     maybeMigrateJsonIntoProject(workspacePath);
     state.currentProjectDir = workspacePath;
+    
+    try {
+      const fallbackJsonDir = getFallbackJsonDirForMain();
+      const appStatePath = path.join(fallbackJsonDir, "appState.json");
+      let fallbackState: Record<string, unknown> = {};
+      if (fs.existsSync(appStatePath)) {
+        try {
+          const content = await fs.promises.readFile(appStatePath, "utf-8");
+          fallbackState = JSON.parse(content);
+        } catch {}
+      }
+      fallbackState.workspacePath = workspacePath;
+      await fs.promises.writeFile(appStatePath, JSON.stringify(fallbackState, null, 2), "utf-8");
+    } catch (err) {
+      console.warn("[Main] Failed to save workspacePath to fallback:", err);
+    }
 
     if (state.inputManager) {
       try {

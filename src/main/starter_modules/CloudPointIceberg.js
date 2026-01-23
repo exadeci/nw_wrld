@@ -36,8 +36,6 @@ class CloudPointIceberg extends BaseThreeJsModule {
     this.createIcebergShape();
 
     this.setModel(this.customGroup);
-
-    this.render();
   }
 
   createIcebergShape() {
@@ -324,6 +322,7 @@ class CloudPointIceberg extends BaseThreeJsModule {
     }
 
     this.pointCloud.geometry.attributes.color.needsUpdate = true;
+    this.requestRender();
   }
 
   destroy() {

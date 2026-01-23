@@ -24,39 +24,17 @@ function defaultUserData(defaultValue: Jsonish): Record<string, Jsonish> {
   return { config: {}, sets: [] };
 }
 
-function normalizeModules(value: Jsonish): { modules: Jsonish[]; changed: boolean } {
+function normalizeModules(value: Jsonish): Jsonish[] {
   const list = isArray(value) ? value : [];
   const out: Jsonish[] = [];
-  let changed = !isArray(value);
   for (const m of list) {
-    if (!isPlainObject(m)) {
-      changed = true;
-      continue;
-    }
+    if (!isPlainObject(m)) continue;
     const id = asNonEmptyString(m.id);
     const type = asNonEmptyString(m.type);
-    if (!id || !type) {
-      changed = true;
-      continue;
-    }
-
-    const hasDisabledKey = Object.prototype.hasOwnProperty.call(m, "disabled");
-    const disabledIsTrue = (m as Record<string, Jsonish>).disabled === true;
-
-    const needsIdType = m.id !== id || m.type !== type;
-    const needsDisabled = hasDisabledKey && !disabledIsTrue;
-
-    if (!needsIdType && !needsDisabled) {
-      out.push(m);
-      continue;
-    }
-
-    changed = true;
-    const next: Record<string, Jsonish> = { ...m, id, type };
-    if (!disabledIsTrue) delete next.disabled;
-    out.push(next);
+    if (!id || !type) continue;
+    out.push({ ...m, id, type });
   }
-  return { modules: out, changed };
+  return out;
 }
 
 function normalizeTrack(value: Jsonish): Jsonish | null {
@@ -68,8 +46,11 @@ function normalizeTrack(value: Jsonish): Jsonish | null {
     changed = true;
   };
 
-  const { modules, changed: modulesChanged } = normalizeModules(out.modules);
-  if (modulesChanged) {
+  const modules = normalizeModules(out.modules);
+  if (
+    !isArray(out.modules) ||
+    modules.length !== (out.modules as Jsonish[]).length
+  ) {
     ensure();
     out.modules = modules;
   }
@@ -79,29 +60,9 @@ function normalizeTrack(value: Jsonish): Jsonish | null {
     out.modulesData = {};
   }
 
-  if (!isPlainObject(out.channelMappings)) {
+  if (!isPlainObject(out.channelMappings) && out.channelMappings != null) {
     ensure();
     out.channelMappings = {};
-  }
-
-  const cm = out.channelMappings as Record<string, Jsonish>;
-  const valid = new Set<number>();
-  for (const k of Object.keys(cm)) {
-    const n = parseInt(k, 10);
-    if (!Number.isFinite(n)) continue;
-    if (n < 1 || n > 12) continue;
-    if (String(n) !== k) continue;
-    valid.add(n);
-  }
-
-  if (valid.size < 3) {
-    ensure();
-    for (let slot = 1; slot <= 12 && valid.size < 3; slot++) {
-      if (valid.has(slot)) continue;
-      const key = String(slot);
-      cm[key] = slot;
-      valid.add(slot);
-    }
   }
 
   return changed ? out : value;

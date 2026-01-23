@@ -142,5 +142,6 @@ export const useDashboardPersistence = ({
     };
     updateAppState();
   }, [isSequencerMuted, activeTrackId, activeSetId, isInitialMountRef, workspacePathRef]);
+
 };
 

@@ -230,3 +230,86 @@ export const ValidationError = ({
 
   return <div className="text-red-400 text-[11px] mt-1 font-mono">{validation.errorMessage}</div>;
 };
+
+export const RangeInput = ({ value, min = 0, max = 1, step = 0.01, onChange, label, showValue = true, style, ...props }) => {
+  return (
+    <div className="flex items-center gap-3 w-full">
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={onChange}
+        style={{
+          flex: 1,
+          height: "4px",
+          appearance: "none",
+          WebkitAppearance: "none",
+          background: `linear-gradient(to right, #666 0%, #666 ${((value - min) / (max - min)) * 100}%, #333 ${((value - min) / (max - min)) * 100}%, #333 100%)`,
+          borderRadius: "2px",
+          outline: "none",
+          cursor: "pointer",
+          ...style,
+        }}
+        {...props}
+      />
+      {showValue && (
+        <span
+          style={{
+            fontSize: TERMINAL_STYLES.fontSize,
+            fontFamily: TERMINAL_STYLES.fontFamily,
+            color: TERMINAL_STYLES.text,
+            minWidth: "40px",
+            textAlign: "right",
+          }}
+        >
+          {typeof value === "number" ? value.toFixed(2) : value}
+        </span>
+      )}
+    </div>
+  );
+};
+
+export const LevelMeter = ({ value = 0, label, color = "#4ade80" }) => {
+  const clampedValue = Math.max(0, Math.min(1, value));
+  return (
+    <div className="flex items-center gap-3 w-full">
+      <div
+        style={{
+          flex: 1,
+          height: "6px",
+          backgroundColor: "#222",
+          borderRadius: "3px",
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            height: "100%",
+            width: `${clampedValue * 100}%`,
+            backgroundColor: color,
+            transition: "width 50ms ease-out",
+            borderRadius: "3px",
+          }}
+        />
+      </div>
+      <span
+        style={{
+          fontSize: TERMINAL_STYLES.fontSize,
+          fontFamily: TERMINAL_STYLES.fontFamily,
+          color: TERMINAL_STYLES.text,
+          minWidth: "40px",
+          textAlign: "right",
+          opacity: 0.7,
+        }}
+      >
+        {clampedValue.toFixed(2)}
+      </span>
+    </div>
+  );
+};

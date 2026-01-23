@@ -55,9 +55,18 @@ export function setupApp() {
     });
   }
 
+    // WebGL/GPU optimizations
+  app.commandLine.appendSwitch("enable-gpu-rasterization");
+  app.commandLine.appendSwitch("enable-webgl2-compute-context");
+  app.commandLine.appendSwitch("ignore-gpu-blocklist");
   app.commandLine.appendSwitch("max-webgl-contexts", "64");
+  
   app.commandLine.appendSwitch("disable-renderer-backgrounding");
   app.commandLine.appendSwitch("disable-background-timer-throttling");
   app.commandLine.appendSwitch("enable-gpu-rasterization");
   app.commandLine.appendSwitch("enable-zero-copy");
+  
+  // Suppress GPU-related warnings (these are typically harmless)
+  app.commandLine.appendSwitch("disable-gpu-process-crash-limit");
+  // app.commandLine.appendSwitch("disable-logging");
 }

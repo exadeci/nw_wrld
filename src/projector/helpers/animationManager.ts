@@ -18,11 +18,21 @@ class AnimationManager {
   private subscribers: Set<() => void>;
   private rafId: number | null;
   private tickBound: () => void;
+  private fps: number;
+  private frameCount: number;
+  private lastTime: number;
+  private fpsCallbacks: Set<(fps: number) => void>;
+  private forceRunning: boolean;
 
   constructor() {
     this.subscribers = new Set();
     this.rafId = null;
     this.tickBound = this.tick.bind(this);
+    this.fps = 0;
+    this.frameCount = 0;
+    this.lastTime = performance.now();
+    this.fpsCallbacks = new Set();
+    this.forceRunning = false;
   }
 
   /**
@@ -54,8 +64,8 @@ class AnimationManager {
   unsubscribe(callback: () => void) {
     this.subscribers.delete(callback);
 
-    // Stop the loop if no subscribers remain
-    if (this.subscribers.size === 0) {
+    // Stop the loop if no subscribers remain and not forced to run
+    if (this.subscribers.size === 0 && !this.forceRunning) {
       this.stop();
     }
   }
@@ -64,10 +74,25 @@ class AnimationManager {
    * Main animation loop tick - executes all subscribed callbacks
    */
   private tick() {
-    // Update tweens ONCE per frame globally
+    const now = performance.now();
+    this.frameCount++;
+    
+    if (now - this.lastTime >= 1000) {
+      this.fps = Math.round((this.frameCount * 1000) / (now - this.lastTime));
+      this.frameCount = 0;
+      this.lastTime = now;
+      
+      this.fpsCallbacks.forEach((callback) => {
+        try {
+          callback(this.fps);
+        } catch (error: unknown) {
+          console.error("[AnimationManager] Error in FPS callback:", error);
+        }
+      });
+    }
+
     TWEEN.update();
 
-    // Execute all subscriber callbacks
     this.subscribers.forEach((callback) => {
       try {
         callback();
@@ -87,6 +112,8 @@ class AnimationManager {
    */
   start() {
     if (!this.rafId) {
+      this.lastTime = performance.now();
+      this.frameCount = 0;
       this.rafId = requestAnimationFrame(this.tickBound);
     }
   }
@@ -107,8 +134,41 @@ class AnimationManager {
   getSubscriberCount() {
     return this.subscribers.size;
   }
+
+  /**
+   * Subscribe to FPS updates
+   * @param {Function} callback - Called with current FPS value
+   */
+  onFpsUpdate(callback: unknown) {
+    if (typeof callback === "function") {
+      const cb = callback as (fps: number) => void;
+      this.fpsCallbacks.add(cb);
+      this.forceRunning = this.fpsCallbacks.size > 0;
+      if (this.forceRunning && !this.rafId) {
+        this.start();
+      }
+    }
+  }
+
+  /**
+   * Unsubscribe from FPS updates
+   * @param {Function} callback - The callback to remove
+   */
+  offFpsUpdate(callback: (fps: number) => void) {
+    this.fpsCallbacks.delete(callback);
+    this.forceRunning = this.fpsCallbacks.size > 0;
+    if (!this.forceRunning && this.subscribers.size === 0) {
+      this.stop();
+    }
+  }
+
+  /**
+   * Get current FPS
+   */
+  getFps() {
+    return this.fps;
+  }
 }
 
 // Singleton instance - shared across all modules
 export const animationManager = new AnimationManager();
-

@@ -1,4 +1,4 @@
-import { WebMidi, type MidiInput, type NoteOnEvent } from "webmidi";
+import { WebMidi, type MidiInput, type NoteOnEvent, type ControlChangeEvent } from "webmidi";
 import { UDPPort, type OscMessage, type OscError } from "osc";
 import { isValidOSCChannelAddress, isValidOSCTrackAddress } from "../shared/validation/oscValidation";
 import { normalizeInputEventPayload } from "../shared/validation/inputEventValidation";
@@ -291,13 +291,14 @@ class InputManager {
               ? webMidi.getInputByName(deviceName)
               : null);
           if (!input) {
-            const error = new Error(
-              `MIDI device "${midiConfig.deviceName}" not found`
-            );
-            console.error("[InputManager]", error.message);
+            const message = `MIDI device "${midiConfig.deviceName}" not found`;
+            console.warn("[InputManager]", message);
             this.currentSource = null;
-            this.broadcastStatus(INPUT_STATUS.DISCONNECTED, "");
-            return reject(error);
+            this.broadcastStatus(
+              INPUT_STATUS.DISCONNECTED,
+              `Device not available: ${midiConfig.deviceName}`
+            );
+            return resolve();
           }
 
           const resolvedId = typeof input.id === "string" ? input.id : deviceId || "";
@@ -325,6 +326,19 @@ class InputManager {
                 source: "midi",
               });
             }
+          });
+
+          input.addListener("controlchange", (e: ControlChangeEvent) => {
+            const controller = e.controller.number;
+            const channel = e.message.channel;
+            const value = Math.round(e.value * 127);
+
+            this.broadcast("cc-control", {
+              controller,
+              channel,
+              value,
+              source: "midi",
+            });
           });
 
           this.currentSource = { type: "midi", instance: input };
@@ -452,6 +466,7 @@ class InputManager {
                 this.currentSource.instance.removeListener();
               } catch {
                 this.currentSource.instance.removeListener("noteon");
+                this.currentSource.instance.removeListener("controlchange");
               }
             }
             const webMidi = getWebMidiProvider();

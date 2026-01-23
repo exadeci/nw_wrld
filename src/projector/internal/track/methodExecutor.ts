@@ -50,6 +50,14 @@ export async function executeMethods(
     this.logToMain(`executeMethods: ${instanceId}`);
   }
 
+  const track = this.activeTrack as { modulesData?: Record<string, { disabled?: unknown }> } | null;
+  const moduleData = track?.modulesData?.[String(instanceId || "")];
+  const isDisabled = moduleData?.disabled === true;
+  if (isDisabled) {
+    if (debugEnabled) logger.log(`⏱️ executeMethods skipped (disabled): ${instanceId}`);
+    return;
+  }
+
   let needsMatrixUpdate = false;
   let matrixOptions: unknown = null;
   const otherMethods: unknown[] = [];

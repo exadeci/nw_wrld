@@ -63,16 +63,12 @@ type MethodBlockProps = {
 const DraftNumberInput = memo(
   ({
     value,
-    min,
-    max,
     fallback,
     onCommit,
     methodName,
     optionName,
   }: {
     value: unknown;
-    min?: number;
-    max?: number;
     fallback: number;
     onCommit: (next: number) => void;
     methodName?: string;
@@ -88,27 +84,17 @@ const DraftNumberInput = memo(
 
     const displayed = draft !== null ? draft : String(value ?? "");
 
-    const clamp = useCallback(
-      (n: number) => {
-        let out = n;
-        if (typeof min === "number") out = Math.max(min, out);
-        if (typeof max === "number") out = Math.min(max, out);
-        return out;
-      },
-      [min, max]
-    );
-
     const commitIfValid = useCallback(
-      (raw: string) => {
+      (raw) => {
         const s = String(raw);
         const isIntermediate =
           s === "" || s === "-" || s === "." || s === "-." || s.endsWith(".") || /e[+-]?$/i.test(s);
         if (isIntermediate) return;
         const n = Number(s);
         if (!Number.isFinite(n)) return;
-        onCommit(clamp(n));
+        onCommit(n);
       },
-      [clamp, onCommit]
+      [onCommit]
     );
 
     const commitOnBlur = useCallback(() => {
@@ -117,22 +103,20 @@ const DraftNumberInput = memo(
       const isIntermediate =
         s === "" || s === "-" || s === "." || s === "-." || s.endsWith(".") || /e[+-]?$/i.test(s);
       if (isIntermediate) {
-        onCommit(clamp(fallback));
+        onCommit(fallback);
         return;
       }
       const n = Number(s);
       if (!Number.isFinite(n)) {
-        onCommit(clamp(fallback));
+        onCommit(fallback);
         return;
       }
-      onCommit(clamp(n));
-    }, [clamp, draft, fallback, onCommit]);
+      onCommit(n);
+    }, [draft, fallback, onCommit]);
 
     return (
       <NumberInput
         value={displayed}
-        min={min}
-        max={max}
         data-testid="method-option-input"
         data-method-name={methodName}
         data-option-name={optionName}
@@ -210,6 +194,11 @@ export const MethodBlock = memo(
           Array.isArray(currentOption.randomValues) &&
           currentOption.randomValues.length > 0 &&
           currentOption.randomizeFromUserColors);
+      const optionDef = moduleMethods
+        .find((m) => m.name === method.name)
+        ?.options.find((o) => o.name === option.name);
+      const _allowRandomization = optionDef?.allowRandomization || false;
+
       if (mode === "editor") {
         if (option.type === "number") {
           const fallback =
@@ -221,8 +210,6 @@ export const MethodBlock = memo(
           return (
             <DraftNumberInput
               value={currentOption.value}
-              min={option.min}
-              max={option.max}
               fallback={fallback}
               onCommit={(next) => handleOptionChange(option.name, next)}
               methodName={method.name}
@@ -519,42 +506,22 @@ export const MethodBlock = memo(
                 <>
                   <div className="flex flex-col gap-0.5">
                     <div className="text-[9px] text-neutral-300/30">min:</div>
-                    <DraftNumberInput
+                    <NumberInput
                       value={currentOption.randomRange[0]}
-                      min={option.min}
-                      max={option.max}
-                      fallback={
-                        typeof option.min === "number"
-                          ? option.min
-                          : typeof currentOption.randomRange?.[0] === "number"
-                            ? currentOption.randomRange[0]
-                            : 0
+                      onChange={(e) =>
+                        onRandomRangeChange &&
+                        onRandomRangeChange(option.name, 0, e.target.value, option)
                       }
-                      onCommit={(next) =>
-                        onRandomRangeChange && onRandomRangeChange(option.name, 0, next, option)
-                      }
-                      methodName={method.name}
-                      optionName={`${option.name}:randomMin`}
                     />
                   </div>
                   <div className="flex flex-col gap-0.5">
                     <div className="text-[9px] text-neutral-300/30">max:</div>
-                    <DraftNumberInput
+                    <NumberInput
                       value={currentOption.randomRange[1]}
-                      min={option.min}
-                      max={option.max}
-                      fallback={
-                        typeof option.max === "number"
-                          ? option.max
-                          : typeof currentOption.randomRange?.[1] === "number"
-                            ? currentOption.randomRange[1]
-                            : 0
+                      onChange={(e) =>
+                        onRandomRangeChange &&
+                        onRandomRangeChange(option.name, 1, e.target.value, option)
                       }
-                      onCommit={(next) =>
-                        onRandomRangeChange && onRandomRangeChange(option.name, 1, next, option)
-                      }
-                      methodName={method.name}
-                      optionName={`${option.name}:randomMax`}
                     />
                   </div>
                 </>
@@ -571,8 +538,6 @@ export const MethodBlock = memo(
           return (
             <DraftNumberInput
               value={currentOption.value}
-              min={option.min}
-              max={option.max}
               fallback={fallback}
               onCommit={(next) => handleOptionChange(option.name, next)}
               methodName={method.name}

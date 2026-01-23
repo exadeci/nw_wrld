@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import BaseThreeJsModule from "../helpers/threeBase";
+import BaseThreeJsModule from "../helpers/threeBase.js";
 
 export class ThreeTemplate extends BaseThreeJsModule {
   static title = "ThreeTemplate";

@@ -42,7 +42,6 @@ type OptionDef = {
   min?: number;
   max?: number;
   values?: string[];
-  allowRandomization?: boolean;
 };
 
 type _MethodDef = {
@@ -137,15 +136,8 @@ const SortableItem = memo(
           min = false;
           max = true;
         } else {
-          min = defaultVal * 0.8;
+          min = Math.max(defaultVal * 0.8, 0);
           max = defaultVal * 1.2;
-          if (typeof optionDef?.min === "number") min = Math.max(optionDef.min, min);
-          if (typeof optionDef?.max === "number") max = Math.min(optionDef.max, max);
-          if (typeof min === "number" && typeof max === "number" && min > max) {
-            const tmp = min;
-            min = max;
-            max = tmp;
-          }
         }
         changeOption(method.name, optionName, [min, max], "randomRange");
       },
@@ -201,12 +193,7 @@ const SortableItem = memo(
         } else {
           const current = option.randomRange as [number, number];
           newRandomRange = [...current] as [number, number];
-          const parsed = parseFloat(newValue);
-          if (!Number.isFinite(parsed)) return;
-          let next = parsed;
-          if (typeof optionDef?.min === "number") next = Math.max(optionDef.min, next);
-          if (typeof optionDef?.max === "number") next = Math.min(optionDef.max, next);
-          newRandomRange[indexOrValues as number] = next;
+          newRandomRange[indexOrValues as number] = parseFloat(newValue);
         }
         changeOption(method.name, optionName, newRandomRange, "randomRange");
       },
@@ -333,9 +320,6 @@ export const MethodConfiguratorModal = ({
               type: String(oObj.type || ""),
               defaultVal: oObj.defaultVal,
               values,
-              min: typeof oObj.min === "number" ? oObj.min : undefined,
-              max: typeof oObj.max === "number" ? oObj.max : undefined,
-              allowRandomization: oObj.allowRandomization === true,
             };
           })
           .filter((o: OptionDef | null): o is OptionDef => Boolean(o));
@@ -371,27 +355,6 @@ export const MethodConfiguratorModal = ({
       : `Module "${selectedModuleType}" is not available in the current workspace scan.`;
 
   const [activeSetId] = useAtom(activeSetIdAtom);
-
-  const selectedTrackChannelCount = useMemo(() => {
-    const ch = selectedChannel as SelectedChannel | null;
-    if (!ch) return 0;
-    const tracks = getActiveSetTracks(userData, activeSetId);
-    const trackUnknown = tracks[ch.trackIndex];
-    if (!trackUnknown || typeof trackUnknown !== "object") return 0;
-    const track = trackUnknown as Record<string, unknown>;
-    const cmUnknown = track.channelMappings;
-    const cm =
-      cmUnknown && typeof cmUnknown === "object" && !Array.isArray(cmUnknown)
-        ? (cmUnknown as Record<string, unknown>)
-        : {};
-    const valid = Object.keys(cm).filter((k) => {
-      const n = parseInt(k, 10);
-      if (!Number.isFinite(n)) return false;
-      if (n < 1 || n > 12) return false;
-      return String(n) === k;
-    });
-    return valid.length;
-  }, [userData, activeSetId, selectedChannel]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -433,13 +396,6 @@ export const MethodConfiguratorModal = ({
 
       let changed = false;
 
-      const clampNumber = (n: number, min: number | undefined, max: number | undefined) => {
-        let out = n;
-        if (typeof min === "number") out = Math.max(min, out);
-        if (typeof max === "number") out = Math.min(max, out);
-        return out;
-      };
-
       for (const m of methodList) {
         if (!m?.name || !Array.isArray(m.options)) continue;
         const methodDef = normalizedModuleMethods.find((mm) => mm?.name === m.name);
@@ -453,9 +409,7 @@ export const MethodConfiguratorModal = ({
           if (optDef.type === "number") {
             if (typeof opt.value === "string") {
               const n = Number(opt.value);
-              const next = Number.isFinite(n)
-                ? clampNumber(n, optDef.min, optDef.max)
-                : optDef.defaultVal;
+              const next = Number.isFinite(n) ? n : optDef.defaultVal;
               if (opt.value !== next) {
                 opt.value = next;
                 changed = true;
@@ -466,12 +420,8 @@ export const MethodConfiguratorModal = ({
               const na = typeof a === "number" ? a : Number(a);
               const nb = typeof b === "number" ? b : Number(b);
               if (Number.isFinite(na) && Number.isFinite(nb)) {
-                const next = [
-                  clampNumber(na, optDef.min, optDef.max),
-                  clampNumber(nb, optDef.min, optDef.max),
-                ];
-                if (opt.randomRange[0] !== next[0] || opt.randomRange[1] !== next[1]) {
-                  opt.randomRange = next as [number, number];
+                if (na > nb) {
+                  opt.randomRange = [nb, na] as [number, number];
                   changed = true;
                 }
               } else {
@@ -1019,8 +969,6 @@ export const MethodConfiguratorModal = ({
                 }}
                 type="secondary"
                 className="text-[11px]"
-                disabled={selectedTrackChannelCount <= 3}
-                title={selectedTrackChannelCount <= 3 ? "Minimum 3 channels required" : "Delete Channel"}
               >
                 DELETE CHANNEL
               </Button>

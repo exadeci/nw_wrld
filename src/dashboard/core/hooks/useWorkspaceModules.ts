@@ -59,8 +59,15 @@ export const useWorkspaceModules = ({
     try {
       if (isWorkspaceModalOpen) return;
       const projectDirArg = getProjectDir();
-      if (!projectDirArg) return;
-      if (!workspacePath) return;
+      console.log("[Dashboard] loadModules:", { projectDirArg, workspacePath, isWorkspaceModalOpen });
+      if (!projectDirArg) {
+        console.warn("[Dashboard] No project directory found");
+        return;
+      }
+      if (!workspacePath) {
+        console.warn("[Dashboard] No workspace path set");
+        return;
+      }
       let summaries: unknown[] = [];
       let skipped: unknown[] = [];
       try {
@@ -76,15 +83,20 @@ export const useWorkspaceModules = ({
             const rec = res as { summaries?: unknown; skipped?: unknown };
             summaries = Array.isArray(rec?.summaries) ? (rec.summaries as unknown[]) : [];
             skipped = Array.isArray(rec?.skipped) ? (rec.skipped as unknown[]) : [];
+            console.log("[Dashboard] Module summaries loaded:", { count: summaries.length, skipped: skipped.length });
           } else if (typeof bridge.workspace.listModuleSummaries === "function") {
             summaries = await bridge.workspace.listModuleSummaries();
+            console.log("[Dashboard] Module summaries loaded (legacy):", { count: summaries.length });
           } else {
+            console.warn("[Dashboard] No listModuleSummaries method available");
             summaries = [];
           }
         } else {
+          console.warn("[Dashboard] Bridge or workspace not available");
           summaries = [];
         }
-      } catch {
+      } catch (err) {
+        console.error("[Dashboard] Error fetching module summaries:", err);
         summaries = [];
       }
       const safeSummaries = Array.isArray(summaries) ? summaries : [];
@@ -158,7 +170,14 @@ export const useWorkspaceModules = ({
       return;
     } catch (error) {
       console.error("❌ [Dashboard] Error loading modules:", error);
-      alert("Failed to load modules from project folder.");
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("❌ [Dashboard] Error details:", {
+        projectDir: getProjectDir(),
+        workspacePath,
+        errorMessage,
+        error,
+      });
+      alert(`Failed to load modules from project folder.\n\nError: ${errorMessage}\n\nCheck the console for more details.`);
     }
   }, [
     isWorkspaceModalOpen,
@@ -294,7 +313,7 @@ export const useWorkspaceModules = ({
           });
         } catch {}
         try {
-          maybeHot.accept("../../../projector/helpers/threeBase", () => {
+          maybeHot.accept("../../../projector/helpers/threeBase.js", () => {
             loadModules();
           });
         } catch {}

@@ -19,7 +19,7 @@
 
     "strict": false
   },
-  "include": ["src/**/*", "index.js"],
+  "include": ["src/**/*", "index.js", "../../Documents/new_wrld/modules/Video.js"],
   "exclude": ["node_modules", "dist", "release", "build"]
 }
 

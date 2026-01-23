@@ -284,6 +284,8 @@ const sandboxRequestAllowedTypes = new Set([
   "introspectModule",
   "destroyTrack",
   "setMatrixForInstance",
+  "audioStartCapture",
+  "audioStopCapture",
 ]);
 
 const sendToSandbox = (payload: unknown): boolean => {

@@ -1,59 +1,44 @@
-import { memo, useEffect, useMemo, useRef, useState } from "react";
-import type { ChangeEvent } from "react";
-import { Select, TextInput } from "./FormInputs";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Select, TextInput } from "./FormInputs.tsx";
+import { Button } from "./Button.tsx";
 
 const CUSTOM_VALUE = "__nw_wrld_custom__";
 
-type Listing = { ok: boolean; files: string[]; dirs: string[] };
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return (
-    Boolean(value) &&
-    typeof value === "object" &&
-    !Array.isArray(value) &&
-    Object.prototype.toString.call(value) === "[object Object]"
-  );
-}
-
 const listAssetsCached = (() => {
-  const cache = new Map<string, Listing | Promise<Listing>>();
+  const cache = new Map();
 
-  return async (relDir: string): Promise<Listing> => {
+  return async (relDir) => {
     const key = String(relDir || "").trim();
     if (!key) return { ok: false, files: [], dirs: [] };
 
     const existing = cache.get(key);
-    if (existing && typeof (existing as Promise<Listing>).then === "function") {
+    if (existing && typeof existing.then === "function") {
       try {
-        return await (existing as Promise<Listing>);
+        return await existing;
       } catch {
         return { ok: false, files: [], dirs: [] };
       }
     }
-    if (existing && typeof existing === "object") return existing as Listing;
+    if (existing && typeof existing === "object") return existing;
 
-    const bridge = (globalThis as unknown as { nwWrldBridge?: unknown }).nwWrldBridge;
-    const workspace = isPlainObject(bridge) ? (bridge as Record<string, unknown>)["workspace"] : null;
-    const listAssetsValue = isPlainObject(workspace)
-      ? (workspace as Record<string, unknown>)["listAssets"]
-      : null;
+    const bridge = globalThis.nwWrldBridge;
     const fn =
-      typeof listAssetsValue === "function"
-        ? (listAssetsValue as (dir: string) => Promise<unknown>)
+      bridge &&
+      bridge.workspace &&
+      typeof bridge.workspace.listAssets === "function"
+        ? bridge.workspace.listAssets
         : null;
 
-    const p = (async (): Promise<Listing> => {
+    const p = (async () => {
       if (!fn) return { ok: false, files: [], dirs: [] };
       try {
         const res = await fn(key);
-        const ok = isPlainObject(res) ? Boolean(res.ok) : false;
-        const filesRaw = isPlainObject(res) ? (res.files as unknown) : null;
-        const dirsRaw = isPlainObject(res) ? (res.dirs as unknown) : null;
-        const files = Array.isArray(filesRaw)
-          ? filesRaw.map((n) => String(n || "")).filter(Boolean)
+        const ok = Boolean(res?.ok);
+        const files = Array.isArray(res?.files)
+          ? res.files.map((n) => String(n || "")).filter(Boolean)
           : [];
-        const dirs = Array.isArray(dirsRaw)
-          ? dirsRaw.map((n) => String(n || "")).filter(Boolean)
+        const dirs = Array.isArray(res?.dirs)
+          ? res.dirs.map((n) => String(n || "")).filter(Boolean)
           : [];
         return { ok, files, dirs };
       } catch {
@@ -68,14 +53,14 @@ const listAssetsCached = (() => {
   };
 })();
 
-function hasListSyntax(value: unknown): boolean {
+const hasListSyntax = (value) => {
   const s = String(value ?? "");
   return s.includes("\n") || s.includes(",");
-}
+};
 
-function normalizeExtSet(extensions: unknown): Set<string> {
+const normalizeExtSet = (extensions) => {
   const list = Array.isArray(extensions) ? extensions : [];
-  const out = new Set<string>();
+  const out = new Set();
   list.forEach((e) => {
     const raw = String(e || "").trim();
     if (!raw) return;
@@ -83,19 +68,9 @@ function normalizeExtSet(extensions: unknown): Set<string> {
     out.add(ext);
   });
   return out;
-}
-
-type AssetOptionInputProps = {
-  kind?: "file" | "dir";
-  baseDir?: string;
-  value: unknown;
-  onChange?: ((next: string) => void) | null;
-  extensions?: unknown;
-  allowCustom?: boolean;
-  className?: string;
 };
 
-export const AssetOptionInput = memo(
+export const AssetOptionInput = React.memo(
   ({
     kind = "file",
     baseDir = "",
@@ -104,8 +79,8 @@ export const AssetOptionInput = memo(
     extensions = null,
     allowCustom = true,
     className = "w-20 py-0.5",
-  }: AssetOptionInputProps) => {
-    const [listing, setListing] = useState<Listing>({ ok: false, files: [], dirs: [] });
+  }) => {
+    const [listing, setListing] = useState({ ok: false, files: [], dirs: [] });
     const [isCustom, setIsCustom] = useState(false);
     const didAutoPickRef = useRef(false);
 
@@ -155,7 +130,10 @@ export const AssetOptionInput = memo(
         }));
     }, [base, extSet, kind, listing.dirs, listing.files]);
 
-    const availableValues = useMemo(() => new Set(available.map((o) => o.value)), [available]);
+    const availableValues = useMemo(
+      () => new Set(available.map((o) => o.value)),
+      [available]
+    );
 
     useEffect(() => {
       if (!allowCustom) {
@@ -199,36 +177,62 @@ export const AssetOptionInput = memo(
 
     const selectValue = isCustom ? CUSTOM_VALUE : current.trim();
 
+    const handleBrowse = async () => {
+      const bridge = globalThis.nwWrldBridge;
+      if (!bridge?.workspace?.browseAssetFolder) return;
+      
+      try {
+        const result = await bridge.workspace.browseAssetFolder(base);
+        if (result?.ok && result?.path && typeof onChange === "function") {
+          setIsCustom(false);
+          onChange(result.path);
+        }
+      } catch (error) {
+        console.error("Error browsing folder:", error);
+      }
+    };
+
     return (
       <div className="flex flex-col gap-1">
-        <Select
-          value={selectValue}
-          onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-            const next = e.target.value;
-            if (next === CUSTOM_VALUE) {
-              setIsCustom(true);
-              return;
-            }
-            setIsCustom(false);
-            if (typeof onChange === "function") onChange(next);
-          }}
-        >
-          {options.map((opt) => (
-            <option key={opt.value} value={opt.value} className="bg-[#101010]">
-              {opt.label}
-            </option>
-          ))}
-          {allowCustom && (
-            <option value={CUSTOM_VALUE} className="bg-[#101010]">
-              custom…
-            </option>
+        <div className="flex gap-1">
+          <Select
+            value={selectValue}
+            onChange={(e) => {
+              const next = e.target.value;
+              if (next === CUSTOM_VALUE) {
+                setIsCustom(true);
+                return;
+              }
+              setIsCustom(false);
+              if (typeof onChange === "function") onChange(next);
+            }}
+            className="flex-1"
+          >
+            {options.map((opt) => (
+              <option key={opt.value} value={opt.value} className="bg-[#101010]">
+                {opt.label}
+              </option>
+            ))}
+            {allowCustom && (
+              <option value={CUSTOM_VALUE} className="bg-[#101010]">
+                custom…
+              </option>
+            )}
+          </Select>
+          {kind === "dir" && (
+            <Button
+              onClick={handleBrowse}
+              className="px-2 py-1 text-xs whitespace-nowrap"
+            >
+              Browse
+            </Button>
           )}
-        </Select>
+        </div>
 
         {allowCustom && isCustom && (
           <TextInput
             value={current}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            onChange={(e) => {
               if (typeof onChange === "function") onChange(e.target.value);
             }}
             className={className}
@@ -238,4 +242,5 @@ export const AssetOptionInput = memo(
     );
   }
 );
+
 

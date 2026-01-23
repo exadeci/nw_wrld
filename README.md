@@ -405,10 +405,10 @@ nw_wrld/
 │   ├── projector/              # Visual output window
 │   │   ├── Projector.js        # Main projector logic
 │   │   ├── helpers/
-│   │   │   ├── moduleBase.ts   # Base class (the foundation)
-│   │   │   └── threeBase.ts    # Three.js base class
+│   │   │   ├── moduleBase.js   # Base class (the foundation)
+│   │   │   └── threeBase.js    # Three.js base class
 │   │   └── templates/
-│   │       └── ThreeTemplate.ts # 3D module template
+│   │       └── ThreeTemplate.js # 3D module template
 │   │
 │   ├── main/                   # Electron main process
 │   │   ├── InputManager.js     # MIDI/OSC input handling

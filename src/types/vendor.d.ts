@@ -7,10 +7,20 @@ declare module "webmidi" {
     channel: number;
   }
 
+  export interface MidiController {
+    number: number;
+  }
+
   export interface NoteOnEvent {
     note: MidiNote;
     message: MidiMessage;
     velocity: number;
+  }
+
+  export interface ControlChangeEvent {
+    controller: MidiController;
+    message: MidiMessage;
+    value: number;
   }
 
   export interface MidiInput {
@@ -18,8 +28,10 @@ declare module "webmidi" {
     name: string;
     manufacturer?: string;
     addListener(event: "noteon", handler: (e: NoteOnEvent) => void): void;
+    addListener(event: "controlchange", handler: (e: ControlChangeEvent) => void): void;
     removeListener(): void;
     removeListener(event: "noteon"): void;
+    removeListener(event: "controlchange"): void;
   }
 
   export interface WebMidiStatic {

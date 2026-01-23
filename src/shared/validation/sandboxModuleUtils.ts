@@ -1,6 +1,7 @@
 const WORKSPACE_MODULE_ALLOWED_IMPORTS = new Set([
   "ModuleBase",
   "BaseThreeJsModule",
+  "AudioAnalyzer",
   "assetUrl",
   "readText",
   "loadJson",
@@ -14,6 +15,12 @@ const WORKSPACE_MODULE_ALLOWED_IMPORTS = new Set([
   "PCDLoader",
   "GLTFLoader",
   "STLLoader",
+  "EffectComposer",
+  "RenderPass",
+  "ShaderPass",
+  "OrbitControls",
+  "createNoise2D",
+  "createNoise3D",
 ]);
 
 export const getTokenFromLocationHash = (hash: unknown): string | null => {

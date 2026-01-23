@@ -1,4 +1,4 @@
-import Projector from "./projector/Projector.js";
+import Projector from "./projector/Projector.ts";
 
 import "./shared/styles/_main.css";
 

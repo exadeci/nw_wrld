@@ -90,6 +90,9 @@ export async function handleChannelMessage(
       const moduleData = get(modulesData as never, instanceId as never) as unknown;
       if (!moduleData) continue;
 
+      const isDisabled = (moduleData as { disabled?: unknown } | null)?.disabled === true;
+      if (isDisabled) continue;
+
       const methods = get(
         (moduleData as { methods?: unknown } | null)?.methods as never,
         channelNumber as never

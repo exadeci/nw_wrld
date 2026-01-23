@@ -42,6 +42,11 @@ export const useIPCInvoke = () => {
         ? await messaging.selectWorkspace()
         : null;
     }
+    if (channel === "workspace:set") {
+      return typeof messaging.setWorkspace === "function"
+        ? await messaging.setWorkspace(args[0])
+        : null;
+    }
     return null;
   }, []);
 };

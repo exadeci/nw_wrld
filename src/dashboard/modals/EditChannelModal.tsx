@@ -1,49 +1,20 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useAtom } from "jotai";
-import { Modal } from "../shared/Modal";
-import { ModalHeader } from "../components/ModalHeader";
-import { ModalFooter } from "../components/ModalFooter";
-import { Button } from "../components/Button";
-import { Select, Label } from "../components/FormInputs";
-import { HelpIcon } from "../components/HelpIcon";
+import { Modal } from "../shared/Modal.tsx";
+import { ModalHeader } from "../components/ModalHeader.tsx";
+import { ModalFooter } from "../components/ModalFooter.tsx";
+import { Button } from "../components/Button.tsx";
+import { Select, Label } from "../components/FormInputs.tsx";
+import { HelpIcon } from "../components/HelpIcon.tsx";
 import { userDataAtom, activeSetIdAtom } from "../core/state.ts";
-import { updateActiveSet, updateUserData } from "../core/utils";
+import { updateActiveSet, updateUserData } from "../core/utils.ts";
 import { getActiveSetTracks } from "../../shared/utils/setUtils.ts";
 import { HELP_TEXT } from "../../shared/helpText.ts";
-import { parsePitchClass, pitchClassToName, resolveChannelTrigger } from "../../shared/midi/midiUtils.ts";
-
-const asPlainObject = (value: unknown): Record<string, unknown> | null => {
-  if (!value) return null;
-  if (typeof value !== "object") return null;
-  if (Array.isArray(value)) return null;
-  return value as Record<string, unknown>;
-};
-
-const getMidiExactNoteMap = (globalMappings: unknown): Record<string, unknown> => {
-  const gm = asPlainObject(globalMappings);
-  const cm = asPlainObject(gm?.channelMappings);
-  const midi = asPlainObject(cm?.midi);
-  const exactNote = asPlainObject(midi?.exactNote);
-  return exactNote || {};
-};
-
-type InputConfigLike = {
-  type?: unknown;
-  noteMatchMode?: unknown;
-};
-
-type AppConfigLike = {
-  sequencerMode?: unknown;
-};
-
-type EditChannelModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  trackIndex: number;
-  channelNumber: number;
-  inputConfig?: InputConfigLike | null;
-  config?: AppConfigLike | null;
-};
+import {
+  parsePitchClass,
+  pitchClassToName,
+  resolveChannelTrigger,
+} from "../../shared/midi/midiUtils.ts";
 
 export const EditChannelModal = ({
   isOpen,
@@ -52,62 +23,56 @@ export const EditChannelModal = ({
   channelNumber,
   inputConfig,
   config,
-}: EditChannelModalProps) => {
+}) => {
   const [userData, setUserData] = useAtom(userDataAtom);
   const [activeSetId] = useAtom(activeSetIdAtom);
   const [newChannelNumber, setNewChannelNumber] = useState(1);
 
   const tracks = getActiveSetTracks(userData, activeSetId);
-  const track = (tracks as unknown[])[trackIndex] as Record<string, unknown> | undefined;
-  const inputType = inputConfig?.type === "osc" ? "osc" : "midi";
-  const noteMatchMode = inputConfig?.noteMatchMode === "exactNote" ? "exactNote" : "pitchClass";
-  const globalMappings = useMemo(() => (userData as Record<string, unknown>).config || {}, [userData]);
+  const track = tracks[trackIndex];
+  const inputType = inputConfig?.type || "midi";
+  const noteMatchMode =
+    inputConfig?.noteMatchMode === "exactNote" ? "exactNote" : "pitchClass";
+  const globalMappings = userData.config || {};
 
   const exactNoteOptions = useMemo(
-    () => Array.from({ length: 128 }, (_, n) => ({ value: n, label: String(n) })),
+    () =>
+      Array.from({ length: 128 }, (_, n) => ({ value: n, label: String(n) })),
     []
   );
 
   const updateExactNoteMappingForSlot = useCallback(
-    (slot: number, noteNumber: number) => {
+    (slot, noteNumber) => {
       const n = parseInt(String(noteNumber ?? ""), 10);
       if (!Number.isFinite(n) || n < 0 || n > 127) return;
-      updateUserData(setUserData, (draft: unknown) => {
-        const d = draft as Record<string, unknown>;
-        if (!d.config) d.config = {};
-        const cfg = d.config as Record<string, unknown>;
-        if (!cfg.input) cfg.input = {};
-        (cfg.input as Record<string, unknown>).noteMatchMode = "exactNote";
-        if (!cfg.channelMappings) cfg.channelMappings = {};
-        const cm = cfg.channelMappings as Record<string, unknown>;
-        if (!cm.midi) {
-          cm.midi = { pitchClass: {}, exactNote: {} };
+      updateUserData(setUserData, (draft) => {
+        if (!draft.config) draft.config = {};
+        if (!draft.config.input) draft.config.input = {};
+        draft.config.input.noteMatchMode = "exactNote";
+        if (!draft.config.channelMappings) draft.config.channelMappings = {};
+        if (!draft.config.channelMappings.midi) {
+          draft.config.channelMappings.midi = { pitchClass: {}, exactNote: {} };
         }
-        const midi = cm.midi as Record<string, unknown>;
-        if (!midi.exactNote) {
-          midi.exactNote = {};
+        if (!draft.config.channelMappings.midi.exactNote) {
+          draft.config.channelMappings.midi.exactNote = {};
         }
-        (midi.exactNote as Record<string, unknown>)[slot] = n;
+        draft.config.channelMappings.midi.exactNote[slot] = n;
       });
     },
     [setUserData]
   );
 
   const existingChannelNumbers = useMemo(() => {
-    const mappings =
-      track && typeof track.channelMappings === "object" && track.channelMappings
-        ? (track.channelMappings as Record<string, unknown>)
-        : {};
     return new Set(
-      Object.keys(mappings)
+      Object.keys(track?.channelMappings || {})
         .map(Number)
         .filter((num) => num !== channelNumber)
     );
   }, [track, channelNumber]);
 
   const availableChannelNumbers = useMemo(() => {
-    const numbers: number[] = [];
-    for (let i = 1; i <= 12; i++) {
+    const numbers = [];
+    for (let i = 1; i <= 20; i++) {
       if (!existingChannelNumbers.has(i) || i === channelNumber) {
         numbers.push(i);
       }
@@ -126,7 +91,9 @@ export const EditChannelModal = ({
             return s ? s : null;
           }
           const pc =
-            typeof resolvedTrigger === "number" ? resolvedTrigger : parsePitchClass(resolvedTrigger);
+            typeof resolvedTrigger === "number"
+              ? resolvedTrigger
+              : parsePitchClass(resolvedTrigger);
           if (pc === null) return null;
           return pitchClassToName(pc) || String(pc);
         })()
@@ -139,19 +106,21 @@ export const EditChannelModal = ({
     if (noteMatchMode !== "exactNote") return;
     const slot = newChannelNumber;
     if (!slot) return;
-    const exactNote = getMidiExactNoteMap(globalMappings);
-    const current = exactNote[String(slot)] ?? null;
+    const current =
+      globalMappings?.channelMappings?.midi?.exactNote?.[slot] ?? null;
     const n = typeof current === "number" ? current : null;
     const usedByOtherSlots = new Set(
-      Object.entries(exactNote)
+      Object.entries(globalMappings?.channelMappings?.midi?.exactNote || {})
         .filter(([s]) => parseInt(s, 10) !== slot)
         .map(([, v]) => v)
-        .filter((v) => typeof v === "number" && v >= 0 && v <= 127) as number[]
+        .filter((v) => typeof v === "number" && v >= 0 && v <= 127)
     );
     const isValid = typeof n === "number" && n >= 0 && n <= 127;
     const isUnique = isValid && !usedByOtherSlots.has(n);
     if (isUnique) return;
-    const pick = Array.from({ length: 128 }, (_, x) => x).find((x) => !usedByOtherSlots.has(x));
+    const pick = Array.from({ length: 128 }, (_, x) => x).find(
+      (x) => !usedByOtherSlots.has(x)
+    );
     if (pick === undefined) return;
     updateExactNoteMappingForSlot(slot, pick);
   }, [
@@ -175,37 +144,31 @@ export const EditChannelModal = ({
   if (!isOpen) return null;
 
   const isDuplicateNumber =
-    newChannelNumber !== channelNumber && existingChannelNumbers.has(newChannelNumber);
-  const canSubmit = Boolean(newChannelNumber) && !isDuplicateNumber;
+    newChannelNumber !== channelNumber &&
+    existingChannelNumbers.has(newChannelNumber);
+  const canSubmit = newChannelNumber && !isDuplicateNumber;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
 
-    updateActiveSet(setUserData, activeSetId, (activeSet: unknown) => {
-      const s = activeSet as Record<string, unknown>;
-      const ts = Array.isArray(s.tracks) ? (s.tracks as unknown[]) : [];
-      const currentTrack = (ts[trackIndex] as Record<string, unknown> | null) || null;
-      if (!currentTrack) return;
-      const channelMappings = currentTrack.channelMappings as Record<string, unknown>;
-      const modulesData = currentTrack.modulesData as Record<string, unknown>;
-
+    updateActiveSet(setUserData, activeSetId, (activeSet) => {
+      const currentTrack = activeSet.tracks[trackIndex];
       const oldKey = String(channelNumber);
       const newKey = String(newChannelNumber);
 
       if (oldKey !== newKey) {
-        delete channelMappings[oldKey];
+        delete currentTrack.channelMappings[oldKey];
 
-        Object.keys(modulesData).forEach((moduleId) => {
-          const md = modulesData[moduleId] as Record<string, unknown> | null;
-          const methods = md?.methods as Record<string, unknown> | null;
-          if (methods && methods[oldKey]) {
-            methods[newKey] = methods[oldKey];
-            delete methods[oldKey];
+        Object.keys(currentTrack.modulesData).forEach((moduleId) => {
+          if (currentTrack.modulesData[moduleId].methods?.[oldKey]) {
+            currentTrack.modulesData[moduleId].methods[newKey] =
+              currentTrack.modulesData[moduleId].methods[oldKey];
+            delete currentTrack.modulesData[moduleId].methods[oldKey];
           }
         });
       }
 
-      channelMappings[newKey] = newChannelNumber;
+      currentTrack.channelMappings[newKey] = newChannelNumber;
     });
 
     onClose();
@@ -230,27 +193,38 @@ export const EditChannelModal = ({
           </div>
           <Select
             value={newChannelNumber}
-            onChange={(e) => setNewChannelNumber(parseInt(e.target.value, 10))}
+            onChange={(e) => setNewChannelNumber(parseInt(e.target.value))}
             className="w-full py-1 font-mono"
           >
             {availableChannelNumbers.map((num) => {
-              const rawTrigger = resolveChannelTrigger(num, inputType, globalMappings);
+              const rawTrigger = resolveChannelTrigger(
+                num,
+                inputType,
+                globalMappings
+              );
               const trigger =
                 inputType === "midi"
                   ? (() => {
-                      const nm = inputConfig?.noteMatchMode === "exactNote" ? "exactNote" : "pitchClass";
-                      if (nm === "exactNote") {
+                      const noteMatchMode =
+                        inputConfig?.noteMatchMode === "exactNote"
+                          ? "exactNote"
+                          : "pitchClass";
+                      if (noteMatchMode === "exactNote") {
                         return String(rawTrigger || "").trim();
                       }
                       const pc =
-                        typeof rawTrigger === "number" ? rawTrigger : parsePitchClass(rawTrigger);
+                        typeof rawTrigger === "number"
+                          ? rawTrigger
+                          : parsePitchClass(rawTrigger);
                       if (pc === null) return String(rawTrigger || "").trim();
                       return pitchClassToName(pc) || String(pc);
                     })()
                   : rawTrigger;
               return (
                 <option key={num} value={num} className="bg-[#101010]">
-                  {config?.sequencerMode ? `Channel ${num}` : `Channel ${num} (${trigger || "not configured"})`}
+                  {config?.sequencerMode
+                    ? `Channel ${num}`
+                    : `Channel ${num} (${trigger || "not configured"})`}
                 </option>
               );
             })}
@@ -260,41 +234,58 @@ export const EditChannelModal = ({
               Channel {newChannelNumber} is already used
             </div>
           )}
-          {!config?.sequencerMode && inputType === "midi" && resolvedNoteName ? (
+          {!config?.sequencerMode &&
+          inputType === "midi" &&
+          resolvedNoteName ? (
             <div className="text-blue-500 text-[11px] mt-1 font-mono">
-              ✓ Will use trigger: <span className="text-blue-500">{resolvedNoteName}</span>
+              ✓ Will use trigger:{" "}
+              <span className="text-blue-500">{resolvedNoteName}</span>
             </div>
           ) : !config?.sequencerMode && resolvedTrigger ? (
             <div className="text-blue-500 text-[11px] mt-1 font-mono">
-              ✓ Will use trigger: {String(resolvedTrigger)}
+              ✓ Will use trigger: {resolvedTrigger}
             </div>
           ) : null}
         </div>
 
-        {!config?.sequencerMode && inputType === "midi" && noteMatchMode === "exactNote" ? (
+        {!config?.sequencerMode &&
+        inputType === "midi" &&
+        noteMatchMode === "exactNote" ? (
           <div>
             <Label>Trigger Note (0–127)</Label>
             <Select
               value={String(
-                (getMidiExactNoteMap(globalMappings)[String(newChannelNumber)] as number | undefined) ?? 0
+                globalMappings?.channelMappings?.midi?.exactNote?.[
+                  newChannelNumber
+                ] ?? 0
               )}
               onChange={(e) =>
-                updateExactNoteMappingForSlot(newChannelNumber, parseInt(e.target.value, 10))
+                updateExactNoteMappingForSlot(
+                  newChannelNumber,
+                  parseInt(e.target.value, 10)
+                )
               }
               className="w-full py-1 font-mono"
             >
               {exactNoteOptions.map((opt) => {
-                const exactNote = getMidiExactNoteMap(globalMappings);
-                const selected = exactNote[String(newChannelNumber)];
+                const selected =
+                  globalMappings?.channelMappings?.midi?.exactNote?.[
+                    newChannelNumber
+                  ];
                 const usedByOtherSlot = Object.entries(
-                  exactNote
+                  globalMappings?.channelMappings?.midi?.exactNote || {}
                 ).some(([s, v]) => {
                   if (parseInt(s, 10) === newChannelNumber) return false;
                   return v === opt.value;
                 });
                 const disabled = usedByOtherSlot && opt.value !== selected;
                 return (
-                  <option key={opt.value} value={String(opt.value)} disabled={disabled} className="bg-[#101010]">
+                  <option
+                    key={opt.value}
+                    value={String(opt.value)}
+                    disabled={disabled}
+                    className="bg-[#101010]"
+                  >
                     {opt.label}
                   </option>
                 );
@@ -315,4 +306,3 @@ export const EditChannelModal = ({
     </Modal>
   );
 };
-

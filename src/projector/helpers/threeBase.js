@@ -1,48 +1,32 @@
-import ModuleBase from "./moduleBase";
+// src/helpers/threeBase.js
+
+/**
+ * Important info: The `BaseThreeJsModule` class extends from `ModuleBase`.
+ *
+ * - `ModuleBase` provides essential lifecycle management for containers (HTML elements).
+ *   It handles the initialization of the container, sets up transformation states (like position, scale, and opacity),
+ *   and applies the necessary styles to prepare the element for manipulation.
+ *
+ * - In the constructor, it stores the reference to the container (`this.elem`) and initializes core properties such as
+ *   `currentX`, `currentY`, `currentScale`, and `currentOpacity`. It also ensures that the element is hidden and has
+ *   the correct opacity and transformation applied from the start. If an overlay image is required, this can be added
+ *   later through the overlay method.
+ *
+ * - The `destroy` method ensures proper cleanup of the element by removing it from the DOM and any associated overlays.
+ *   It also clears any references to the DOM element (`this.elem`), avoiding memory leaks and ensuring that the module
+ *   is completely destroyed when no longer needed.
+ *
+ * - Uses WebGPURenderer which automatically falls back to WebGL2 if WebGPU is not available.
+ *   WebGPU provides significant performance improvements for complex scenes and multiple concurrent modules.
+ */
+
+import ModuleBase from "./moduleBase.ts";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { animationManager } from "./animationManager";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import TWEEN from "@tweenjs/tween.js";
+import { animationManager } from "./animationManager.ts";
 
 export class BaseThreeJsModule extends ModuleBase {
-  scene: THREE.Scene;
-  renderer: THREE.WebGLRenderer;
-  camera: THREE.PerspectiveCamera;
-  controls: OrbitControls;
-
-  cameraSettings: {
-    zoomLevel: number;
-    viewDirection: "front" | "top" | "right" | "back" | "bottom" | "left";
-    cameraAnimation: string | null;
-    cameraSpeed: number;
-  };
-
-  currentAnimation: string | null;
-  animationSpeed: number;
-  animationDirection: number;
-
-  isInitialized: boolean;
-  customAnimate: (() => void) | null;
-  randomRotateDirection: THREE.Vector2;
-
-  model: THREE.Object3D | null;
-  modelBoundingBox: THREE.Box3 | null;
-  modelCenter: THREE.Vector3 | null;
-  modelSize: number;
-
-  displacement: {
-    enabled: boolean;
-    amplitude: number;
-    vector: THREE.Vector3;
-  };
-
-  displacementTime: { t: number; speed: number };
-
-  lastDisplacementNow: number | null;
-
-  animationFrameId: number | null;
-  intervalId: ReturnType<typeof setInterval> | null;
-  destroyed: boolean;
-
   static methods = [
     ...ModuleBase.methods,
     {
@@ -54,8 +38,6 @@ export class BaseThreeJsModule extends ModuleBase {
           defaultVal: 75,
           type: "number",
           allowRandomization: true,
-          min: 0,
-          max: 150,
         },
       ],
     },
@@ -111,59 +93,12 @@ export class BaseThreeJsModule extends ModuleBase {
         },
       ],
     },
-    
-    {
-      name: "displacementParams",
-      executeOnLoad: false,
-      options: [
-        {
-          name: "amplitude",
-          defaultVal: 1,
-          type: "number",
-          min: 0,
-          max: 50,
-          allowRandomization: true,
-        },
-        {
-          name: "oscTime",
-          defaultVal: 1.0,
-          type: "number",
-          min: 0.01,
-          max: 10,
-          allowRandomization: true,
-        },
-        {
-          name: "x",
-          defaultVal: 1,
-          type: "number",
-          min: -5,
-          max: 5,
-          allowRandomization: true,
-        },
-        {
-          name: "y",
-          defaultVal: 1,
-          type: "number",
-          min: -5,
-          max: 5,
-          allowRandomization: true,
-        },
-        {
-          name: "z",
-          defaultVal: 1,
-          type: "number",
-          min: -5,
-          max: 5,
-          allowRandomization: true,
-        },
-      ],
-    },
-
   ];
 
-  constructor(container: HTMLElement | null) {
+  constructor(container) {
     super(container);
 
+    // Bind methods early to ensure 'this' context is correct
     this.render = this.render.bind(this);
     this.animate = this.animate.bind(this);
     this.onWindowResize = this.onWindowResize.bind(this);
@@ -184,12 +119,21 @@ export class BaseThreeJsModule extends ModuleBase {
     this.animationSpeed = this.cameraSettings.cameraSpeed;
     this.animationDirection = 1;
 
-    // Set up renderer
+    // Initialize renderer synchronously with WebGLRenderer first (ensures immediate availability)
+    // Then try to upgrade to WebGPU if available
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    this.useWebGPU = false;
+    this.rendererInitialized = true;
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(this.elem.offsetWidth, this.elem.offsetHeight);
     this.elem.appendChild(this.renderer.domElement);
+
+    if (typeof window !== "undefined" && window.Projector) {
+      window.Projector.updateRendererType("WebGL");
+    }
+
+    this._tryUpgradeToWebGPU();
 
     // Initialize Camera
     this.camera = new THREE.PerspectiveCamera(
@@ -212,7 +156,10 @@ export class BaseThreeJsModule extends ModuleBase {
     this.controls.autoRotateSpeed = 2.0;
 
     // Add event listener for controls
-    this.controls.addEventListener("change", this.render);
+    this.controls.addEventListener("change", () => {
+      this.markNeedsRender();
+      this.render();
+    });
 
     // Bind resize event
     window.addEventListener("resize", this.onWindowResize);
@@ -220,65 +167,105 @@ export class BaseThreeJsModule extends ModuleBase {
     // Initialize flag for animation loop
     this.isInitialized = false;
 
-    this.animationFrameId = null;
-    this.intervalId = null;
-    this.destroyed = false;
-
     // Placeholder for custom animation
     this.customAnimate = null;
 
-    this.randomRotateDirection = new THREE.Vector2(1, 1); // Default directions
+    this.randomRotateDirection = new THREE.Vector2(1, 1);
 
-    // Initialize Displacement parameter
-    this.displacement = {
-      enabled: false,
-      amplitude: 0,
-      vector: new THREE.Vector3(1, 1, 1),
-    };
+    this.needsRender = true;
+  }
 
-    this.displacementTime = {
-      t: 0,
-      speed: 1.0,
-    };
+  async _tryUpgradeToWebGPU() {
+    try {
+      const { WebGPURenderer } = await import("three/webgpu");
+      const oldRenderer = this.renderer;
+      const oldCanvas = oldRenderer.domElement;
+      const parent = oldCanvas.parentNode;
+      
+      const oldControlsTarget = this.controls?.target?.clone();
+      const oldControlsMinDist = this.controls?.minDistance;
+      const oldControlsMaxDist = this.controls?.maxDistance;
+      
+      if (this.controls) {
+        this.controls.dispose();
+      }
+      
+      this.renderer = new WebGPURenderer({ antialias: true, alpha: true });
+      this.useWebGPU = true;
+      this.rendererInitialized = false;
+      
+      this.renderer.setClearColor(0x000000, 0);
+      this.renderer.setPixelRatio(window.devicePixelRatio);
+      this.renderer.setSize(this.elem.offsetWidth, this.elem.offsetHeight);
+      
+      parent.replaceChild(this.renderer.domElement, oldCanvas);
+      oldRenderer.dispose();
+      
+      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+      this.controls.enableDamping = true;
+      this.controls.dampingFactor = 0.05;
+      this.controls.enablePan = true;
+      this.controls.enableRotate = true;
+      this.controls.enableZoom = true;
+      this.controls.autoRotate = false;
+      this.controls.autoRotateSpeed = 2.0;
+      this.controls.addEventListener("change", () => {
+        this.markNeedsRender();
+        this.render();
+      });
+      
+      if (oldControlsTarget) {
+        this.controls.target.copy(oldControlsTarget);
+        this.controls.minDistance = oldControlsMinDist;
+        this.controls.maxDistance = oldControlsMaxDist;
+        this.controls.update();
+      }
 
-    this.lastDisplacementNow = null;
+      if (typeof window !== "undefined" && window.Projector) {
+        window.Projector.updateRendererType("WebGPU");
+      }
+    } catch (error) {
+      if (typeof window !== "undefined" && window.Projector) {
+        window.Projector.updateRendererType("WebGL");
+      }
+    }
   }
 
   /**
    * Sets up the model within the scene and configures the camera accordingly.
    * @param {THREE.Object3D} model - The 3D model to add to the scene.
    */
-  setModel(model) {
+  async setModel(model) {
     if (!model) {
       console.warn("No model provided to setModel.");
       return;
     }
 
-    // Add the model to the scene
-    this.model = model;
+    if (!this.rendererInitialized && this.useWebGPU) {
+      await this.renderer.init();
+      this.rendererInitialized = true;
+    }
+
     this.scene.add(model);
 
-    // Compute bounding box, center, and size
     this.modelBoundingBox = new THREE.Box3().setFromObject(model);
     this.modelCenter = this.modelBoundingBox.getCenter(new THREE.Vector3());
     const size = this.modelBoundingBox.getSize(new THREE.Vector3());
     this.modelSize = Math.max(size.x, size.y, size.z);
 
-    // Configure camera based on the model
     this.configureCamera();
 
-    // Update controls to look at the center
     this.controls.target.copy(this.modelCenter);
     this.controls.minDistance = this.modelSize * 0.001;
     this.controls.maxDistance = this.modelSize * 2.5;
     this.controls.update();
 
-    // Start the animation loop if not already started
     if (!this.isInitialized) {
       this.isInitialized = true;
       animationManager.subscribe(this.animate);
     }
 
+    this.markNeedsRender();
     this.render();
   }
 
@@ -303,10 +290,26 @@ export class BaseThreeJsModule extends ModuleBase {
 
   /**
    * Renders the current state of the scene.
+   * @param {boolean} force - Force render even if not dirty
    */
-  render() {
+  render(force = false) {
     if (!this.renderer || !this.scene || !this.camera || this.destroyed) return;
+    
+    if (!force && !this.needsRender) return;
+    
+    if (this.elem && this.elem.offsetWidth === 0 && this.elem.offsetHeight === 0) {
+      return;
+    }
+    
     this.renderer.render(this.scene, this.camera);
+    this.needsRender = false;
+  }
+
+  /**
+   * Marks the scene as needing a render on the next frame.
+   */
+  markNeedsRender() {
+    this.needsRender = true;
   }
 
   /**
@@ -316,36 +319,27 @@ export class BaseThreeJsModule extends ModuleBase {
   animate() {
     if (!this.renderer || !this.scene || !this.camera || this.destroyed) return;
 
-    // Update camera animation if any
+    if (!this.rendererInitialized && this.useWebGPU) {
+      if (!this._initPromise) {
+        this._initPromise = this.renderer.init().then(() => {
+          this.rendererInitialized = true;
+          this._initPromise = null;
+        });
+      }
+      return;
+    }
+
+    this.controls.update();
+    if (this.controls.enableDamping) {
+      this.markNeedsRender();
+    }
+
     this.updateCameraAnimation();
 
-    // Advance displacement-local time once per animation frame
-    const now = performance.now();
-    if (this.lastDisplacementNow === null) this.lastDisplacementNow = now;
-    const dt = (now - this.lastDisplacementNow) / 1000;
-    this.lastDisplacementNow = now;
-    const safeDt = Math.min(Math.max(dt, 0), 0.1);
-    this.displacementTime.t += safeDt * this.displacementTime.speed;
-
-    // Applies geometry displacement each frame for all geometries contained in the current model.
-    if (this.model) {
-      this.model.traverse((obj) => {
-        if (obj.geometry && obj.geometry.isBufferGeometry) {
-          this.saveBaseGeometry(obj.geometry);
-          this.applyDisplacement(obj.geometry);
-        }
-      });
-    }
-
-    // Update controls (for damping and autoRotate)
-    this.controls.update();
-
-    // Execute custom animation if set
     if (this.customAnimate) {
       this.customAnimate();
+      this.markNeedsRender();
     }
-
-    // TWEEN.update() now handled by AnimationManager
 
     this.render();
   }
@@ -361,6 +355,7 @@ export class BaseThreeJsModule extends ModuleBase {
 
     this.renderer.setSize(this.elem.offsetWidth, this.elem.offsetHeight);
 
+    this.markNeedsRender();
     this.render();
   }
 
@@ -373,95 +368,11 @@ export class BaseThreeJsModule extends ModuleBase {
   }
 
   /**
-   * Saves the original vertex positions of a geometry.
-   * This allows displacement to be applied non-destructively and reversed.
-   * @param {THREE.BufferGeometry} geometry - Geometry whose base positions should be stored.
+   * Helper method for modules to mark scene as needing render.
+   * Call this after modifying scene objects, geometry, or materials.
    */
-  saveBaseGeometry(geometry) {
-    const pos = geometry?.attributes?.position;
-    if (!pos) return;
-
-    if (pos.isInterleavedBufferAttribute) return;
-
-    if (!geometry.userData.basePositions || geometry.userData.basePositions.length !== pos.array.length) {
-      geometry.userData.basePositions = pos.array.slice();
-    }
-
-    if (
-      !geometry.userData.displacementNoise ||
-      geometry.userData.displacementNoise.length !== pos.count
-    ) {
-      const noise = new Float32Array(pos.count);
-      for (let i = 0; i < pos.count; i++) {
-        noise[i] = this.deterministicGaussian(i);
-      }
-      geometry.userData.displacementNoise = noise;
-    }
-  }
-
-  hash01(i) {
-    // deterministic 0..1 from an integer
-    const x = Math.sin(i * 127.1 + 311.7) * 43758.5453123;
-    return x - Math.floor(x);
-  }
-
-  deterministicGaussian(i) {
-    // approx gaussian by summing uniforms (deterministic)
-    // 6 uniforms -> roughly normal(0,1) after centering
-    let s = 0;
-    s += this.hash01(i * 1 + 17);
-    s += this.hash01(i * 2 + 29);
-    s += this.hash01(i * 3 + 43);
-    s += this.hash01(i * 4 + 61);
-    s += this.hash01(i * 5 + 83);
-    s += this.hash01(i * 6 + 101);
-    return s - 3.0;
-  }
-
-  /**
-   * Applies displacement to a geometry based on the current displacement state.
-   * Uses saved base positions to prevent cumulative distortion.
-   * @param {THREE.BufferGeometry} geometry - Geometry to displace.
-   */
-  applyDisplacement(geometry) {
-    if (!this.displacement.enabled) return;
-
-    const pos = geometry?.attributes?.position;
-    const base = geometry?.userData?.basePositions;
-    const noise = geometry?.userData?.displacementNoise;
-    if (!pos || !base) return;
-    if (pos.isInterleavedBufferAttribute) return;
-    if (!noise || noise.length !== pos.count) return;
-
-    const amp = Number(this.displacement.amplitude) || 0;
-    const v = this.displacement.vector;
-
-    // Convert time into a smooth 0..1 blend factor controlling interpolation between A and B
-    const blend =
-      (Math.sin(this.displacementTime.t) * 0.5) + 0.5;
-
-    // If amp is zero, restore exactly (same behavior as DisplaceGeometry)
-    if (!amp) {
-      pos.array.set(base);
-      pos.needsUpdate = true;
-      return;
-    }
-
-    for (let i = 0; i < pos.count; i++) {
-      const i3 = i * 3;
-
-      // per-vertex deterministic "gaussian-like" offset
-      const g = noise[i] * amp;
-
-      // replicate DisplaceGeometry’s “add same g to x,y,z” warp,
-      // but keep your vector as a directional scaler
-      // Interpolate between base (A) and displaced (B) positions using time-based blend
-      pos.array[i3]     = base[i3]     + (g * v.x) * blend;
-      pos.array[i3 + 1] = base[i3 + 1] + (g * v.y) * blend;
-      pos.array[i3 + 2] = base[i3 + 2] + (g * v.z) * blend;
-    }
-
-    pos.needsUpdate = true;
+  requestRender() {
+    this.markNeedsRender();
   }
 
   /**
@@ -525,6 +436,7 @@ export class BaseThreeJsModule extends ModuleBase {
             rotateDeltaMultiplier
         );
         break;
+        break;
       default:
         console.warn(`Unknown camera animation: ${this.currentAnimation}`);
         this.stopCameraAnimation();
@@ -532,7 +444,7 @@ export class BaseThreeJsModule extends ModuleBase {
     }
 
     this.controls.update();
-    this.render();
+    this.markNeedsRender();
   }
 
   /**
@@ -714,63 +626,6 @@ export class BaseThreeJsModule extends ModuleBase {
   }
 
   /**
-   * Implements the 'displacementAmplitude' method.
-   * Controls the strength of geometry displacement.
-   * @param {Object} options - Configuration options.
-   */
-  displacementAmplitude({ amplitude = 0 } = {}) {
-    const amp = Number(amplitude) || 0;
-    this.displacement.amplitude = amp;
-    this.displacement.enabled = amp !== 0;
-
-    // Reset displacement time when effect is disabled to avoid phase jumps
-    if (amplitude === 0 && this.displacementTime) {
-      this.displacementTime.t = 0;
-    }
-  }
-
-  /**
-   * Controls per-axis amplitude multipliers for geometry displacement.
-   * These values scale the global amplitude independently on X, Y, and Z.
-   */
-  displacementVector({ x = 1, y = 1, z = 1 } = {}) {
-    this.displacement.vector.set(
-      Number(x) || 1,
-      Number(y) || 1,
-      Number(z) || 1
-    );
-  }
-
-  /**
-   * Controls global displacement amplitude, oscillation speed,
-   * and per-axis amplitude multipliers in one call.
-   */
-  displacementParams({ amplitude = 0, oscTime = 1.0, x = 1, y = 1, z = 1 } = {}) {
-    // amplitude + enable
-    const amp = Number(amplitude) || 0;
-    this.displacement.amplitude = amp;
-    this.displacement.enabled = amp !== 0;
-
-    // direction
-    this.displacement.vector.set(
-      Number(x) || 1,
-      Number(y) || 1,
-      Number(z) || 1
-    );
-
-    // oscillate speed (time factor)
-    if (this.displacementTime) {
-      const safeSpeed = Number(oscTime);
-      this.displacementTime.speed = Number.isFinite(safeSpeed) ? safeSpeed : 1.0;
-    }
-
-    // reset time when disabled
-    if (amp === 0 && this.displacementTime) {
-      this.displacementTime.t = 0;
-    }
-  }
-
-  /**
    * Updates the camera's zoom based on the provided percentage.
    * @param {number} percentage - The zoom level percentage.
    */
@@ -812,8 +667,7 @@ export class BaseThreeJsModule extends ModuleBase {
     this.camera.lookAt(this.controls.target);
 
     this.controls.update();
-
-    this.render();
+    this.markNeedsRender();
   }
 
   /**
@@ -874,7 +728,7 @@ export class BaseThreeJsModule extends ModuleBase {
     this.camera.lookAt(center);
     this.controls.target.copy(center);
     this.controls.update();
-    this.render();
+    this.markNeedsRender();
   }
 
   /**
@@ -956,6 +810,53 @@ export class BaseThreeJsModule extends ModuleBase {
   }
 
   /**
+   * Attempts to initialize the audio analyzer with the audio stream.
+   * This method should be called by modules that need audio reactivity.
+   * Sets this.audioReady to true when successful.
+   * 
+   * Modules should initialize these properties in their constructor:
+   * - this.analyzer = null;
+   * - this.audioReady = false;
+   * - this.pollInterval = null;
+   * 
+   * @returns {Promise<void>}
+   */
+  async tryInitializeAudio() {
+    if (this.audioReady || this.destroyed) return;
+    const sdk = globalThis.nwWrldSdk;
+    const stream = sdk?.audio?.getStream?.();
+    if (stream) {
+      this.analyzer = new AudioAnalyzer();
+      const initialized = await this.analyzer.init(stream);
+      if (initialized) {
+        this.audioReady = true;
+        if (this.pollInterval) {
+          clearInterval(this.pollInterval);
+          this.pollInterval = null;
+        }
+      }
+    }
+  }
+
+  /**
+   * Starts polling for the audio stream if it's not immediately available.
+   * Polls every 1000ms until the stream is available or the module is destroyed.
+   * 
+   * This method should be called after tryInitializeAudio() if audioReady is false.
+   */
+  startStreamPolling() {
+    if (this.pollInterval) return;
+    this.pollInterval = setInterval(() => {
+      if (this.destroyed) {
+        clearInterval(this.pollInterval);
+        this.pollInterval = null;
+        return;
+      }
+      this.tryInitializeAudio();
+    }, 1000);
+  }
+
+  /**
    * Implements the 'destroy' method for cleanup.
    */
   destroy() {
@@ -999,7 +900,7 @@ export class BaseThreeJsModule extends ModuleBase {
         }
 
         // Nullify properties to help with garbage collection
-        for (const propName in object) {
+        for (let propName in object) {
           if (
             typeof object[propName] === "object" &&
             object[propName] !== null
@@ -1007,7 +908,7 @@ export class BaseThreeJsModule extends ModuleBase {
             object[propName] = null;
           }
         }
-      } catch {
+      } catch (e) {
         return;
       }
     };
@@ -1025,6 +926,19 @@ export class BaseThreeJsModule extends ModuleBase {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
+    }
+
+    // Clean up audio analyzer and polling
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
+    }
+
+    if (this.analyzer) {
+      if (typeof this.analyzer.destroy === "function") {
+        this.analyzer.destroy();
+      }
+      this.analyzer = null;
     }
 
     // Dispose of controls
@@ -1064,7 +978,7 @@ export class BaseThreeJsModule extends ModuleBase {
     super.destroy();
 
     // Special case for properties not covered by standard removal
-    for (const propName in this) {
+    for (let propName in this) {
       if (this[propName] && typeof this[propName] === "object") {
         disposeObject(this[propName]);
         this[propName] = null;

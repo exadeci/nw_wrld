@@ -122,6 +122,7 @@ const nwWrldBridge = {
     configureInput: (payload: unknown) => ipcRenderer.invoke("input:configure", payload),
     getMidiDevices: () => ipcRenderer.invoke("input:get-midi-devices"),
     selectWorkspace: () => ipcRenderer.invoke("workspace:select"),
+    setWorkspace: (workspacePath: unknown) => ipcRenderer.invoke("workspace:set", workspacePath),
   },
 };
 
@@ -138,7 +139,55 @@ if (isTestEnv && isMockMidi) {
   };
 }
 
+const forwardConsoleToMain = () => {
+  const originalLog = console.log;
+  const originalError = console.error;
+  const originalWarn = console.warn;
+  const originalInfo = console.info;
+  const originalDebug = console.debug;
+
+  const formatMessage = (args: unknown[]): string => {
+    return args
+      .map((arg) => {
+        if (typeof arg === "string") return arg;
+        if (arg instanceof Error) return `${arg.name}: ${arg.message}\n${arg.stack}`;
+        try {
+          return JSON.stringify(arg, null, 2);
+        } catch {
+          return String(arg);
+        }
+      })
+      .join(" ");
+  };
+
+  console.log = (...args: unknown[]) => {
+    originalLog.apply(console, args);
+    ipcRenderer.send("log-to-main", `[LOG] ${formatMessage(args)}`);
+  };
+
+  console.error = (...args: unknown[]) => {
+    originalError.apply(console, args);
+    ipcRenderer.send("log-to-main", `[ERROR] ${formatMessage(args)}`);
+  };
+
+  console.warn = (...args: unknown[]) => {
+    originalWarn.apply(console, args);
+    ipcRenderer.send("log-to-main", `[WARN] ${formatMessage(args)}`);
+  };
+
+  console.info = (...args: unknown[]) => {
+    originalInfo.apply(console, args);
+    ipcRenderer.send("log-to-main", `[INFO] ${formatMessage(args)}`);
+  };
+
+  console.debug = (...args: unknown[]) => {
+    originalDebug.apply(console, args);
+    ipcRenderer.send("log-to-main", `[DEBUG] ${formatMessage(args)}`);
+  };
+};
+
 if (isTopLevelFrame()) {
+  forwardConsoleToMain();
   contextBridge.exposeInMainWorld("nwWrldBridge", nwWrldBridge);
   contextBridge.exposeInMainWorld("nwWrldAppBridge", nwWrldAppBridge);
 }
