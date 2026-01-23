@@ -6,15 +6,7 @@
 
 class SpaceGlobe extends BaseThreeJsModule {
   static methods = [
-    {
-      name: "start",
-      executeOnLoad: true,
-      options: [
-        { name: "autoRotateSpeed", defaultVal: 5, type: "number", min: 0, max: 20 },
-        { name: "blobScale", defaultVal: 2, type: "number", min: 0.5, max: 5 },
-        { name: "nucleusDetail", defaultVal: 28, type: "number", min: 1, max: 30 },
-      ],
-    },
+    ...BaseThreeJsModule.methods,
     {
       name: "setAutoRotateSpeed",
       executeOnLoad: false,
@@ -24,6 +16,15 @@ class SpaceGlobe extends BaseThreeJsModule {
       name: "setBlobScale",
       executeOnLoad: false,
       options: [{ name: "value", defaultVal: 2, type: "number", min: 0.5, max: 5 }],
+    },
+    {
+      name: "start",
+      executeOnLoad: true,
+      options: [
+        { name: "autoRotateSpeed", defaultVal: 5, type: "number", min: 0, max: 20 },
+        { name: "blobScale", defaultVal: 2, type: "number", min: 0.5, max: 5 },
+        { name: "nucleusDetail", defaultVal: 28, type: "number", min: 1, max: 30 },
+      ],
     },
   ];
 
@@ -146,6 +147,8 @@ class SpaceGlobe extends BaseThreeJsModule {
       this.controls.maxDistance = 350;
       this.controls.minDistance = 150;
       this.controls.enablePan = false;
+      this.controls.enableDamping = true;
+      this.controls.dampingFactor = 0.05;
       this.controls.target.set(0, 0, 0);
       this.controls.update();
     }
@@ -379,7 +382,7 @@ class SpaceGlobe extends BaseThreeJsModule {
     this.nucleus.position.set(0, 0, 0);
     this.customGroup.add(this.nucleus);
 
-    const geometrySphereBg = new THREE.SphereGeometry(90, 50, 50);
+    const geometrySphereBg = new THREE.SphereGeometry(1000, 64, 64);
     const materialSphereBg = new THREE.MeshBasicMaterial({
       side: THREE.BackSide,
       color: 0x000000,
@@ -756,14 +759,12 @@ class SpaceGlobe extends BaseThreeJsModule {
     positionsContraction.needsUpdate = true;
   }
 
-  animate() {
-    if (this.destroyed || !this.clock || !this.renderer || !this.scene || !this.camera) return;
-
+  updateScene() {
     if (!this.nucleus || !this.pointStars2) {
-      this.markNeedsRender();
       return;
     }
 
+    this.delta = this.clock.getDelta();
     this.nucleusPosition = this.nucleus.geometry.attributes.position;
     this.originalY = this.pointStars2.geometry.attributes.originalY;
     this.time = Date.now();
@@ -787,6 +788,21 @@ class SpaceGlobe extends BaseThreeJsModule {
     if (this.controls) {
       this.controls.autoRotateSpeed = this.autoRotateSpeed;
       this.controls.update();
+    }
+  }
+
+  animate() {
+    if (this.destroyed || !this.clock || !this.renderer || !this.scene || !this.camera) return;
+
+    if (!this.nucleus || !this.pointStars2) {
+      this.markNeedsRender();
+      return;
+    }
+
+    this.updateScene();
+
+    if (this.renderer && this.scene && this.camera) {
+      this.renderer.render(this.scene, this.camera);
     }
 
     this.markNeedsRender();

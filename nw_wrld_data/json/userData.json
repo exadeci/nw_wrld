@@ -17,26 +17,18 @@
           "12": 11
         },
         "exactNote": {
-          "1": 48,
-          "2": 49,
-          "3": 50,
-          "4": 51,
-          "5": 52,
-          "6": 53,
-          "7": 54,
-          "8": 55,
-          "9": 56,
-          "10": 57,
-          "11": 58,
-          "12": 59,
-          "13": 60,
-          "14": 61,
-          "15": 62,
-          "16": 63,
-          "17": 64,
-          "18": 65,
-          "19": 66,
-          "20": 67
+          "1": 60,
+          "2": 61,
+          "3": 62,
+          "4": 63,
+          "5": 64,
+          "6": 65,
+          "7": 66,
+          "8": 67,
+          "9": 68,
+          "10": 69,
+          "11": 70,
+          "12": 71
         }
       },
       "osc": {
@@ -57,7 +49,7 @@
         "pitchClass": {
           "1": 0,
           "2": 1,
-          "3": 4,
+          "3": 2,
           "4": 3,
           "5": 4,
           "6": 5,
@@ -69,26 +61,18 @@
           "12": 11
         },
         "exactNote": {
-          "1": 36,
-          "2": 37,
-          "3": 38,
-          "4": 39,
-          "5": 40,
-          "6": 41,
-          "7": 42,
-          "8": 43,
-          "9": 44,
-          "10": 45,
-          "11": 46,
-          "12": 47,
-          "13": 72,
-          "14": 73,
-          "15": 74,
-          "16": 75,
-          "17": 76,
-          "18": 77,
-          "19": 78,
-          "20": 79
+          "1": 72,
+          "2": 73,
+          "3": 74,
+          "4": 75,
+          "5": 76,
+          "6": 77,
+          "7": 78,
+          "8": 79,
+          "9": 80,
+          "10": 81,
+          "11": 82,
+          "12": 83
         }
       },
       "osc": {
@@ -106,63 +90,14 @@
         "12": "/ch/12"
       }
     },
-    "ccMappings": {
-      "midi": {
-        "1": 23,
-        "2": 24,
-        "3": 25,
-        "4": 26,
-        "5": {
-          "channel": 1,
-          "cc": 19
-        },
-        "6": {
-          "channel": 2,
-          "cc": 19
-        },
-        "7": {
-          "channel": 1,
-          "cc": 0
-        },
-        "8": {
-          "channel": 2,
-          "cc": 0
-        },
-        "9": {
-          "channel": 1,
-          "cc": 15
-        },
-        "10": {
-          "channel": 1,
-          "cc": 11
-        },
-        "11": {
-          "channel": 1,
-          "cc": 7
-        },
-        "12": {
-          "channel": 2,
-          "cc": 15
-        },
-        "13": {
-          "channel": 2,
-          "cc": 11
-        },
-        "14": {
-          "channel": 2,
-          "cc": 7
-        }
-      }
-    },
     "input": {
       "type": "midi",
-      "deviceName": "DDJ-FLX6",
+      "deviceName": "IAC Driver Bus 1",
       "trackSelectionChannel": 2,
       "methodTriggerChannel": 1,
       "velocitySensitive": false,
-      "noteMatchMode": "exactNote",
-      "port": 8000,
-      "deviceId": "DDJ-FLX6"
+      "noteMatchMode": "pitchClass",
+      "port": 8000
     },
     "autoRefresh": true,
     "activeSetId": "set_1",
@@ -170,40 +105,7 @@
     "bgColor": "grey",
     "sequencerBpm": 120,
     "activeTrackId": 1762947476706,
-    "sequencerMuted": true,
-    "audioCapture": {
-      "sourceType": "input",
-      "deviceId": "",
-      "systemAudioId": ""
-    },
-    "audioReactive": {
-      "enabled": true,
-      "reactivity": 10,
-      "bassResponse": 2.3,
-      "midResponse": 1,
-      "trebleResponse": 1,
-      "smoothing": 0.54,
-      "fftSize": 256,
-      "inputGain": 10
-    },
-    "ccMappingNames": {
-      "1": "Filter Ch1",
-      "2": "Filter Ch2",
-      "3": "Filter Ch3",
-      "4": "Filter Ch4",
-      "5": "Volume Ch1",
-      "6": "Volume Ch2",
-      "7": "Tempo Left",
-      "8": "Tempo Right",
-      "9": "Low Ch1",
-      "10": "Mid Ch1",
-      "11": "Hi Ch1",
-      "12": "Low Ch1",
-      "13": "Mid Ch1",
-      "14": "Hi Ch1"
-    },
-    "aspectRatio": "default",
-    "showFps": true
+    "sequencerMuted": true
   },
   "sets": [
     {
@@ -218,32 +120,36 @@
           "channelMappings": {
             "1": 1,
             "2": 2,
-            "3": 3,
-            "4": 4,
-            "5": 5,
-            "6": 6,
-            "7": 7,
-            "8": 8,
-            "9": 9
+            "3": 3
           },
           "modules": [
             {
-              "id": "inst_1768373068815_8zgbxskzf",
-              "type": "GridDots",
-              "enabled": true,
-              "disabled": false
+              "id": "inst_1767789263596_vgrrts23y",
+              "type": "PerlinBlob"
             },
             {
-              "id": "inst_1768378930131_49exg6hb0",
+              "id": "inst_1767789269900_negj9cqzg",
+              "type": "BasicGeometry"
+            },
+            {
+              "id": "inst_1767789687717_ok1citixc",
+              "type": "GridDots"
+            },
+            {
+              "id": "inst_1767789718949_4cgdmcn5x",
+              "type": "Text"
+            },
+            {
+              "id": "inst_1767802900192_wvvwecdg9",
+              "type": "GridOverlay"
+            },
+            {
+              "id": "inst_1767802987627_d29ptps5n",
               "type": "Corners"
-            },
-            {
-              "id": "inst_1768387775115_1qb02x7q2",
-              "type": "AudioLowEarthPoint"
             }
           ],
           "modulesData": {
-            "inst_1768373068815_8zgbxskzf": {
+            "inst_1767789263596_vgrrts23y": {
               "constructor": [
                 {
                   "name": "matrix",
@@ -272,15 +178,254 @@
                   ]
                 },
                 {
+                  "name": "loadData",
+                  "options": [
+                    {
+                      "name": "dataPath",
+                      "value": "json/radiation.json"
+                    },
+                    {
+                      "name": "valueKey",
+                      "value": "Estimated DGSR"
+                    },
+                    {
+                      "name": "maxPoints",
+                      "value": 800
+                    }
+                  ]
+                }
+              ],
+              "methods": {
+                "1": [],
+                "2": []
+              }
+            },
+            "inst_1767789269900_negj9cqzg": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "shape",
+                  "options": [
+                    {
+                      "name": "shape",
+                      "value": "octahedron",
+                      "defaultVal": "cylinder"
+                    }
+                  ]
+                }
+              ],
+              "methods": {
+                "2": [],
+                "3": [
+                  {
+                    "name": "shape",
+                    "options": [
+                      {
+                        "name": "shape",
+                        "value": "cylinder",
+                        "defaultVal": "cylinder",
+                        "randomValues": [
+                          "icosahedron",
+                          "octahedron",
+                          "tetrahedron"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "inst_1767789687717_ok1citixc": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1767789718949_4cgdmcn5x": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 4,
+                        "cols": 4,
+                        "excludedCells": [
+                          "2-1",
+                          "3-1",
+                          "1-2",
+                          "2-2",
+                          "3-2",
+                          "2-3",
+                          "3-3",
+                          "1-1",
+                          "4-1",
+                          "4-2",
+                          "4-3",
+                          "1-3"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "text",
+                  "options": [
+                    {
+                      "name": "text",
+                      "value": "nw_wrld",
+                      "defaultVal": "Hello, world."
+                    }
+                  ]
+                }
+              ],
+              "methods": {
+                "1": [
+                  {
+                    "name": "text",
+                    "options": [
+                      {
+                        "name": "text",
+                        "value": "nw_wrld",
+                        "defaultVal": "Hello, world."
+                      }
+                    ]
+                  },
+                  {
+                    "name": "color",
+                    "options": [
+                      {
+                        "name": "color",
+                        "value": "#ffffff",
+                        "defaultVal": "#ffffff"
+                      }
+                    ]
+                  }
+                ],
+                "2": [
+                  {
+                    "name": "color",
+                    "options": [
+                      {
+                        "name": "color",
+                        "value": "#ff0000",
+                        "defaultVal": "#ffffff"
+                      }
+                    ]
+                  }
+                ],
+                "3": [
+                  {
+                    "name": "randomText",
+                    "options": [
+                      {
+                        "name": "length",
+                        "value": 8,
+                        "defaultVal": 8
+                      },
+                      {
+                        "name": "characters",
+                        "value": "!@£$%^&*()_+{}|\":?><",
+                        "defaultVal": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "inst_1767802900192_wvvwecdg9": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
                   "name": "size",
                   "options": [
                     {
                       "name": "x",
-                      "value": 10
+                      "value": 2
                     },
                     {
                       "name": "y",
-                      "value": 10
+                      "value": 2
                     }
                   ]
                 },
@@ -292,13 +437,34 @@
                       "value": "#ffffff"
                     }
                   ]
+                },
+                {
+                  "name": "scale",
+                  "options": [
+                    {
+                      "name": "scale",
+                      "value": 0.8,
+                      "defaultVal": 1
+                    }
+                  ]
                 }
               ],
               "methods": {
-                "1": []
+                "1": [
+                  {
+                    "name": "show",
+                    "options": [
+                      {
+                        "name": "duration",
+                        "value": 75,
+                        "defaultVal": 0
+                      }
+                    ]
+                  }
+                ]
               }
             },
-            "inst_1768378930131_49exg6hb0": {
+            "inst_1767802987627_d29ptps5n": {
               "constructor": [
                 {
                   "name": "matrix",
@@ -343,132 +509,9 @@
                       "value": 20
                     }
                   ]
-                },
-                {
-                  "name": "setScanlines",
-                  "options": [
-                    {
-                      "name": "intensity",
-                      "value": 36,
-                      "defaultVal": 0
-                    },
-                    {
-                      "name": "speed",
-                      "value": 4,
-                      "defaultVal": 0
-                    }
-                  ]
                 }
               ],
               "methods": {}
-            },
-            "inst_1768387775115_1qb02x7q2": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                },
-                {
-                  "name": "zoomLevel",
-                  "options": [
-                    {
-                      "name": "zoomLevel",
-                      "value": 35
-                    }
-                  ]
-                },
-                {
-                  "name": "viewDirection",
-                  "options": [
-                    {
-                      "name": "viewDirection",
-                      "value": "back"
-                    }
-                  ]
-                },
-                {
-                  "name": "start",
-                  "options": [
-                    {
-                      "name": "sensitivity",
-                      "value": 1.5
-                    },
-                    {
-                      "name": "particleCount",
-                      "value": 500
-                    }
-                  ]
-                }
-              ],
-              "methods": {
-                "1": [
-                  {
-                    "name": "setBlur",
-                    "options": [
-                      {
-                        "name": "amount",
-                        "value": 100,
-                        "defaultVal": 0
-                      },
-                      {
-                        "name": "centerAt50",
-                        "value": true,
-                        "defaultVal": false
-                      },
-                      {
-                        "name": "maxPeak",
-                        "value": 5,
-                        "defaultVal": 5
-                      }
-                    ]
-                  }
-                ],
-                "6": [],
-                "9": [
-                  {
-                    "name": "rotate",
-                    "options": [
-                      {
-                        "name": "direction",
-                        "value": "counter-clockwise",
-                        "defaultVal": "clockwise"
-                      },
-                      {
-                        "name": "speed",
-                        "value": 4.1,
-                        "defaultVal": 1
-                      },
-                      {
-                        "name": "duration",
-                        "value": 1400,
-                        "defaultVal": 0
-                      }
-                    ]
-                  }
-                ]
-              }
             }
           }
         },
@@ -1062,10 +1105,17 @@
           "channelMappings": {
             "1": 1,
             "2": 2,
-            "3": 3,
-            "4": 4
+            "3": 3
           },
           "modules": [
+            {
+              "id": "inst_1767057214300_ygs5wb5on",
+              "type": "CloudPointIceberg"
+            },
+            {
+              "id": "inst_1767057154305_ly665ivbj",
+              "type": "CloudPointIceberg"
+            },
             {
               "id": "inst_1767060162506_j6497qnny",
               "type": "Frame"
@@ -1075,11 +1125,250 @@
               "type": "GridDots"
             },
             {
-              "id": "inst_1768359128571_23u8687vn",
-              "type": "CubeCube"
+              "id": "inst_1767061119737_9li38fl8k",
+              "type": "Text"
             }
           ],
           "modulesData": {
+            "inst_1767057154305_ly665ivbj": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 3,
+                        "cols": 3,
+                        "excludedCells": [
+                          "1-2",
+                          "1-1",
+                          "2-2",
+                          "2-1",
+                          "3-1",
+                          "3-2"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": true
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 15
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 5
+                    }
+                  ]
+                },
+                {
+                  "name": "scale",
+                  "options": [
+                    {
+                      "name": "scale",
+                      "value": 0.5,
+                      "defaultVal": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "viewportLine",
+                  "options": [
+                    {
+                      "name": "x",
+                      "value": 50,
+                      "defaultVal": 50
+                    },
+                    {
+                      "name": "y",
+                      "value": 50,
+                      "defaultVal": 50
+                    },
+                    {
+                      "name": "length",
+                      "value": 100,
+                      "defaultVal": 100
+                    },
+                    {
+                      "name": "opacity",
+                      "value": 1,
+                      "defaultVal": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "offset",
+                  "options": [
+                    {
+                      "name": "x",
+                      "value": -5,
+                      "defaultVal": 0
+                    },
+                    {
+                      "name": "y",
+                      "value": 0,
+                      "defaultVal": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraAnimation",
+                  "options": [
+                    {
+                      "name": "cameraAnimation",
+                      "value": "rotate-left",
+                      "defaultVal": "none"
+                    }
+                  ]
+                }
+              ],
+              "methods": {
+                "1": [
+                  {
+                    "name": "viewDirection",
+                    "options": [
+                      {
+                        "name": "viewDirection",
+                        "value": "front",
+                        "defaultVal": "front"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "inst_1767057214300_ygs5wb5on": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      },
+                      "defaultVal": [
+                        1,
+                        1
+                      ]
+                    },
+                    {
+                      "name": "border",
+                      "value": false,
+                      "defaultVal": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 50
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 5
+                    }
+                  ]
+                },
+                {
+                  "name": "offset",
+                  "options": [
+                    {
+                      "name": "x",
+                      "value": -12,
+                      "defaultVal": 0
+                    },
+                    {
+                      "name": "y",
+                      "value": 0,
+                      "defaultVal": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraAnimation",
+                  "options": [
+                    {
+                      "name": "cameraAnimation",
+                      "value": "rotate-right",
+                      "defaultVal": "none"
+                    }
+                  ]
+                }
+              ],
+              "methods": {
+                "1": [
+                  {
+                    "name": "viewDirection",
+                    "options": [
+                      {
+                        "name": "viewDirection",
+                        "value": "front",
+                        "defaultVal": "front"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
             "inst_1767060162506_j6497qnny": {
               "constructor": [
                 {
@@ -1212,7 +1501,7 @@
               ],
               "methods": {}
             },
-            "inst_1768359128571_23u8687vn": {
+            "inst_1767061119737_9li38fl8k": {
               "constructor": [
                 {
                   "name": "matrix",
@@ -1220,9 +1509,13 @@
                     {
                       "name": "matrix",
                       "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
+                        "rows": 2,
+                        "cols": 2,
+                        "excludedCells": [
+                          "2-1",
+                          "1-2",
+                          "2-2"
+                        ]
                       }
                     },
                     {
@@ -1241,34 +1534,92 @@
                   ]
                 },
                 {
-                  "name": "zoomLevel",
+                  "name": "font",
                   "options": [
                     {
-                      "name": "zoomLevel",
-                      "value": 75
+                      "name": "font",
+                      "value": "font-sith-af"
                     }
                   ]
                 },
                 {
-                  "name": "viewDirection",
+                  "name": "color",
                   "options": [
                     {
-                      "name": "viewDirection",
-                      "value": "front"
+                      "name": "color",
+                      "value": "#ffffff"
                     }
                   ]
                 },
                 {
-                  "name": "cameraSpeed",
+                  "name": "randomText",
                   "options": [
                     {
-                      "name": "cameraSpeed",
-                      "value": 1
+                      "name": "length",
+                      "value": 12,
+                      "defaultVal": 8
+                    },
+                    {
+                      "name": "characters",
+                      "value": "!@%^&*([]0",
+                      "defaultVal": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+                    }
+                  ]
+                },
+                {
+                  "name": "size",
+                  "options": [
+                    {
+                      "name": "percentage",
+                      "value": 200
+                    }
+                  ]
+                },
+                {
+                  "name": "offset",
+                  "options": [
+                    {
+                      "name": "x",
+                      "value": 0,
+                      "defaultVal": 0
+                    },
+                    {
+                      "name": "y",
+                      "value": -20,
+                      "defaultVal": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "opacity",
+                  "options": [
+                    {
+                      "name": "opacity",
+                      "value": 0.5,
+                      "defaultVal": 1
                     }
                   ]
                 }
               ],
-              "methods": {}
+              "methods": {
+                "3": [
+                  {
+                    "name": "randomText",
+                    "options": [
+                      {
+                        "name": "length",
+                        "value": 8,
+                        "defaultVal": 8
+                      },
+                      {
+                        "name": "characters",
+                        "value": "!@%^&*([]0",
+                        "defaultVal": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+                      }
+                    ]
+                  }
+                ]
+              }
             }
           },
           "sequencer": {
@@ -1318,1089 +1669,13 @@
           }
         },
         {
-          "id": 1768714467618,
+          "id": "track_1769142785259",
           "name": "Test",
           "trackSlot": 5,
           "bpm": 120,
           "channelMappings": {},
-          "modules": [
-            {
-              "id": "inst_1768830125721_e45bjic1m",
-              "type": "AudioCloudPointIceberg",
-              "disabled": true
-            },
-            {
-              "id": "inst_1768903896211_243vxyr3m",
-              "type": "GridDots",
-              "disabled": true
-            },
-            {
-              "id": "inst_1768903900086_rezc8tf0p",
-              "type": "Corners",
-              "disabled": true
-            },
-            {
-              "id": "inst_1768909985368_p7n9qmtxq",
-              "type": "AudioRainThunder",
-              "disabled": true
-            },
-            {
-              "id": "inst_1768904687078_ifrm1w7ok",
-              "type": "GridIcosahedron",
-              "disabled": true
-            },
-            {
-              "id": "inst_1768830162309_psiby6b4v",
-              "type": "AudioOrbitalPlane",
-              "disabled": true
-            },
-            {
-              "id": "inst_1768910399021_8ptqb3afd",
-              "type": "UnifiedShipibo",
-              "disabled": true,
-              "enabled": true
-            },
-            {
-              "id": "inst_1768987759066_ciblu9j54",
-              "type": "AudioLowEarthPoint",
-              "disabled": true
-            },
-            {
-              "id": "inst_1768990256027_7gyf201mm",
-              "type": "Galaxy",
-              "disabled": true
-            },
-            {
-              "id": "inst_1768990950930_uzcbqf5t3",
-              "type": "SpaceGlobe",
-              "disabled": true
-            },
-            {
-              "id": "inst_1768991684610_fcobqm8ql",
-              "type": "AudioDreamOcean",
-              "disabled": true
-            },
-            {
-              "id": "inst_1768991768996_mbzrrxwhn",
-              "type": "AudioDreamUnderwater",
-              "disabled": true
-            },
-            {
-              "id": "inst_1768991872055_x7lwpldgz",
-              "type": "Bloom",
-              "disabled": true
-            },
-            {
-              "id": "inst_1768992705057_nmiki3ug9",
-              "type": "Ocean",
-              "disabled": false
-            }
-          ],
-          "modulesData": {
-            "inst_1768830125721_e45bjic1m": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                },
-                {
-                  "name": "zoomLevel",
-                  "options": [
-                    {
-                      "name": "zoomLevel",
-                      "value": 75
-                    }
-                  ]
-                },
-                {
-                  "name": "viewDirection",
-                  "options": [
-                    {
-                      "name": "viewDirection",
-                      "value": "front"
-                    }
-                  ]
-                },
-                {
-                  "name": "cameraSpeed",
-                  "options": [
-                    {
-                      "name": "cameraSpeed",
-                      "value": 1
-                    }
-                  ]
-                },
-                {
-                  "name": "start",
-                  "options": [
-                    {
-                      "name": "sensitivity",
-                      "value": 1.5
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1768830162309_psiby6b4v": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                },
-                {
-                  "name": "start",
-                  "options": [
-                    {
-                      "name": "sensitivity",
-                      "value": 1.5
-                    },
-                    {
-                      "name": "baseHue",
-                      "value": 0
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1768903896211_243vxyr3m": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                },
-                {
-                  "name": "size",
-                  "options": [
-                    {
-                      "name": "x",
-                      "value": 10
-                    },
-                    {
-                      "name": "y",
-                      "value": 10
-                    }
-                  ]
-                },
-                {
-                  "name": "color",
-                  "options": [
-                    {
-                      "name": "color",
-                      "value": "#ffffff"
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1768903900086_rezc8tf0p": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                },
-                {
-                  "name": "color",
-                  "options": [
-                    {
-                      "name": "color",
-                      "value": "#ffffff"
-                    }
-                  ]
-                },
-                {
-                  "name": "size",
-                  "options": [
-                    {
-                      "name": "size",
-                      "value": 20
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1768904687078_ifrm1w7ok": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "zoomLevel",
-                  "options": [
-                    {
-                      "name": "zoomLevel",
-                      "value": 75
-                    }
-                  ]
-                },
-                {
-                  "name": "viewDirection",
-                  "options": [
-                    {
-                      "name": "viewDirection",
-                      "value": "front"
-                    }
-                  ]
-                },
-                {
-                  "name": "cameraSpeed",
-                  "options": [
-                    {
-                      "name": "cameraSpeed",
-                      "value": 1
-                    }
-                  ]
-                },
-                {
-                  "name": "start",
-                  "options": [
-                    {
-                      "name": "sensitivity",
-                      "value": 40
-                    },
-                    {
-                      "name": "refractionStrength",
-                      "value": 0.2
-                    },
-                    {
-                      "name": "edgeWidth",
-                      "value": 2
-                    },
-                    {
-                      "name": "rgbShift",
-                      "value": 0.2
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                },
-                {
-                  "name": "setAudioReactive",
-                  "options": [
-                    {
-                      "name": "enabled",
-                      "value": true,
-                      "defaultVal": true
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1768909985368_p7n9qmtxq": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "zoomLevel",
-                  "options": [
-                    {
-                      "name": "zoomLevel",
-                      "value": 75
-                    }
-                  ]
-                },
-                {
-                  "name": "viewDirection",
-                  "options": [
-                    {
-                      "name": "viewDirection",
-                      "value": "front"
-                    }
-                  ]
-                },
-                {
-                  "name": "cameraSpeed",
-                  "options": [
-                    {
-                      "name": "cameraSpeed",
-                      "value": 1
-                    }
-                  ]
-                },
-                {
-                  "name": "start",
-                  "options": [
-                    {
-                      "name": "sensitivity",
-                      "value": 2
-                    },
-                    {
-                      "name": "rainCount",
-                      "value": 100000
-                    },
-                    {
-                      "name": "rainSize",
-                      "value": 0.1
-                    },
-                    {
-                      "name": "cloudCount",
-                      "value": 3000
-                    },
-                    {
-                      "name": "fogColor",
-                      "value": "#11111f"
-                    },
-                    {
-                      "name": "fogDensity",
-                      "value": 0.002
-                    },
-                    {
-                      "name": "thunderSensitivity",
-                      "value": 1
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1768910399021_8ptqb3afd": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "zoomLevel",
-                  "options": [
-                    {
-                      "name": "zoomLevel",
-                      "value": 10
-                    }
-                  ]
-                },
-                {
-                  "name": "viewDirection",
-                  "options": [
-                    {
-                      "name": "viewDirection",
-                      "value": "front"
-                    }
-                  ]
-                },
-                {
-                  "name": "cameraSpeed",
-                  "options": [
-                    {
-                      "name": "cameraSpeed",
-                      "value": 1
-                    }
-                  ]
-                },
-                {
-                  "name": "start",
-                  "options": [
-                    {
-                      "name": "speed",
-                      "value": 2
-                    },
-                    {
-                      "name": "iterations",
-                      "value": 4
-                    },
-                    {
-                      "name": "intensity",
-                      "value": 1
-                    },
-                    {
-                      "name": "sensitivity",
-                      "value": 2
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                },
-                {
-                  "name": "setAudioReactive",
-                  "options": [
-                    {
-                      "name": "enabled",
-                      "value": false,
-                      "defaultVal": true
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1768987759066_ciblu9j54": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                },
-                {
-                  "name": "zoomLevel",
-                  "options": [
-                    {
-                      "name": "zoomLevel",
-                      "value": 75
-                    }
-                  ]
-                },
-                {
-                  "name": "viewDirection",
-                  "options": [
-                    {
-                      "name": "viewDirection",
-                      "value": "front"
-                    }
-                  ]
-                },
-                {
-                  "name": "cameraSpeed",
-                  "options": [
-                    {
-                      "name": "cameraSpeed",
-                      "value": 1
-                    }
-                  ]
-                },
-                {
-                  "name": "start",
-                  "options": [
-                    {
-                      "name": "sensitivity",
-                      "value": 1.5
-                    },
-                    {
-                      "name": "particleCount",
-                      "value": 500
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1768990256027_7gyf201mm": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                },
-                {
-                  "name": "zoomLevel",
-                  "options": [
-                    {
-                      "name": "zoomLevel",
-                      "value": 4
-                    }
-                  ]
-                },
-                {
-                  "name": "viewDirection",
-                  "options": [
-                    {
-                      "name": "viewDirection",
-                      "value": "front"
-                    }
-                  ]
-                },
-                {
-                  "name": "cameraSpeed",
-                  "options": [
-                    {
-                      "name": "cameraSpeed",
-                      "value": 2
-                    }
-                  ]
-                },
-                {
-                  "name": "start",
-                  "options": [
-                    {
-                      "name": "count",
-                      "value": 100000
-                    },
-                    {
-                      "name": "size",
-                      "value": 0.01
-                    },
-                    {
-                      "name": "radius",
-                      "value": 2.15
-                    },
-                    {
-                      "name": "branches",
-                      "value": 3
-                    },
-                    {
-                      "name": "spin",
-                      "value": 3
-                    },
-                    {
-                      "name": "randomness",
-                      "value": 5
-                    },
-                    {
-                      "name": "randomnessPower",
-                      "value": 4
-                    },
-                    {
-                      "name": "insideColor",
-                      "value": "#ff6030"
-                    },
-                    {
-                      "name": "outsideColor",
-                      "value": "#0949f0"
-                    },
-                    {
-                      "name": "rotationSpeed",
-                      "value": 0.05
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1768990950930_uzcbqf5t3": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "zoomLevel",
-                  "options": [
-                    {
-                      "name": "zoomLevel",
-                      "value": 75
-                    }
-                  ]
-                },
-                {
-                  "name": "viewDirection",
-                  "options": [
-                    {
-                      "name": "viewDirection",
-                      "value": "front"
-                    }
-                  ]
-                },
-                {
-                  "name": "cameraSpeed",
-                  "options": [
-                    {
-                      "name": "cameraSpeed",
-                      "value": 1
-                    }
-                  ]
-                },
-                {
-                  "name": "start",
-                  "options": [
-                    {
-                      "name": "autoRotateSpeed",
-                      "value": 4
-                    },
-                    {
-                      "name": "blobScale",
-                      "value": 2
-                    },
-                    {
-                      "name": "nucleusDetail",
-                      "value": 28
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1768991684610_fcobqm8ql": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                },
-                {
-                  "name": "zoomLevel",
-                  "options": [
-                    {
-                      "name": "zoomLevel",
-                      "value": 75
-                    }
-                  ]
-                },
-                {
-                  "name": "viewDirection",
-                  "options": [
-                    {
-                      "name": "viewDirection",
-                      "value": "front"
-                    }
-                  ]
-                },
-                {
-                  "name": "cameraSpeed",
-                  "options": [
-                    {
-                      "name": "cameraSpeed",
-                      "value": 1
-                    }
-                  ]
-                },
-                {
-                  "name": "start",
-                  "options": [
-                    {
-                      "name": "sensitivity",
-                      "value": 2
-                    },
-                    {
-                      "name": "waveIntensity",
-                      "value": 1
-                    },
-                    {
-                      "name": "speed",
-                      "value": 1
-                    },
-                    {
-                      "name": "cameraVerticalPosition",
-                      "value": 0
-                    },
-                    {
-                      "name": "fogColor",
-                      "value": "#0a0015"
-                    },
-                    {
-                      "name": "enableFog",
-                      "value": true
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1768991768996_mbzrrxwhn": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1768991872055_x7lwpldgz": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "zoomLevel",
-                  "options": [
-                    {
-                      "name": "zoomLevel",
-                      "value": 30
-                    }
-                  ]
-                },
-                {
-                  "name": "viewDirection",
-                  "options": [
-                    {
-                      "name": "viewDirection",
-                      "value": "front"
-                    }
-                  ]
-                },
-                {
-                  "name": "cameraSpeed",
-                  "options": [
-                    {
-                      "name": "cameraSpeed",
-                      "value": 1
-                    }
-                  ]
-                },
-                {
-                  "name": "start",
-                  "options": [
-                    {
-                      "name": "speed",
-                      "value": 4
-                    },
-                    {
-                      "name": "scale",
-                      "value": 3.4
-                    },
-                    {
-                      "name": "rotationSpeed",
-                      "value": 1
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1768992705057_nmiki3ug9": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "zoomLevel",
-                  "options": [
-                    {
-                      "name": "zoomLevel",
-                      "value": 69
-                    }
-                  ]
-                },
-                {
-                  "name": "viewDirection",
-                  "options": [
-                    {
-                      "name": "viewDirection",
-                      "value": "front"
-                    }
-                  ]
-                },
-                {
-                  "name": "cameraSpeed",
-                  "options": [
-                    {
-                      "name": "cameraSpeed",
-                      "value": 1
-                    }
-                  ]
-                },
-                {
-                  "name": "start",
-                  "options": [
-                    {
-                      "name": "speed",
-                      "value": 1
-                    },
-                    {
-                      "name": "seaHeight",
-                      "value": 0.6
-                    },
-                    {
-                      "name": "seaChoppy",
-                      "value": 1
-                    },
-                    {
-                      "name": "seaFreq",
-                      "value": 0.16
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            }
-          }
+          "modules": [],
+          "modulesData": {}
         }
       ]
     }

@@ -344,6 +344,104 @@ export function updateAudioValues(instance) {
   }
 }
 
+export const sharedAnimationMethods = {
+  createStandardAnimateLoop(updateFn) {
+    return function animate() {
+      if (this.destroyed || !this.renderer || !this.scene || !this.camera) return;
+      
+      if (updateFn) {
+        updateFn.call(this);
+      }
+      
+      if (this.renderer && this.scene && this.camera) {
+        this.renderer.render(this.scene, this.camera);
+      }
+      
+      this.markNeedsRender();
+    };
+  },
+
+  createAudioAnimateLoop(updateFn) {
+    return function audioAnimate() {
+      if (this.destroyed || !this.renderer || !this.scene || !this.camera) return;
+      
+      if (this.audioReactive && this.analyzer && this.audioReady) {
+        const sensitivity = this.sensitivity || 1.0;
+        this.volume = this.analyzer.getVolume() * sensitivity;
+        this.bass = this.analyzer.getBass() * sensitivity;
+        this.mid = this.analyzer.getMid() * sensitivity;
+        this.treble = this.analyzer.getTreble() * sensitivity;
+      } else if (!this.audioReactive) {
+        const sensitivity = this.sensitivity || 1.0;
+        this.volume = 0.3 * sensitivity;
+        this.bass = 0.2 * sensitivity;
+        this.mid = 0.3 * sensitivity;
+        this.treble = 0.2 * sensitivity;
+      }
+      
+      if (updateFn) {
+        updateFn.call(this);
+      }
+      
+      if (this.renderer && this.scene && this.camera) {
+        this.renderer.render(this.scene, this.camera);
+      }
+      
+      this.markNeedsRender();
+    };
+  },
+
+  createShaderAnimateLoop(updateUniformsFn) {
+    return function animate() {
+      if (this.destroyed || !this.clock || !this.material || !this.renderer || !this.scene || !this.camera) return;
+      
+      const delta = this.clock.getDelta();
+      if (!this.time) this.time = 0;
+      this.time += delta;
+      
+      if (this.material && this.material.uniforms && updateUniformsFn) {
+        updateUniformsFn.call(this, delta, this.time);
+      }
+      
+      if (this.renderer && this.scene && this.camera) {
+        this.renderer.render(this.scene, this.camera);
+      }
+    };
+  },
+
+  createAudioShaderAnimateLoop(updateUniformsFn) {
+    return function audioAnimate() {
+      if (this.destroyed || !this.clock || !this.material || !this.renderer || !this.scene || !this.camera) return;
+      
+      if (this.audioReactive && this.analyzer && this.audioReady) {
+        const sensitivity = this.sensitivity || 1.0;
+        this.volume = this.analyzer.getVolume() * sensitivity;
+        this.bass = this.analyzer.getBass() * sensitivity;
+        this.mid = this.analyzer.getMid() * sensitivity;
+        this.treble = this.analyzer.getTreble() * sensitivity;
+      } else if (!this.audioReactive) {
+        const sensitivity = this.sensitivity || 1.0;
+        this.volume = 0.3 * sensitivity;
+        this.bass = 0.2 * sensitivity;
+        this.mid = 0.3 * sensitivity;
+        this.treble = 0.2 * sensitivity;
+      }
+      
+      const delta = this.clock.getDelta();
+      if (!this.time) this.time = 0;
+      this.time += delta;
+      
+      if (this.material && this.material.uniforms && updateUniformsFn) {
+        updateUniformsFn.call(this, delta, this.time);
+      }
+      
+      if (this.renderer && this.scene && this.camera) {
+        this.renderer.render(this.scene, this.camera);
+      }
+    };
+  }
+};
+
 export const audioInitializationMethods = {
   async tryInitializeAudio() {
     if (this.audioReady || this.destroyed) return;
