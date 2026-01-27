@@ -1,4 +1,4 @@
-import { find, forEach, isEqual, isFunction } from "lodash";
+import { find, forEach, isFunction } from "lodash";
 import logger from "../../helpers/logger";
 import { TrackSandboxHost } from "../sandbox/TrackSandboxHost";
 import { getMessaging } from "../bridge";
@@ -229,47 +229,9 @@ export async function handleTrackSelection(trackName) {
     this.loadUserData(pending.setId);
     this.applyConfigSettings();
     if (pending.trackName) {
-      const nextTrack = find(this.userData, { name: pending.trackName });
-      if (nextTrack && this.activeTrack && this.activeTrack.name === pending.trackName) {
-        this.activeTrack = nextTrack;
-      }
-      if (
-        this.activeTrack &&
-        this.activeTrack.name === pending.trackName &&
-        nextTrack
-      ) {
-        const activeModules = Array.isArray(this.activeTrack.modules)
-          ? this.activeTrack.modules.filter((m) => !m.disabled)
-          : [];
-        const nextModules = Array.isArray(nextTrack.modules)
-          ? nextTrack.modules.filter((m) => !m.disabled)
-          : [];
-        if (
-          isEqual(
-            {
-              name: this.activeTrack.name,
-              modules: activeModules,
-              modulesData: this.activeTrack.modulesData,
-              channelMappings: this.activeTrack.channelMappings,
-            },
-            {
-              name: nextTrack.name,
-              modules: nextModules,
-              modulesData: nextTrack.modulesData,
-              channelMappings: nextTrack.channelMappings,
-            }
-          )
-        ) {
-        } else {
-          this.deactivateActiveTrack();
-          this.handleTrackSelection(pending.trackName);
-          return;
-        }
-      } else {
-        this.deactivateActiveTrack();
-        this.handleTrackSelection(pending.trackName);
-        return;
-      }
+      this.deactivateActiveTrack();
+      this.handleTrackSelection(pending.trackName);
+      return;
     }
   }
 

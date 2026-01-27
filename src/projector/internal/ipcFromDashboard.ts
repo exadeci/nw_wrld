@@ -1,4 +1,3 @@
-import { find, isEqual } from "lodash";
 import { getMessaging } from "./bridge";
 
 type IpcMessage = {
@@ -147,47 +146,6 @@ export function initDashboardIpc(this: DashboardIpcContext) {
           this.applyConfigSettings();
 
           if (currentTrackName) {
-            const nextTrack = find(this.userData as never, { name: currentTrackName } as never);
-            if (nextTrack && this.activeTrack && this.activeTrack.name === currentTrackName) {
-              this.activeTrack = nextTrack;
-            }
-            if (
-              this.activeTrack &&
-              this.activeTrack.name === currentTrackName &&
-              nextTrack
-            ) {
-              const activeModules = Array.isArray((this.activeTrack as { modules?: unknown }).modules)
-                ? ((this.activeTrack as { modules?: unknown[] }).modules as unknown[]).filter((m: unknown) => {
-                    const mm = m as { disabled?: boolean } | null;
-                    return !mm?.disabled;
-                  })
-                : [];
-              const nextModules = Array.isArray((nextTrack as { modules?: unknown }).modules)
-                ? ((nextTrack as { modules?: unknown[] }).modules as unknown[]).filter((m: unknown) => {
-                    const mm = m as { disabled?: boolean } | null;
-                    return !mm?.disabled;
-                  })
-                : [];
-              if (
-                isEqual(
-                  {
-                    name: this.activeTrack.name,
-                    modules: activeModules,
-                    modulesData: (this.activeTrack as { modulesData?: unknown }).modulesData,
-                    channelMappings: (this.activeTrack as { channelMappings?: unknown })
-                      .channelMappings,
-                  },
-                  {
-                    name: (nextTrack as { name?: unknown }).name,
-                    modules: nextModules,
-                    modulesData: (nextTrack as { modulesData?: unknown }).modulesData,
-                    channelMappings: (nextTrack as { channelMappings?: unknown }).channelMappings,
-                  }
-                )
-              ) {
-                return;
-              }
-            }
             this.deactivateActiveTrack();
             return this.handleTrackSelection(currentTrackName);
           }
