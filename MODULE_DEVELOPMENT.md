@@ -2,6 +2,8 @@
 
 This guide covers creating custom visual modules for nw_wrld, including the workspace (project folder) module contract and the runtime-injected SDK surface.
 
+**See also:** [MODULE_AI_AGENT_GUIDE.md](MODULE_AI_AGENT_GUIDE.md) — a condensed reference of requirements, validation rules, and common pitfalls. Use it when working with AI assistants or when you need a strict checklist and codebase pointers without the full tutorial.
+
 ## Table of Contents
 
 1. [Workspace Modules](#workspace-modules)
