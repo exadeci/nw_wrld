@@ -672,9 +672,10 @@ globalThis.nwSandboxIpc?.on?.(async (data) => {
         const moduleType = String(m?.type || "").trim();
         if (!instanceId || !moduleType) continue;
 
+        const moduleDisabled = (m as { disabled?: boolean })?.disabled === true;
+        if (moduleDisabled) continue;
+
         const moduleData = modulesData?.[instanceId] || {};
-        const isDisabled = moduleData.disabled === true;
-        if (isDisabled) continue;
 
         const constructorMethods = Array.isArray(
           moduleData?.constructor
