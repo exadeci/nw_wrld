@@ -16,6 +16,39 @@ import {
   resolveChannelTrigger,
 } from "../../shared/midi/midiUtils.ts";
 
+const asPlainObject = (value: unknown): Record<string, unknown> | null => {
+  if (!value) return null;
+  if (typeof value !== "object") return null;
+  if (Array.isArray(value)) return null;
+  return value as Record<string, unknown>;
+};
+
+const getMidiExactNoteMap = (globalMappings: unknown): Record<string, unknown> => {
+  const gm = asPlainObject(globalMappings);
+  const cm = asPlainObject(gm?.channelMappings);
+  const midi = asPlainObject(cm?.midi);
+  const exactNote = asPlainObject(midi?.exactNote);
+  return exactNote || {};
+};
+
+type InputConfigLike = {
+  type?: unknown;
+  noteMatchMode?: unknown;
+};
+
+type AppConfigLike = {
+  sequencerMode?: unknown;
+};
+
+type EditChannelModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  trackIndex: number;
+  channelNumber: number;
+  inputConfig?: InputConfigLike | null;
+  config?: AppConfigLike | null;
+};
+
 export const EditChannelModal = ({
   isOpen,
   onClose,

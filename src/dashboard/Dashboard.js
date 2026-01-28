@@ -47,6 +47,7 @@ import {
   useIPCListener,
   useIPCInvoke,
 } from "./core/hooks/useIPC.ts";
+import { useLatestRef } from "./core/hooks/useLatestRef.ts";
 import {
   userDataAtom,
   recordingDataAtom,
@@ -80,10 +81,6 @@ import { useWorkspaceModules } from "./core/hooks/useWorkspaceModules.ts";
 import { useInputEvents } from "./core/hooks/useInputEvents.ts";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
 import { getProjectDir } from "../shared/utils/projectDir.ts";
-
-// =========================
-// Components
-// =========================
 
 const Dashboard = () => {
   const [userData, setUserData] = useAtom(userDataAtom);

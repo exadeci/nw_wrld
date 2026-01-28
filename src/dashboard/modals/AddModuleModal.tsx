@@ -6,17 +6,59 @@ import React, {
   useState,
 } from "react";
 import { useAtom } from "jotai";
-import { FaPlus, FaCode, FaEye, FaSpinner, FaCheck, FaSearch } from "react-icons/fa";
+import { FaPlus, FaCode, FaEye, FaSpinner, FaCheck, FaExclamationTriangle } from "react-icons/fa";
 import { Modal } from "../shared/Modal.tsx";
 import { useIPCListener, useIPCSend } from "../core/hooks/useIPC.ts";
 import { ModalHeader } from "../components/ModalHeader.tsx";
 import { Button } from "../components/Button.tsx";
 import { HelpIcon } from "../components/HelpIcon.tsx";
+import { Tooltip } from "../components/Tooltip.tsx";
 import { activeSetIdAtom, activeTrackIdAtom } from "../core/state.ts";
 import { updateActiveSet } from "../core/utils.ts";
 import { getActiveSetTracks } from "../../shared/utils/setUtils.ts";
 import { HELP_TEXT } from "../../shared/helpText.ts";
 import { formatModuleName } from "../../shared/utils/stringUtils.js";
+
+type ModuleMethod = {
+  name: string;
+  executeOnLoad?: boolean;
+  options?: Array<{
+    name: string;
+    defaultVal?: unknown;
+  }>;
+};
+
+type PredefinedModule = {
+  id?: string;
+  name: string;
+  category: string;
+  status?: string;
+  methods?: ModuleMethod[];
+  instancesOnCurrentTrack?: number;
+};
+
+type Track = {
+  id: string | number;
+  modules: Array<{ id: string; type: string }>;
+  modulesData?: Record<string, unknown>;
+};
+
+type UserData = {
+  [key: string]: unknown;
+};
+
+type AddModuleModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  trackIndex: number | null;
+  userData: UserData;
+  setUserData: (updater: unknown) => void;
+  predefinedModules: PredefinedModule[];
+  skippedWorkspaceModules?: Array<{ file: string; reason: string }>;
+  onCreateNewModule?: () => void;
+  onEditModule: (moduleId: string) => void;
+  mode?: "add-to-track" | "manage-modules";
+};
 
 export const AddModuleModal = ({
   isOpen,

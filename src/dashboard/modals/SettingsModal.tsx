@@ -7,7 +7,6 @@ import {
   NumberInput,
   RadioButton,
   ColorInput,
-  TextInput,
   RangeInput,
   LevelMeter,
 } from "../components/FormInputs.tsx";
