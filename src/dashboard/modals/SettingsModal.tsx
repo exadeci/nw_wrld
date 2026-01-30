@@ -15,8 +15,8 @@ import { HelpIcon } from "../components/HelpIcon.tsx";
 import { HELP_TEXT } from "../../shared/helpText.ts";
 
 const SETTINGS_TABS = [
-  { id: "audio-reactive", label: "Audio Reactive" },
   { id: "general", label: "General" },
+  { id: "audio-reactive", label: "Audio Reactive" },
 ];
 
 const TabNavigation = ({ activeTab, setActiveTab }) => (
@@ -37,7 +37,7 @@ const TabNavigation = ({ activeTab, setActiveTab }) => (
   </div>
 );
 
-const AudioReactiveSettings = ({ config, updateConfig }) => {
+const AudioReactiveSettings = ({ config, updateConfig, isOpen }) => {
   const audioReactive = config?.audioReactive || {
     enabled: true,
     inputGain: 1.0,
@@ -141,7 +141,7 @@ const AudioReactiveSettings = ({ config, updateConfig }) => {
           </div>
         </div>
         <div className="mt-2 text-[9px] text-neutral-600">
-          Start audio capture in General → Audio Capture to see live levels
+          Start audio capture below to see live levels
         </div>
       </div>
 
@@ -265,6 +265,8 @@ const AudioReactiveSettings = ({ config, updateConfig }) => {
           </div>
         </div>
       </div>
+
+      <AudioCaptureSettings isOpen={isOpen} config={config} updateConfig={updateConfig} />
     </div>
   );
 };
@@ -1092,8 +1094,6 @@ const GeneralSettings = ({
 
       <UserColors config={config} updateConfig={updateConfig} />
 
-      <AudioCaptureSettings isOpen={isOpen} config={config} updateConfig={updateConfig} />
-
       <div className="flex flex-col gap-2 font-mono border-t border-neutral-800 pt-6">
         <div className="pl-12">
           <div className="opacity-50 mb-1 text-[11px]">Project Folder:</div>
@@ -1128,7 +1128,7 @@ export const SettingsModal = ({
   workspacePath,
   onSelectWorkspace,
 }) => {
-  const [activeTab, setActiveTab] = useState("audio-reactive");
+  const [activeTab, setActiveTab] = useState("general");
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -1137,7 +1137,7 @@ export const SettingsModal = ({
       <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {activeTab === "audio-reactive" && (
-        <AudioReactiveSettings config={config} updateConfig={updateConfig} />
+        <AudioReactiveSettings config={config} updateConfig={updateConfig} isOpen={isOpen} />
       )}
 
       {activeTab === "general" && (
