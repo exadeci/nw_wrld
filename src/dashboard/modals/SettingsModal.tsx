@@ -7,6 +7,7 @@ import {
   NumberInput,
   RadioButton,
   ColorInput,
+  TextInput,
   RangeInput,
   LevelMeter,
 } from "../components/FormInputs.tsx";
@@ -565,9 +566,8 @@ const AudioCaptureSettings = ({ isOpen, config, updateConfig }) => {
         if (systemResult?.ok) {
           setSystemAudioSources(systemResult.sources || []);
         }
-        
-        const stream = bridge.audio.getStream();
-        setIsCapturing(!!stream || (statusResult?.isCapturing === true));
+
+        setIsCapturing(statusResult?.isCapturing === true);
       } catch (error) {
         console.error("Error loading audio devices:", error);
       }

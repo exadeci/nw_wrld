@@ -783,6 +783,20 @@ const Dashboard = () => {
         }
       }
 
+      if (workspacePathToUse && data?.config?.audioReactive?.enabled !== false) {
+        const audioCapture = data?.config?.audioCapture || {};
+        const sourceType = audioCapture.sourceType || "input";
+        const deviceId = audioCapture.deviceId || "";
+        const systemAudioId = audioCapture.systemAudioId || "";
+        setTimeout(() => {
+          const opts =
+            sourceType === "system"
+              ? { type: "system", systemAudioId: systemAudioId || null }
+              : { type: sourceType, deviceId: deviceId || null };
+          sendToProjector("audio-capture-start", opts);
+        }, 500);
+      }
+
       isInitialMount.current = false;
     };
 

@@ -49,15 +49,18 @@ export class TrackSandboxHost {
     track,
     moduleSources,
     assetsBaseUrl,
+    audioReactive,
   }: {
     track: unknown;
     moduleSources: unknown;
     assetsBaseUrl: unknown;
+    audioReactive?: unknown;
   }) {
     return this.request("initTrack", {
       track,
       moduleSources,
       assetsBaseUrl,
+      audioReactive,
     });
   }
 

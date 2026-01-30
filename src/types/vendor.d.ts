@@ -1,6 +1,7 @@
 declare module "webmidi" {
   export interface MidiNote {
     number: number;
+    rawAttack?: number;
   }
 
   export interface MidiMessage {
@@ -34,10 +35,16 @@ declare module "webmidi" {
     removeListener(event: "controlchange"): void;
   }
 
+  export type Input = MidiInput;
+  export type WebMidiInput = Input;
+
   export interface WebMidiStatic {
     enabled: boolean;
     inputs: MidiInput[];
+    addListener?(event: "connected" | "disconnected", handler: (e: unknown) => void): void;
+    removeListener?(event: "connected" | "disconnected", handler: (e: unknown) => void): void;
     enable(callback: (err: Error | null) => void): void;
+    enable(options: { callback: (err: Error | null) => void }): void;
     disable(): void | Promise<void>;
     getInputById?(id: string): MidiInput | null;
     getInputByName(name: string): MidiInput | null;

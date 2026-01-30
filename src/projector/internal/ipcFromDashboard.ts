@@ -1,4 +1,5 @@
-import { getMessaging } from "./bridge";
+import { find, isEqual } from "lodash";
+import { getBridge, getMessaging } from "./bridge";
 
 type IpcMessage = {
   type?: unknown;
@@ -24,6 +25,7 @@ type DashboardIpcContext = {
   pendingReloadData: unknown;
   activeTrack: { name?: unknown } | null;
   userData: unknown;
+  trackSandboxHost: { token: string | null; ensureSandbox: () => Promise<unknown> } | null;
 
   loadUserData: (setId: unknown) => unknown;
   applyConfigSettings: () => unknown;
@@ -39,7 +41,7 @@ type DashboardIpcContext = {
 export function initDashboardIpc(this: DashboardIpcContext) {
   const messaging = getMessaging();
   if (messaging && typeof messaging.onFromDashboard === "function") {
-    messaging.onFromDashboard((event: unknown, data: unknown) => {
+    messaging.onFromDashboard(async (event: unknown, data: unknown) => {
       try {
         if (!data || typeof data !== "object") {
           console.error("❌ [PROJECTOR-IPC] Invalid IPC message received:", data);
@@ -124,7 +126,6 @@ export function initDashboardIpc(this: DashboardIpcContext) {
         }
 
         if (type === "refresh-projector") {
-          console.log("🎵 [Projector] Received refresh-projector message, current config:", this.config?.audioReactive);
           return this.refreshPage();
         }
 
@@ -146,6 +147,44 @@ export function initDashboardIpc(this: DashboardIpcContext) {
           this.applyConfigSettings();
 
           if (currentTrackName) {
+            const nextTrack = find(this.userData as never, { name: currentTrackName } as never);
+            if (
+              this.activeTrack &&
+              this.activeTrack.name === currentTrackName &&
+              nextTrack
+            ) {
+              const activeModules = Array.isArray((this.activeTrack as { modules?: unknown }).modules)
+                ? ((this.activeTrack as { modules?: unknown[] }).modules as unknown[]).filter((m: unknown) => {
+                    const mm = m as { disabled?: boolean } | null;
+                    return !mm?.disabled;
+                  })
+                : [];
+              const nextModules = Array.isArray((nextTrack as { modules?: unknown }).modules)
+                ? ((nextTrack as { modules?: unknown[] }).modules as unknown[]).filter((m: unknown) => {
+                    const mm = m as { disabled?: boolean } | null;
+                    return !mm?.disabled;
+                  })
+                : [];
+              if (
+                isEqual(
+                  {
+                    name: this.activeTrack.name,
+                    modules: activeModules,
+                    modulesData: (this.activeTrack as { modulesData?: unknown }).modulesData,
+                    channelMappings: (this.activeTrack as { channelMappings?: unknown })
+                      .channelMappings,
+                  },
+                  {
+                    name: (nextTrack as { name?: unknown }).name,
+                    modules: nextModules,
+                    modulesData: (nextTrack as { modulesData?: unknown }).modulesData,
+                    channelMappings: (nextTrack as { channelMappings?: unknown }).channelMappings,
+                  }
+                )
+              ) {
+                return;
+              }
+            }
             this.deactivateActiveTrack();
             return this.handleTrackSelection(currentTrackName);
           }
@@ -202,6 +241,51 @@ export function initDashboardIpc(this: DashboardIpcContext) {
               this.debugLogTimeout = null;
             }
             this.debugLogQueue = [];
+          }
+          return;
+        }
+
+        if (type === "audio-capture-start") {
+          const bridge = getBridge();
+          const ensure = bridge?.sandbox?.ensure;
+          const request = bridge?.sandbox?.request;
+          if (typeof ensure !== "function" || typeof request !== "function") return;
+          try {
+            const res = (await ensure()) as { ok?: boolean; token?: string } | null;
+            const token = res?.ok === true ? String(res?.token || "").trim() : null;
+            if (!token) return;
+            const reqProps = {
+              type: typeof (props as { type?: unknown }).type === "string"
+                ? (props as { type?: string }).type
+                : "input",
+              deviceId:
+                typeof (props as { deviceId?: unknown }).deviceId === "string"
+                  ? (props as { deviceId?: string }).deviceId
+                  : null,
+              systemAudioId:
+                typeof (props as { systemAudioId?: unknown }).systemAudioId === "string"
+                  ? (props as { systemAudioId?: string }).systemAudioId
+                  : null,
+            };
+            await request(token, "audioStartCapture", reqProps);
+          } catch (err) {
+            console.error("❌ [PROJECTOR-IPC] audio-capture-start failed:", err);
+          }
+          return;
+        }
+
+        if (type === "audio-capture-stop") {
+          const bridge = getBridge();
+          const ensure = bridge?.sandbox?.ensure;
+          const request = bridge?.sandbox?.request;
+          if (typeof ensure !== "function" || typeof request !== "function") return;
+          try {
+            const res = (await ensure()) as { ok?: boolean; token?: string } | null;
+            const token = res?.ok === true ? String(res?.token || "").trim() : null;
+            if (!token) return;
+            await request(token, "audioStopCapture", {});
+          } catch (err) {
+            console.error("❌ [PROJECTOR-IPC] audio-capture-stop failed:", err);
           }
           return;
         }

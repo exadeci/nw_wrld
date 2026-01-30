@@ -6,7 +6,7 @@ import React, {
   useState,
 } from "react";
 import { useAtom } from "jotai";
-import { FaPlus, FaCode, FaEye, FaSpinner, FaCheck, FaExclamationTriangle } from "react-icons/fa";
+import { FaPlus, FaCode, FaEye, FaSpinner, FaCheck, FaExclamationTriangle, FaSearch } from "react-icons/fa";
 import { Modal } from "../shared/Modal.tsx";
 import { useIPCListener, useIPCSend } from "../core/hooks/useIPC.ts";
 import { ModalHeader } from "../components/ModalHeader.tsx";

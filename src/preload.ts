@@ -67,6 +67,14 @@ const nwWrldBridge = {
     readAssetText: (relPath: unknown) =>
       ipcRenderer.invoke("bridge:workspace:readAssetText", relPath),
   },
+  audio: {
+    getInputDevices: () => ipcRenderer.invoke("bridge:audio:getInputDevices"),
+    getOutputDevices: () => ipcRenderer.invoke("bridge:audio:getOutputDevices"),
+    getSystemAudioSources: () => ipcRenderer.invoke("bridge:audio:getSystemAudioSources"),
+    getStatus: () => ipcRenderer.invoke("bridge:audio:getStatus"),
+    getStream: () => ipcRenderer.invoke("bridge:audio:getStream"),
+    getAudioLevels: () => ipcRenderer.invoke("bridge:audio:getAudioLevels"),
+  },
   app: {
     getBaseMethodNames: () => ipcRenderer.sendSync("bridge:app:getBaseMethodNames") as unknown,
     getMethodCode: (moduleName: unknown, methodName: unknown) =>

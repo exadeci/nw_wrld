@@ -1,4 +1,4 @@
-import { WebMidi, type MidiInput, type NoteOnEvent, type ControlChangeEvent } from "webmidi";
+import { WebMidi, type MidiInput, type WebMidiInput, type NoteOnEvent, type ControlChangeEvent } from "webmidi";
 import { UDPPort, type OscMessage, type OscError } from "osc";
 import { isValidOSCChannelAddress, isValidOSCTrackAddress } from "../shared/validation/oscValidation";
 import { normalizeInputEventPayload } from "../shared/validation/inputEventValidation";
@@ -268,12 +268,12 @@ class InputManager {
 
           let input: WebMidiInput | undefined;
           try {
-            if (deviceId) {
+            if (deviceId && webMidi.getInputById) {
               input = webMidi.getInputById(deviceId) as unknown as WebMidiInput | undefined;
             }
           } catch {}
           try {
-            if (!input && deviceName) {
+            if (!input && deviceName && webMidi.getInputByName) {
               input = webMidi.getInputByName(deviceName) as unknown as WebMidiInput | undefined;
             }
           } catch {}
@@ -297,7 +297,7 @@ class InputManager {
             : deviceName;
           this.installMidiWebMidiListeners(webMidi, resolvedId, resolvedName);
 
-          input.addListener("noteon", (e) => {
+          input.addListener("noteon", (e: NoteOnEvent) => {
             const note = e.note.number;
             const channel = e.message.channel;
             const rawAttack =
