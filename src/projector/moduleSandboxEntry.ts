@@ -727,6 +727,13 @@ globalThis.nwSandboxIpc?.on?.(async (data) => {
       return;
     }
 
+    if (type === "updateAudioReactive") {
+      audioReactiveConfig = props.audioReactive ?? audioReactiveConfig;
+      globalThis.nwWrldSdk = createSdk();
+      respond({ ok: true });
+      return;
+    }
+
     respond({ ok: false, error: "UNKNOWN_MESSAGE_TYPE" });
   } catch (e) {
     respond({ ok: false, error: e?.message || "SANDBOX_ERROR" });

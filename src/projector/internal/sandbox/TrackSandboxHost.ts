@@ -64,6 +64,10 @@ export class TrackSandboxHost {
     });
   }
 
+  updateAudioReactive(audioReactive: unknown) {
+    return this.request("updateAudioReactive", { audioReactive });
+  }
+
   setMatrixForInstance({
     instanceId,
     track,

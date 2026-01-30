@@ -261,7 +261,9 @@ export async function handleTrackSelection(trackName) {
             }
           )
         ) {
-          // no-op
+          this.trackSandboxHost
+            .updateAudioReactive(this.config?.audioReactive ?? null)
+            .catch(() => {});
         } else {
           this.deactivateActiveTrack();
           this.handleTrackSelection(pending.trackName);
