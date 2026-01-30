@@ -193,7 +193,39 @@ class Uji extends ModuleBase {
           type: "select",
           values: UJI_PRESET_VALUES_SAFE,
         },
+        { name: "bounce", defaultVal: true, type: "boolean" },
+        {
+          name: "background",
+          defaultVal: "preset",
+          type: "select",
+          values: ["preset", "none"],
+        },
+        { name: "backgroundColor", defaultVal: "", type: "color" },
+        { name: "lineColor", defaultVal: "", type: "color" },
       ],
+    },
+    {
+      name: "bounce",
+      executeOnLoad: false,
+      options: [{ name: "enabled", defaultVal: true, type: "boolean" }],
+    },
+    {
+      name: "setBackground",
+      executeOnLoad: false,
+      options: [
+        {
+          name: "mode",
+          defaultVal: "preset",
+          type: "select",
+          values: ["preset", "none"],
+        },
+        { name: "color", defaultVal: "", type: "color" },
+      ],
+    },
+    {
+      name: "setLineColor",
+      executeOnLoad: false,
+      options: [{ name: "color", defaultVal: "", type: "color" }],
     },
     {
       name: "setAudioReactive",
@@ -221,7 +253,38 @@ class Uji extends ModuleBase {
     this.pollInterval = null;
     this.audioReactive = true;
     this.audioSensitivity = 1.5;
+    this.bounce = true;
+    this.backgroundMode = "preset";
+    this.backgroundColor = null;
+    this.lineColorOverride = null;
     this.init();
+  }
+
+  drawBackground(ctx, opts, w, h, r) {
+    if (this.backgroundMode === "none") return;
+    const color = this.backgroundColor && String(this.backgroundColor).trim();
+    if (color) {
+      ctx.fillStyle = /^(rgba?|#|hsl)/i.test(color) ? color : `#${color.replace(/^#/, "")}`;
+      ctx.fillRect(0, 0, w, h);
+      return;
+    }
+    if (opts.canvasnoise > 0) {
+      const tileSize = 512;
+      const imageData = ctx.createImageData(tileSize, tileSize);
+      const dark = [(1 - opts.canvasnoise / 2) * opts.canvasred, (1 - opts.canvasnoise / 2) * opts.canvasgreen, (1 - opts.canvasnoise / 2) * opts.canvasblue];
+      const light = [(1 - opts.canvasnoise / 2) * opts.canvasred + (opts.canvasnoise / 2) * 255, (1 - opts.canvasnoise / 2) * opts.canvasgreen + (opts.canvasnoise / 2) * 255, (1 - opts.canvasnoise / 2) * opts.canvasblue + (opts.canvasnoise / 2) * 255];
+      for (let i = 0; i < imageData.data.length; i += 4) {
+        const col = r() < 0.5 ? dark : light;
+        imageData.data[i] = col[0];
+        imageData.data[i + 1] = col[1];
+        imageData.data[i + 2] = col[2];
+        imageData.data[i + 3] = opts.canvasopacity * 255;
+      }
+      for (let x = 0; x < w; x += tileSize) for (let y = 0; y < h; y += tileSize) ctx.putImageData(imageData, x, y);
+    } else {
+      ctx.fillStyle = `rgba(${opts.canvasred},${opts.canvasgreen},${opts.canvasblue},${opts.canvasopacity})`;
+      ctx.fillRect(0, 0, w, h);
+    }
   }
 
   init() {
@@ -273,12 +336,34 @@ class Uji extends ModuleBase {
     if (this.currentPreset && !this.destroyed) this.draw({ preset: this.currentPreset });
   }
 
-  draw({ preset = UJI_PRESET_VALUES_SAFE[0] } = {}) {
+  draw({ preset = UJI_PRESET_VALUES_SAFE[0], bounce, background, backgroundColor, lineColor } = {}) {
     const hash = UJI_PRESET_BY_NAME[preset];
     if (!hash) return;
     this.currentPreset = preset;
+    if (typeof bounce === "boolean") this.bounce = bounce;
+    if (background === "preset" || background === "none") this.backgroundMode = background;
+    if (backgroundColor != null && String(backgroundColor).trim()) this.backgroundColor = String(backgroundColor).trim();
+    else if (backgroundColor !== undefined && !backgroundColor) this.backgroundColor = null;
+    if (lineColor != null) this.lineColorOverride = String(lineColor).trim() || null;
     const opts = Object.assign({}, UJI_DEFAULTS, parseUjiHash(hash) || {});
     requestAnimationFrame(() => this.runUji(opts));
+  }
+
+  bounce(options = {}) {
+    const { enabled = true } = options;
+    this.bounce = Boolean(enabled);
+  }
+
+  setBackground(options = {}) {
+    const { mode, color } = options;
+    if (mode === "preset" || mode === "none") this.backgroundMode = mode;
+    if (color != null && String(color).trim()) this.backgroundColor = String(color).trim();
+    else this.backgroundColor = null;
+  }
+
+  setLineColor(options = {}) {
+    const c = options?.color;
+    this.lineColorOverride = c != null && String(c).trim() ? String(c).trim() : null;
   }
 
   runUji(opts) {
@@ -331,72 +416,36 @@ class Uji extends ModuleBase {
     if (opts.initialrotation > 0) {
       line = line.map((p) => rotate([w / 2, h / 2], p, opts.initialrotation * (Math.PI / 180)));
     }
-    if (opts.canvasnoise > 0) {
-      const tileSize = 512;
-      const imageData = ctx.createImageData(tileSize, tileSize);
-      const dark = [(1 - opts.canvasnoise / 2) * opts.canvasred, (1 - opts.canvasnoise / 2) * opts.canvasgreen, (1 - opts.canvasnoise / 2) * opts.canvasblue];
-      const light = [(1 - opts.canvasnoise / 2) * opts.canvasred + (opts.canvasnoise / 2) * 255, (1 - opts.canvasnoise / 2) * opts.canvasgreen + (opts.canvasnoise / 2) * 255, (1 - opts.canvasnoise / 2) * opts.canvasblue + (opts.canvasnoise / 2) * 255];
-      for (let i = 0; i < imageData.data.length; i += 4) {
-        const col = r() < 0.5 ? dark : light;
-        imageData.data[i] = col[0];
-        imageData.data[i + 1] = col[1];
-        imageData.data[i + 2] = col[2];
-        imageData.data[i + 3] = opts.canvasopacity * 255;
-      }
-      for (let x = 0; x < w; x += tileSize) for (let y = 0; y < h; y += tileSize) ctx.putImageData(imageData, x, y);
-    } else {
-      ctx.fillStyle = `rgba(${opts.canvasred},${opts.canvasgreen},${opts.canvasblue},${opts.canvasopacity})`;
-      ctx.fillRect(0, 0, w, h);
-    }
-    ctx.strokeStyle = `rgba(${opts.linered},${opts.linegreen},${opts.lineblue},${opts.lineopacity})`;
+    this.drawBackground(ctx, opts, w, h, r);
     const blendModes = ["source-over", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion"];
     ctx.globalCompositeOperation = blendModes[opts.blendmode] || "source-over";
     ctx.lineCap = ["butt", "round", "square"][(opts.linecap || 1) - 1];
-    if (opts.shadowblur > 0) {
-      ctx.shadowColor = ctx.strokeStyle;
-      ctx.shadowBlur = opts.shadowblur;
-    } else if (opts.shadowblur < 0) {
-      ctx.shadowColor = `rgba(${255 - opts.linered},${255 - opts.linegreen},${255 - opts.lineblue},${opts.lineopacity})`;
-      ctx.shadowBlur = -opts.shadowblur;
-    }
+    const copyLine = (arr) => arr.map((p) => [p[0], p[1]]);
     let n = 0;
+    let direction = 1;
+    const linesHistory = [copyLine(line)];
     const maxIter = Math.max(10, Math.min(2000, opts.iterations));
     const tick = 1000 / 60;
     const self = this;
-    this.intervalId = setInterval(() => {
-      if (self.destroyed) return;
-      n++;
-      if (n > maxIter) {
-        clearInterval(self.intervalId);
-        self.intervalId = null;
-        return;
-      }
-      let volume = 0;
-      let bass = 0;
-      let mid = 0;
-      let treble = 0;
-      if (self.audioReactive && self.analyzer && self.audioReady) {
-        const sens = self.audioSensitivity || 1;
-        volume = self.analyzer.getVolume() * sens;
-        bass = self.analyzer.getBass() * sens;
-        mid = self.analyzer.getMid() * sens;
-        treble = self.analyzer.getTreble() * sens;
-      }
-      const audioRotationDeg = (bass * 8 + volume * 3);
-      const audioJitter = 1 + (bass * 0.4 + volume * 0.2);
-      const audioThickness = 1 + (bass * 0.3 + treble * 0.1);
-      if (opts.hueshiftspeed !== 0) {
-        const shifted = shiftHue({ r: opts.linered, g: opts.linegreen, b: opts.lineblue }, (opts.hueshiftspeed * n) % 360);
+    const drawPath = (currentLine, iter, thicknessMult) => {
+      if (self.lineColorOverride) {
+        ctx.strokeStyle = /^(rgba?|#|hsl)/i.test(self.lineColorOverride) ? self.lineColorOverride : `#${String(self.lineColorOverride).replace(/^#/, "")}`;
+      } else if (opts.hueshiftspeed !== 0) {
+        const shifted = shiftHue({ r: opts.linered, g: opts.linegreen, b: opts.lineblue }, (opts.hueshiftspeed * iter) % 360);
         ctx.strokeStyle = `rgba(${shifted.r},${shifted.g},${shifted.b},${opts.lineopacity})`;
-        if (opts.shadowblur > 0) ctx.shadowColor = ctx.strokeStyle;
+      } else {
+        ctx.strokeStyle = `rgba(${opts.linered},${opts.linegreen},${opts.lineblue},${opts.lineopacity})`;
       }
+      if (opts.shadowblur > 0) ctx.shadowColor = ctx.strokeStyle;
+      else if (opts.shadowblur < 0) ctx.shadowColor = `rgba(${255 - opts.linered},${255 - opts.linegreen},${255 - opts.lineblue},${opts.lineopacity})`;
       ctx.beginPath();
       let preceding = null;
-      line = line.map((p, i) => {
+      for (let i = 0; i < currentLine.length; i++) {
+        const p = currentLine[i];
         let x = p[0];
         let y = p[1];
-        const fadeOut = opts.fadeoutspeed > -1 && n - opts.fadeoutstart > (i % (r() + 0.001)) * opts.fadeoutspeed;
-        const skip = i === 0 || r() < opts.skipchance || (opts.revealspeed > -1 && i / opts.revealspeed > n) || (opts.fadeinspeed > 0 && n < r() * opts.fadeinspeed) || fadeOut || (opts.sawtoothfadeoutsize > -1 && n - opts.sawtoothfadeoutstart > i % opts.sawtoothfadeoutsize);
+        const fadeOut = opts.fadeoutspeed > -1 && iter - opts.fadeoutstart > (i % (r() + 0.001)) * opts.fadeoutspeed;
+        const skip = i === 0 || r() < opts.skipchance || (opts.revealspeed > -1 && i / opts.revealspeed > iter) || (opts.fadeinspeed > 0 && iter < r() * opts.fadeinspeed) || fadeOut || (opts.sawtoothfadeoutsize > -1 && iter - opts.sawtoothfadeoutstart > i % opts.sawtoothfadeoutsize);
         if (skip) {
           ctx.moveTo(x, y);
         } else {
@@ -415,20 +464,71 @@ class Uji extends ModuleBase {
           }
         }
         preceding = p;
-        const expH = opts.expansionhori ** (1 + (opts.expansionhoriexp || 0) * n / 1000);
-        const expV = opts.expansionverti ** (1 + (opts.expansionvertiexp || 0) * n / 1000);
-        const jitterMult = opts.jitter * audioJitter;
-        x = center[0] + (x - center[0] + (r() - 0.5) * jitterMult) * expH + opts.translationhori + (opts.wavinessphori > -1 ? opts.wavinessahori * Math.sin(2 * Math.PI * i / opts.wavinessphori) : 0);
-        y = center[1] + (y - center[1] + (r() - 0.5) * jitterMult) * expV + opts.translationverti + (opts.wavinesspverti > -1 ? opts.wavinessaverti * Math.sin(2 * Math.PI * i / opts.wavinesspverti) : 0);
-        let angle = (opts.rotationspeed + audioRotationDeg) * (Math.PI / 180);
-        if (opts.rotationspeedup !== 0) angle *= 1 + opts.rotationspeedup * n;
-        if (opts.rotationperiod > -1) angle *= Math.sin(2 * Math.PI * n / opts.rotationperiod);
-        if (opts.rotationuntil > -1) angle *= (opts.rotationuntil - Math.min(n, opts.rotationuntil)) / opts.rotationuntil;
-        const out = rotate([w * opts.rotationoriginhori, h * opts.rotationoriginverti], [x, y], angle);
-        return out;
-      });
-      ctx.lineWidth = Math.max(0.1, opts.thickness * audioThickness);
+      }
+      ctx.lineWidth = Math.max(0.1, opts.thickness * thicknessMult);
       ctx.stroke();
+    };
+    const updateLine = (currentLine, iter, rotationDeg, jitterMult) => {
+      return currentLine.map((p, i) => {
+        let x = p[0];
+        let y = p[1];
+        const expH = opts.expansionhori ** (1 + (opts.expansionhoriexp || 0) * iter / 1000);
+        const expV = opts.expansionverti ** (1 + (opts.expansionvertiexp || 0) * iter / 1000);
+        const jitter = opts.jitter * jitterMult;
+        x = center[0] + (x - center[0] + (r() - 0.5) * jitter) * expH + opts.translationhori + (opts.wavinessphori > -1 ? opts.wavinessahori * Math.sin(2 * Math.PI * i / opts.wavinessphori) : 0);
+        y = center[1] + (y - center[1] + (r() - 0.5) * jitter) * expV + opts.translationverti + (opts.wavinesspverti > -1 ? opts.wavinessaverti * Math.sin(2 * Math.PI * i / opts.wavinesspverti) : 0);
+        let angle = (opts.rotationspeed + rotationDeg) * (Math.PI / 180);
+        if (opts.rotationspeedup !== 0) angle *= 1 + opts.rotationspeedup * iter;
+        if (opts.rotationperiod > -1) angle *= Math.sin(2 * Math.PI * iter / opts.rotationperiod);
+        if (opts.rotationuntil > -1) angle *= (opts.rotationuntil - Math.min(iter, opts.rotationuntil)) / opts.rotationuntil;
+        return rotate([w * opts.rotationoriginhori, h * opts.rotationoriginverti], [x, y], angle);
+      });
+    };
+    if (opts.shadowblur > 0) ctx.shadowBlur = opts.shadowblur;
+    else if (opts.shadowblur < 0) ctx.shadowBlur = -opts.shadowblur;
+    this.intervalId = setInterval(() => {
+      if (self.destroyed) return;
+      let volume = 0;
+      let bass = 0;
+      let mid = 0;
+      let treble = 0;
+      if (self.audioReactive && self.analyzer && self.audioReady) {
+        const sens = self.audioSensitivity || 1;
+        volume = self.analyzer.getVolume() * sens;
+        bass = self.analyzer.getBass() * sens;
+        mid = self.analyzer.getMid() * sens;
+        treble = self.analyzer.getTreble() * sens;
+      }
+      const audioRotationDeg = (bass * 8 + volume * 3);
+      const audioJitter = 1 + (bass * 0.4 + volume * 0.2);
+      const audioThickness = 1 + (bass * 0.3 + treble * 0.1);
+      if (direction === 1) {
+        n++;
+        if (n > maxIter) {
+          if (!self.bounce) {
+            clearInterval(self.intervalId);
+            self.intervalId = null;
+            return;
+          }
+          direction = -1;
+          n = maxIter - 1;
+          line = copyLine(linesHistory[n]);
+        } else {
+          drawPath(line, n, audioThickness);
+          line = updateLine(line, n, audioRotationDeg, audioJitter);
+          linesHistory[n] = copyLine(line);
+        }
+      } else {
+        drawPath(line, n, audioThickness);
+        n--;
+        if (n < 0) {
+          direction = 1;
+          n = 0;
+          line = copyLine(linesHistory[0]);
+        } else {
+          line = copyLine(linesHistory[n]);
+        }
+      }
     }, tick);
     this.show();
   }

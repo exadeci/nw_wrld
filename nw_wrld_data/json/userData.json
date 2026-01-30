@@ -1701,8 +1701,7 @@
             },
             {
               "id": "inst_1769758731545_5h8fdq8lv",
-              "type": "AudioOrbitalPlane",
-              "disabled": true
+              "type": "AudioOrbitalPlane"
             },
             {
               "id": "inst_1769758882545_1h1dlncrc",
@@ -1876,7 +1875,23 @@
                   "options": [
                     {
                       "name": "preset",
-                      "value": "Triangle spiral"
+                      "value": "Circle spiral 3"
+                    },
+                    {
+                      "name": "background",
+                      "value": "none"
+                    },
+                    {
+                      "name": "backgroundColor",
+                      "value": "#fff5f5"
+                    },
+                    {
+                      "name": "bounce",
+                      "value": true
+                    },
+                    {
+                      "name": "lineColor",
+                      "value": "#c49292"
                     }
                   ]
                 },
