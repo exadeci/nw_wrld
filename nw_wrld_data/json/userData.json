@@ -105,7 +105,22 @@
     "bgColor": "grey",
     "sequencerBpm": 120,
     "activeTrackId": 1762947476706,
-    "sequencerMuted": true
+    "sequencerMuted": true,
+    "audioReactive": {
+      "enabled": true,
+      "inputGain": 10,
+      "reactivity": 1,
+      "bassResponse": 1,
+      "midResponse": 1,
+      "trebleResponse": 1,
+      "smoothing": 0.8,
+      "fftSize": 256
+    },
+    "audioCapture": {
+      "sourceType": "input",
+      "deviceId": "",
+      "systemAudioId": ""
+    }
   },
   "sets": [
     {
@@ -1669,13 +1684,85 @@
           }
         },
         {
-          "id": "track_1769142785259",
+          "id": "track_1769650853035",
           "name": "Test",
           "trackSlot": 5,
           "bpm": 120,
           "channelMappings": {},
-          "modules": [],
-          "modulesData": {}
+          "modules": [
+            {
+              "id": "inst_1769650857272_67ux6tt17",
+              "type": "Corners"
+            },
+            {
+              "id": "inst_1769650860939_3znild7vy",
+              "type": "AudioOrbitalPlane"
+            }
+          ],
+          "modulesData": {
+            "inst_1769650857272_67ux6tt17": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1769650860939_3znild7vy": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            }
+          }
         }
       ]
     }
