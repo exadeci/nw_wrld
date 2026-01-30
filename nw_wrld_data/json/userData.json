@@ -1695,8 +1695,18 @@
               "type": "Corners"
             },
             {
-              "id": "inst_1769650860939_3znild7vy",
-              "type": "AudioOrbitalPlane"
+              "id": "inst_1769758688994_5y4ek9q77",
+              "type": "AudioCloudPointIceberg",
+              "disabled": true
+            },
+            {
+              "id": "inst_1769758731545_5h8fdq8lv",
+              "type": "AudioOrbitalPlane",
+              "disabled": true
+            },
+            {
+              "id": "inst_1769758882545_1h1dlncrc",
+              "type": "Uji"
             }
           ],
           "modulesData": {
@@ -1731,7 +1741,7 @@
               ],
               "methods": {}
             },
-            "inst_1769650860939_3znild7vy": {
+            "inst_1769758688994_5y4ek9q77": {
               "constructor": [
                 {
                   "name": "matrix",
@@ -1747,6 +1757,126 @@
                     {
                       "name": "border",
                       "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 75
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "sensitivity",
+                      "value": 1.5
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1769758731545_5h8fdq8lv": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "sensitivity",
+                      "value": 1.5
+                    },
+                    {
+                      "name": "baseHue",
+                      "value": 0
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1769758882545_1h1dlncrc": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "draw",
+                  "options": [
+                    {
+                      "name": "preset",
+                      "value": "Triangle spiral"
                     }
                   ]
                 },

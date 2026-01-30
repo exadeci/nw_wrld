@@ -1,7 +1,7 @@
 /*
 @nwWrld name: Uji
 @nwWrld category: 2D
-@nwWrld imports: ModuleBase
+@nwWrld imports: ModuleBase, AudioAnalyzer
 */
 
 const UJI_OPTION_KEYS = [
@@ -195,6 +195,16 @@ class Uji extends ModuleBase {
         },
       ],
     },
+    {
+      name: "setAudioReactive",
+      executeOnLoad: false,
+      options: [{ name: "enabled", defaultVal: true, type: "boolean" }],
+    },
+    {
+      name: "setAudioSensitivity",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: 1.5, type: "number", min: 0.1, max: 5 }],
+    },
   ];
 
   constructor(container) {
@@ -206,6 +216,11 @@ class Uji extends ModuleBase {
     this.currentPreset = null;
     this.boundResize = null;
     this.destroyed = false;
+    this.analyzer = null;
+    this.audioReady = false;
+    this.pollInterval = null;
+    this.audioReactive = true;
+    this.audioSensitivity = 1.5;
     this.init();
   }
 
@@ -219,7 +234,39 @@ class Uji extends ModuleBase {
     this.ctx = this.canvas.getContext("2d");
     this.boundResize = this.handleResize.bind(this);
     window.addEventListener("resize", this.boundResize);
+    this.tryInitializeAudio();
+    this.startStreamPolling();
+    this.draw({ preset: UJI_PRESET_VALUES_SAFE[0] });
     this.show();
+  }
+
+  async tryInitializeAudio() {
+    if (this.audioReady || this.destroyed) return;
+    const sdk = globalThis.nwWrldSdk;
+    const stream = sdk?.audio?.getStream?.();
+    if (stream && typeof AudioAnalyzer !== "undefined") {
+      this.analyzer = new AudioAnalyzer();
+      const initialized = await this.analyzer.init(stream);
+      if (initialized) {
+        this.audioReady = true;
+        if (this.pollInterval) {
+          clearInterval(this.pollInterval);
+          this.pollInterval = null;
+        }
+      }
+    }
+  }
+
+  startStreamPolling() {
+    if (this.pollInterval) return;
+    this.pollInterval = setInterval(() => {
+      if (this.destroyed) {
+        clearInterval(this.pollInterval);
+        this.pollInterval = null;
+        return;
+      }
+      this.tryInitializeAudio();
+    }, 1000);
   }
 
   handleResize() {
@@ -324,6 +371,20 @@ class Uji extends ModuleBase {
         self.intervalId = null;
         return;
       }
+      let volume = 0;
+      let bass = 0;
+      let mid = 0;
+      let treble = 0;
+      if (self.audioReactive && self.analyzer && self.audioReady) {
+        const sens = self.audioSensitivity || 1;
+        volume = self.analyzer.getVolume() * sens;
+        bass = self.analyzer.getBass() * sens;
+        mid = self.analyzer.getMid() * sens;
+        treble = self.analyzer.getTreble() * sens;
+      }
+      const audioRotationDeg = (bass * 8 + volume * 3);
+      const audioJitter = 1 + (bass * 0.4 + volume * 0.2);
+      const audioThickness = 1 + (bass * 0.3 + treble * 0.1);
       if (opts.hueshiftspeed !== 0) {
         const shifted = shiftHue({ r: opts.linered, g: opts.linegreen, b: opts.lineblue }, (opts.hueshiftspeed * n) % 360);
         ctx.strokeStyle = `rgba(${shifted.r},${shifted.g},${shifted.b},${opts.lineopacity})`;
@@ -340,12 +401,12 @@ class Uji extends ModuleBase {
           ctx.moveTo(x, y);
         } else {
           if (opts.segmentrotation !== 0 || opts.segmentlengthening !== 100) {
-            const mid = [(x + preceding[0]) / 2, (y + preceding[1]) / 2];
-            let start = [mid[0] + (preceding[0] - mid[0]) * (opts.segmentlengthening / 100), mid[1] + (preceding[1] - mid[1]) * (opts.segmentlengthening / 100)];
-            let end = [mid[0] + (x - mid[0]) * (opts.segmentlengthening / 100), mid[1] + (y - mid[1]) * (opts.segmentlengthening / 100)];
+            const midPt = [(x + preceding[0]) / 2, (y + preceding[1]) / 2];
+            let start = [midPt[0] + (preceding[0] - midPt[0]) * (opts.segmentlengthening / 100), midPt[1] + (preceding[1] - midPt[1]) * (opts.segmentlengthening / 100)];
+            let end = [midPt[0] + (x - midPt[0]) * (opts.segmentlengthening / 100), midPt[1] + (y - midPt[1]) * (opts.segmentlengthening / 100)];
             if (opts.segmentrotation !== 0) {
-              start = rotate(mid, start, opts.segmentrotation * (Math.PI / 180));
-              end = rotate(mid, end, opts.segmentrotation * (Math.PI / 180));
+              start = rotate(midPt, start, opts.segmentrotation * (Math.PI / 180));
+              end = rotate(midPt, end, opts.segmentrotation * (Math.PI / 180));
             }
             ctx.moveTo(start[0], start[1]);
             ctx.lineTo(end[0], end[1]);
@@ -356,19 +417,30 @@ class Uji extends ModuleBase {
         preceding = p;
         const expH = opts.expansionhori ** (1 + (opts.expansionhoriexp || 0) * n / 1000);
         const expV = opts.expansionverti ** (1 + (opts.expansionvertiexp || 0) * n / 1000);
-        x = center[0] + (x - center[0] + (r() - 0.5) * opts.jitter) * expH + opts.translationhori + (opts.wavinessphori > -1 ? opts.wavinessahori * Math.sin(2 * Math.PI * i / opts.wavinessphori) : 0);
-        y = center[1] + (y - center[1] + (r() - 0.5) * opts.jitter) * expV + opts.translationverti + (opts.wavinesspverti > -1 ? opts.wavinessaverti * Math.sin(2 * Math.PI * i / opts.wavinesspverti) : 0);
-        let angle = opts.rotationspeed * (Math.PI / 180);
+        const jitterMult = opts.jitter * audioJitter;
+        x = center[0] + (x - center[0] + (r() - 0.5) * jitterMult) * expH + opts.translationhori + (opts.wavinessphori > -1 ? opts.wavinessahori * Math.sin(2 * Math.PI * i / opts.wavinessphori) : 0);
+        y = center[1] + (y - center[1] + (r() - 0.5) * jitterMult) * expV + opts.translationverti + (opts.wavinesspverti > -1 ? opts.wavinessaverti * Math.sin(2 * Math.PI * i / opts.wavinesspverti) : 0);
+        let angle = (opts.rotationspeed + audioRotationDeg) * (Math.PI / 180);
         if (opts.rotationspeedup !== 0) angle *= 1 + opts.rotationspeedup * n;
         if (opts.rotationperiod > -1) angle *= Math.sin(2 * Math.PI * n / opts.rotationperiod);
         if (opts.rotationuntil > -1) angle *= (opts.rotationuntil - Math.min(n, opts.rotationuntil)) / opts.rotationuntil;
         const out = rotate([w * opts.rotationoriginhori, h * opts.rotationoriginverti], [x, y], angle);
         return out;
       });
-      ctx.lineWidth = opts.thickness;
+      ctx.lineWidth = Math.max(0.1, opts.thickness * audioThickness);
       ctx.stroke();
     }, tick);
     this.show();
+  }
+
+  setAudioReactive(options = {}) {
+    const { enabled = true } = options;
+    this.audioReactive = Boolean(enabled);
+  }
+
+  setAudioSensitivity(options = {}) {
+    const val = Number(options?.value ?? options?.sensitivity ?? this.audioSensitivity);
+    this.audioSensitivity = Math.max(0.1, Math.min(5, Number.isFinite(val) ? val : 1.5));
   }
 
   destroy() {
@@ -376,6 +448,14 @@ class Uji extends ModuleBase {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
+    }
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
+    }
+    if (this.analyzer && typeof this.analyzer.destroy === "function") {
+      this.analyzer.destroy();
+      this.analyzer = null;
     }
     if (this.boundResize) {
       window.removeEventListener("resize", this.boundResize);
