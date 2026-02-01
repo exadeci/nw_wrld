@@ -1,7 +1,7 @@
 /*
 @nwWrld name: Uji
 @nwWrld category: 2D
-@nwWrld imports: ModuleBase, AudioAnalyzer
+@nwWrld imports: ModuleBase, AudioAnalyzer, assetUrl
 */
 
 const UJI_OPTION_KEYS = [
@@ -202,6 +202,7 @@ class Uji extends ModuleBase {
         },
         { name: "backgroundColor", defaultVal: "", type: "color" },
         { name: "lineColor", defaultVal: "", type: "color" },
+        { name: "speed", defaultVal: 1, type: "number", min: 0.25, max: 8 },
       ],
     },
     {
@@ -257,7 +258,43 @@ class Uji extends ModuleBase {
     this.backgroundMode = "preset";
     this.backgroundColor = null;
     this.lineColorOverride = null;
+    this.drawSpeed = 1;
+    this.fontStyleEl = null;
     this.init();
+  }
+
+  injectIosevkaFont() {
+    if (this.fontStyleEl && this.fontStyleEl.parentNode) return;
+    let resolveUrl;
+    try {
+      resolveUrl = (path) => (typeof assetUrl === "function" && assetUrl(path)) || path;
+    } catch (_) {
+      resolveUrl = (path) => path;
+    }
+    const url = resolveUrl;
+    const regularTtf = url("fonts/iosevka-aile-regular.ttf");
+    const italicTtf = url("fonts/iosevka-aile-italic.ttf");
+    const css = `
+@font-face {
+  font-family: 'Iosevka Aile Web';
+  font-display: swap;
+  font-weight: 400;
+  font-stretch: normal;
+  font-style: normal;
+  src: url('${regularTtf}') format('truetype');
+}
+@font-face {
+  font-family: 'Iosevka Aile Web';
+  font-display: swap;
+  font-weight: 400;
+  font-stretch: normal;
+  font-style: italic;
+  src: url('${italicTtf}') format('truetype');
+}`;
+    const el = document.createElement("style");
+    el.textContent = css.trim();
+    document.head.appendChild(el);
+    this.fontStyleEl = el;
   }
 
   drawBackground(ctx, opts, w, h, r) {
@@ -289,6 +326,8 @@ class Uji extends ModuleBase {
 
   init() {
     if (!this.elem) return;
+    this.injectIosevkaFont();
+    this.elem.style.fontFamily = "'Iosevka Aile Web', sans-serif";
     this.canvas = document.createElement("canvas");
     this.canvas.style.width = "100%";
     this.canvas.style.height = "100%";
@@ -336,7 +375,7 @@ class Uji extends ModuleBase {
     if (this.currentPreset && !this.destroyed) this.draw({ preset: this.currentPreset });
   }
 
-  draw({ preset = UJI_PRESET_VALUES_SAFE[0], bounce, background, backgroundColor, lineColor } = {}) {
+  draw({ preset = UJI_PRESET_VALUES_SAFE[0], bounce, background, backgroundColor, lineColor, speed } = {}) {
     const hash = UJI_PRESET_BY_NAME[preset];
     if (!hash) return;
     this.currentPreset = preset;
@@ -345,6 +384,7 @@ class Uji extends ModuleBase {
     if (backgroundColor != null && String(backgroundColor).trim()) this.backgroundColor = String(backgroundColor).trim();
     else if (backgroundColor !== undefined && !backgroundColor) this.backgroundColor = null;
     if (lineColor != null) this.lineColorOverride = String(lineColor).trim() || null;
+    if (typeof speed === "number" && speed >= 0.25 && speed <= 8) this.drawSpeed = speed;
     const opts = Object.assign({}, UJI_DEFAULTS, parseUjiHash(hash) || {});
     requestAnimationFrame(() => this.runUji(opts));
   }
@@ -423,6 +463,8 @@ class Uji extends ModuleBase {
     const copyLine = (arr) => arr.map((p) => [p[0], p[1]]);
     let n = 0;
     let direction = 1;
+    let speedAcc = 0;
+    let revertAcc = 0;
     const linesHistory = [copyLine(line)];
     const maxIter = Math.max(10, Math.min(2000, opts.iterations));
     const tick = 1000 / 60;
@@ -502,31 +544,47 @@ class Uji extends ModuleBase {
       const audioRotationDeg = (bass * 8 + volume * 3);
       const audioJitter = 1 + (bass * 0.4 + volume * 0.2);
       const audioThickness = 1 + (bass * 0.3 + treble * 0.1);
+      const speed = Math.max(0.25, Math.min(8, self.drawSpeed || 1));
       if (direction === 1) {
-        n++;
-        if (n > maxIter) {
+        speedAcc += speed;
+        const steps = Math.min(Math.floor(speedAcc), maxIter - n);
+        speedAcc -= steps;
+        for (let s = 0; s < steps; s++) {
+          n++;
+          drawPath(line, n, audioThickness);
+          line = updateLine(line, n, audioRotationDeg, audioJitter);
+          linesHistory[n] = copyLine(line);
+          if (n >= maxIter) break;
+        }
+        if (n >= maxIter) {
           if (!self.bounce) {
             clearInterval(self.intervalId);
             self.intervalId = null;
             return;
           }
           direction = -1;
-          n = maxIter - 1;
-          line = copyLine(linesHistory[n]);
-        } else {
-          drawPath(line, n, audioThickness);
-          line = updateLine(line, n, audioRotationDeg, audioJitter);
-          linesHistory[n] = copyLine(line);
+          revertAcc = 0;
         }
-      } else {
-        drawPath(line, n, audioThickness);
-        n--;
-        if (n < 0) {
-          direction = 1;
-          n = 0;
-          line = copyLine(linesHistory[0]);
-        } else {
-          line = copyLine(linesHistory[n]);
+      }
+      if (direction === -1) {
+        revertAcc += speed;
+        const revertSteps = Math.min(Math.floor(revertAcc), n + 1);
+        revertAcc -= revertSteps;
+        if (revertSteps > 0) {
+          ctx.clearRect(0, 0, w, h);
+          self.drawBackground(ctx, opts, w, h, r);
+          n -= revertSteps;
+          if (n < 0) {
+            direction = 1;
+            n = 0;
+            speedAcc = 0;
+            line = copyLine(linesHistory[0]);
+          } else {
+            line = copyLine(linesHistory[n]);
+          }
+          for (let i = 0; i <= n; i++) {
+            drawPath(linesHistory[i], i, audioThickness);
+          }
         }
       }
     }, tick);
@@ -566,6 +624,10 @@ class Uji extends ModuleBase {
     }
     this.canvas = null;
     this.ctx = null;
+    if (this.fontStyleEl && this.fontStyleEl.parentNode) {
+      this.fontStyleEl.parentNode.removeChild(this.fontStyleEl);
+    }
+    this.fontStyleEl = null;
     super.destroy();
   }
 }

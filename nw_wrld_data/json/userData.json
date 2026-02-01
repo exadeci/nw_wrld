@@ -1840,7 +1840,7 @@
                   "options": [
                     {
                       "name": "sensitivity",
-                      "value": 1.5
+                      "value": 4
                     },
                     {
                       "name": "baseHue",
@@ -1875,7 +1875,7 @@
                   "options": [
                     {
                       "name": "preset",
-                      "value": "Circle spiral 3"
+                      "value": "Square rot"
                     },
                     {
                       "name": "background",
@@ -1883,7 +1883,7 @@
                     },
                     {
                       "name": "backgroundColor",
-                      "value": "#fff5f5"
+                      "value": "#270c0c"
                     },
                     {
                       "name": "bounce",
@@ -1891,7 +1891,11 @@
                     },
                     {
                       "name": "lineColor",
-                      "value": "#c49292"
+                      "value": "#03587c"
+                    },
+                    {
+                      "name": "speed",
+                      "value": 0.25
                     }
                   ]
                 },
