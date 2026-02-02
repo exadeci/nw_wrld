@@ -1742,11 +1742,22 @@
             },
             {
               "id": "inst_1770037944591_m99e25h7l",
-              "type": "DancingGlowLights"
+              "type": "DancingGlowLights",
+              "disabled": true
             },
             {
               "id": "inst_1769650857272_67ux6tt17",
               "type": "Corners"
+            },
+            {
+              "id": "inst_1770038699405_7g11ov7mt",
+              "type": "AudioOctgrams",
+              "disabled": true
+            },
+            {
+              "id": "inst_1770039006664_m6n4qeolu",
+              "type": "LayeredGridBokeh",
+              "disabled": true
             }
           ],
           "modulesData": {
@@ -2425,6 +2436,148 @@
                       "name": "sensitivity",
                       "value": 2
                     },
+                    {
+                      "name": "speed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1770038699405_7g11ov7mt": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 75
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "sensitivity",
+                      "value": 2
+                    },
+                    {
+                      "name": "speed",
+                      "value": 1
+                    },
+                    {
+                      "name": "audioReactive",
+                      "value": true
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1770039006664_m6n4qeolu": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 75
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
                     {
                       "name": "speed",
                       "value": 1
