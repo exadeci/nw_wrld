@@ -348,178 +348,181 @@ export const AddModuleModal = ({
           </div>
         ) : (
           Object.entries(filteredModulesByCategory).map(([category, modules]) => (
-          <div key={category} className="mb-6 font-mono">
-            <div className="mb-2">
-              <div className="opacity-50 text-[11px] text-neutral-300">
-                {category}:
-              </div>
+            <div key={category} className="mb-6 font-mono">
+              <div className="mb-2">
+                <div className="opacity-50 text-[11px] text-neutral-300">
+                  {category}:
+                </div>
 
-              <div className="pl-6 uppercase flex flex-col flex-wrap gap-2">
-                {modules.map((module) => {
-                  const handlePreview = () => {
-                    const hoveredId = module.id || module.name;
-                    if (!hoveredId) return;
-                    if (hoveredPreviewModuleId === hoveredId) return;
-                    const requestId = `${Date.now()}_${Math.random()
-                      .toString(36)
-                      .slice(2, 8)}`;
-                    setHoveredPreviewModuleId(hoveredId);
-                    setLoadingPreviewModuleId(hoveredId);
-                    previewRequestRef.current = {
-                      moduleId: hoveredId,
-                      requestId,
-                    };
-                    lastAutoPreviewSentRef.current = null;
-                    const moduleMethods = Array.isArray(module.methods)
-                      ? module.methods
-                      : [];
-                    const hasMethodData = moduleMethods.length > 0;
-
-                    if (!hasMethodData) {
-                      sendToProjector("module-introspect", {
-                        moduleId: module.id || module.name,
-                      });
-                      return;
-                    }
-
-                    const constructorMethods = hasMethodData
-                      ? moduleMethods
-                          .filter((m) => m.executeOnLoad)
-                          .map((m) => ({
-                            name: m.name,
-                            options: m?.options?.length
-                              ? m.options.map((opt) => ({
-                                  name: opt.name,
-                                  value: opt.defaultVal,
-                                }))
-                              : null,
-                          }))
-                      : [];
-
-                    const finalConstructorMethods = [...constructorMethods];
-                    if (
-                      !finalConstructorMethods.some((m) => m.name === "matrix")
-                    ) {
-                      finalConstructorMethods.unshift({
-                        name: "matrix",
-                        options: [
-                          {
-                            name: "matrix",
-                            value: { rows: 1, cols: 1, excludedCells: [] },
-                          },
-                          { name: "border", value: false },
-                        ],
-                      });
-                    }
-                    if (
-                      !finalConstructorMethods.some((m) => m.name === "show")
-                    ) {
-                      finalConstructorMethods.push({
-                        name: "show",
-                        options: [{ name: "duration", value: 0 }],
-                      });
-                    }
-
-                    const previewData = {
-                      type: "preview-module",
-                      props: {
-                        moduleName: module.id || module.name,
+                <div className="pl-6 uppercase flex flex-col flex-wrap gap-2">
+                  {modules.map((module) => {
+                    const handlePreview = () => {
+                      const hoveredId = module.id || module.name;
+                      if (!hoveredId) return;
+                      if (hoveredPreviewModuleId === hoveredId) return;
+                      const requestId = `${Date.now()}_${Math.random()
+                        .toString(36)
+                        .slice(2, 8)}`;
+                      setHoveredPreviewModuleId(hoveredId);
+                      setLoadingPreviewModuleId(hoveredId);
+                      previewRequestRef.current = {
+                        moduleId: hoveredId,
                         requestId,
-                        moduleData: {
-                          constructor: finalConstructorMethods,
-                          methods: {},
+                      };
+                      lastAutoPreviewSentRef.current = null;
+                      const moduleMethods = Array.isArray(module.methods)
+                        ? module.methods
+                        : [];
+                      const hasMethodData = moduleMethods.length > 0;
+
+                      if (!hasMethodData) {
+                        sendToProjector("module-introspect", {
+                          moduleId: module.id || module.name,
+                        });
+                        return;
+                      }
+
+                      const constructorMethods = hasMethodData
+                        ? moduleMethods
+                            .filter((m) => m.executeOnLoad)
+                            .map((m) => ({
+                              name: m.name,
+                              options: m?.options?.length
+                                ? m.options.map((opt) => ({
+                                    name: opt.name,
+                                    value: opt.defaultVal,
+                                  }))
+                                : null,
+                            }))
+                        : [];
+
+                      const finalConstructorMethods = [...constructorMethods];
+                      if (
+                        !finalConstructorMethods.some((m) => m.name === "matrix")
+                      ) {
+                        finalConstructorMethods.unshift({
+                          name: "matrix",
+                          options: [
+                            {
+                              name: "matrix",
+                              value: { rows: 1, cols: 1, excludedCells: [] },
+                            },
+                            { name: "border", value: false },
+                          ],
+                        });
+                      }
+                      if (
+                        !finalConstructorMethods.some((m) => m.name === "show")
+                      ) {
+                        finalConstructorMethods.push({
+                          name: "show",
+                          options: [{ name: "duration", value: 0 }],
+                        });
+                      }
+
+                      const previewData = {
+                        type: "preview-module",
+                        props: {
+                          moduleName: module.id || module.name,
+                          requestId,
+                          moduleData: {
+                            constructor: finalConstructorMethods,
+                            methods: {},
+                          },
                         },
-                      },
+                      };
+
+                      sendToProjector(previewData.type, previewData.props);
+                      lastAutoPreviewSentRef.current = hoveredId;
                     };
 
-                    sendToProjector(previewData.type, previewData.props);
-                    lastAutoPreviewSentRef.current = hoveredId;
-                  };
-
-                  const handleClearPreview = () => {
-                    setHoveredPreviewModuleId(null);
-                    setLoadingPreviewModuleId(null);
-                    previewRequestRef.current = {
-                      moduleId: null,
-                      requestId: null,
+                    const handleClearPreview = () => {
+                      setHoveredPreviewModuleId(null);
+                      setLoadingPreviewModuleId(null);
+                      previewRequestRef.current = {
+                        moduleId: null,
+                        requestId: null,
+                      };
+                      lastAutoPreviewSentRef.current = null;
+                      sendToProjector("clear-preview", {});
                     };
-                    lastAutoPreviewSentRef.current = null;
-                    sendToProjector("clear-preview", {});
-                  };
 
-                  const isHovered =
-                    hoveredPreviewModuleId === (module.id || module.name);
-                  const isLoading =
-                    loadingPreviewModuleId === (module.id || module.name);
+                    const isHovered =
+                      hoveredPreviewModuleId === (module.id || module.name);
+                    const isLoading =
+                      loadingPreviewModuleId === (module.id || module.name);
 
-                  return (
-                    <div
-                      key={module.id || module.name}
-                      className="flex items-center gap-1 group"
-                    >
-                      <div className="font-mono text-[11px] text-neutral-300 uppercase flex-1 flex items-center gap-2">
-                        <div className="truncate">{formatModuleName(module.name)}</div>
-                        {module.instancesOnCurrentTrack > 0 ? (
-                          <div
-                            className="flex items-center gap-1 text-blue-500/50"
-                            title={`${module.instancesOnCurrentTrack} instance${
-                              module.instancesOnCurrentTrack > 1 ? "s" : ""
-                            } on this track`}
-                          >
-                            <FaCheck />
-                            {module.instancesOnCurrentTrack > 1 ? (
-                              <span className="text-[10px]">
-                                {module.instancesOnCurrentTrack}
-                              </span>
-                            ) : null}
+                    return (
+                      <div
+                        key={module.id || module.name}
+                        className="flex items-center gap-1 group"
+                      >
+                        <div className="font-mono text-[11px] text-neutral-300 uppercase flex-1 flex items-center gap-2">
+                          <div className="truncate">
+                            {formatModuleName(module.name)}
                           </div>
-                        ) : null}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div
-                          onMouseEnter={handlePreview}
-                          onMouseLeave={handleClearPreview}
-                          className="cursor-default"
-                        >
-                          <div
-                            title={
-                              isHovered && isLoading
-                                ? "Loading preview..."
-                                : "Preview module"
-                            }
-                            className="cursor-help flex items-center text-neutral-400"
-                          >
-                            {isHovered && isLoading ? (
-                              <FaSpinner className="animate-spin" />
-                            ) : (
-                              <FaEye />
-                            )}
-                          </div>
+                          {module.instancesOnCurrentTrack > 0 ? (
+                            <div
+                              className="flex items-center gap-1 text-blue-500/50"
+                              title={`${module.instancesOnCurrentTrack} instance${
+                                module.instancesOnCurrentTrack > 1 ? "s" : ""
+                              } on this track`}
+                            >
+                              <FaCheck />
+                              {module.instancesOnCurrentTrack > 1 ? (
+                                <span className="text-[10px]">
+                                  {module.instancesOnCurrentTrack}
+                                </span>
+                              ) : null}
+                            </div>
+                          ) : null}
                         </div>
+                        <div className="flex items-center gap-3">
+                          <div
+                            onMouseEnter={handlePreview}
+                            onMouseLeave={handleClearPreview}
+                            className="cursor-default"
+                          >
+                            <div
+                              title={
+                                isHovered && isLoading
+                                  ? "Loading preview..."
+                                  : "Preview module"
+                              }
+                              className="cursor-help flex items-center text-neutral-400"
+                            >
+                              {isHovered && isLoading ? (
+                                <FaSpinner className="animate-spin" />
+                              ) : (
+                                <FaEye />
+                              )}
+                            </div>
+                          </div>
 
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEditModule(module.id || module.name);
-                          }}
-                          type="secondary"
-                          icon={<FaCode />}
-                          title="Edit code"
-                          className="text-blue-500"
-                        />
-                        <Button
-                          onClick={() => handleAddToTrack(module)}
-                          type="secondary"
-                          icon={<FaPlus />}
-                          title={
-                            track ? "Add to track" : "Select a track first"
-                          }
-                          disabled={!track}
-                        />
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEditModule(module.id || module.name);
+                            }}
+                            type="secondary"
+                            icon={<FaCode />}
+                            title="Edit code"
+                            className="text-blue-500"
+                          />
+                          <Button
+                            onClick={() => handleAddToTrack(module)}
+                            type="secondary"
+                            icon={<FaPlus />}
+                            title={
+                              track ? "Add to track" : "Select a track first"
+                            }
+                            disabled={!track}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
           ))
