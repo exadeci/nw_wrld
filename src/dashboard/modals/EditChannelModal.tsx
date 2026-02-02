@@ -62,11 +62,17 @@ export const EditChannelModal = ({
   const [newChannelNumber, setNewChannelNumber] = useState(1);
 
   const tracks = getActiveSetTracks(userData, activeSetId);
-  const track = tracks[trackIndex];
-  const inputType = inputConfig?.type || "midi";
-  const noteMatchMode =
-    inputConfig?.noteMatchMode === "exactNote" ? "exactNote" : "pitchClass";
-  const globalMappings = userData.config || {};
+  const track = (tracks as unknown[])[trackIndex] as Record<string, unknown> | undefined;
+  const inputType =
+    inputConfig?.type === "osc"
+      ? "osc"
+      : inputConfig?.type === "audio"
+        ? "audio"
+        : inputConfig?.type === "file"
+          ? "file"
+          : "midi";
+  const noteMatchMode = inputConfig?.noteMatchMode === "exactNote" ? "exactNote" : "pitchClass";
+  const globalMappings = useMemo(() => (userData as Record<string, unknown>).config || {}, [userData]);
 
   const exactNoteOptions = useMemo(
     () =>

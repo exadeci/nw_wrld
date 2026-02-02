@@ -67,6 +67,7 @@ export const AddModuleModal = ({
   userData,
   setUserData,
   predefinedModules,
+  skippedWorkspaceModules = [],
   onCreateNewModule,
   onEditModule,
   mode = "add-to-track",
@@ -521,9 +522,26 @@ export const AddModuleModal = ({
                 })}
               </div>
             </div>
-          </div>
-        ))
+          ))
         )}
+        {skippedWorkspaceModules && skippedWorkspaceModules.length > 0 ? (
+          <div className="mt-6">
+            <div className="opacity-50 text-[11px] mb-1">Skipped modules:</div>
+            <div className="pl-6 flex flex-col gap-2">
+              {skippedWorkspaceModules.map((s) => (
+                <div key={s.file} className="flex items-start gap-2 text-[11px] text-neutral-300">
+                  <span className="text-red-500/70 mt-[1px]">
+                    <FaExclamationTriangle />
+                  </span>
+                  <div className="min-w-0">
+                    <div className="truncate">{s.file}</div>
+                    <div className="opacity-60">{s.reason}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
     </Modal>
   );

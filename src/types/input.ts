@@ -13,7 +13,7 @@ export interface InputStatusPayload {
   data: InputStatusData;
 }
 
-export type InputSource = "midi" | "osc";
+export type InputSource = "midi" | "osc" | "audio" | "file";
 
 export interface InputEventBase {
   timestamp: number;
@@ -54,12 +54,26 @@ export interface MidiCCEvent extends InputEventBase {
   value: number;
 }
 
+export interface AudioMethodTriggerEvent extends InputEventBase {
+  source: "audio";
+  channelName: string;
+  velocity: number;
+}
+
+export interface FileMethodTriggerEvent extends InputEventBase {
+  source: "file";
+  channelName: string;
+  velocity: number;
+}
+
 export type TrackSelectionEventData =
   | MidiTrackSelectionEvent
   | OscTrackSelectionEvent;
 export type MethodTriggerEventData =
   | MidiMethodTriggerEvent
-  | OscMethodTriggerEvent;
+  | OscMethodTriggerEvent
+  | AudioMethodTriggerEvent
+  | FileMethodTriggerEvent;
 
 export type InputEventPayload =
   | { type: "track-selection"; data: TrackSelectionEventData }

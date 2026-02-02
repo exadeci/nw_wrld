@@ -68,6 +68,8 @@ export const DEFAULT_GLOBAL_MAPPINGS = {
       9: "/track/9",
       10: "/track/10",
     },
+    audio: {},
+    file: {},
   },
   channelMappings: {
     midi: {
@@ -161,6 +163,16 @@ export const DEFAULT_GLOBAL_MAPPINGS = {
       18: null,
       19: null,
       20: null,
+    },
+    audio: {
+      1: "low",
+      2: "medium",
+      3: "high",
+    },
+    file: {
+      1: "low",
+      2: "medium",
+      3: "high",
     },
   },
 };

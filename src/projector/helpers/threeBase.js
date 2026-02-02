@@ -38,6 +38,9 @@ export class BaseThreeJsModule extends ModuleBase {
           defaultVal: 75,
           type: "number",
           allowRandomization: true,
+          min: 0,
+          max: 100,
+          unit: "%",
         },
       ],
     },
@@ -90,6 +93,7 @@ export class BaseThreeJsModule extends ModuleBase {
           type: "number",
           min: 0.01,
           max: 10,
+          unit: "×",
         },
       ],
     },
@@ -435,7 +439,6 @@ export class BaseThreeJsModule extends ModuleBase {
             this.animationSpeed *
             rotateDeltaMultiplier
         );
-        break;
         break;
       default:
         console.warn(`Unknown camera animation: ${this.currentAnimation}`);

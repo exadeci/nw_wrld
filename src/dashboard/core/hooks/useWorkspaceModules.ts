@@ -53,21 +53,15 @@ export const useWorkspaceModules = ({
   didMigrateWorkspaceModuleTypesRef,
   loadModulesRunIdRef,
 }: UseWorkspaceModulesArgs) => {
-  const loadModules = useCallback(async () => {
+  const loadModules = useCallback(async (opts?: { refreshProjector?: boolean }) => {
     const runId = ++loadModulesRunIdRef.current;
     const isStale = () => runId !== loadModulesRunIdRef.current;
     try {
       if (isWorkspaceModalOpen) return;
       const projectDirArg = getProjectDir();
-      console.log("[Dashboard] loadModules:", { projectDirArg, workspacePath, isWorkspaceModalOpen });
-      if (!projectDirArg) {
-        console.warn("[Dashboard] No project directory found");
-        return;
-      }
-      if (!workspacePath) {
-        console.warn("[Dashboard] No workspace path set");
-        return;
-      }
+      if (!projectDirArg) return;
+      if (!workspacePath) return;
+      const refreshProjector = opts?.refreshProjector !== false;
       let summaries: unknown[] = [];
       let skipped: unknown[] = [];
       try {
@@ -166,7 +160,9 @@ export const useWorkspaceModules = ({
       });
       setIsProjectorReady(false);
       if (isStale()) return;
-      sendToProjector("refresh-projector", {});
+      if (refreshProjector) {
+        sendToProjector("refresh-projector", {});
+      }
       return;
     } catch (error) {
       console.error("❌ [Dashboard] Error loading modules:", error);
@@ -298,7 +294,7 @@ export const useWorkspaceModules = ({
   useIPCListener(
     "workspace:modulesChanged",
     () => {
-      loadModules();
+      loadModules({ refreshProjector: false });
     },
     [loadModules]
   );

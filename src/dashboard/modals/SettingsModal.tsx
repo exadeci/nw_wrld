@@ -1,4 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  memo,
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+  type ChangeEvent,
+  type KeyboardEvent,
+} from "react";
 import { Modal } from "../shared/Modal.tsx";
 import { ModalHeader } from "../components/ModalHeader.tsx";
 import { Button } from "../components/Button.tsx";
@@ -13,6 +22,7 @@ import {
 } from "../components/FormInputs.tsx";
 import { HelpIcon } from "../components/HelpIcon.tsx";
 import { HELP_TEXT } from "../../shared/helpText.ts";
+import { AUDIO_DEFAULTS } from "../core/audio/audioTuning.ts";
 
 const SETTINGS_TABS = [
   { id: "general", label: "General" },
@@ -382,25 +392,120 @@ const DraftIntInput = React.memo(({ value, fallback, onCommit, ...props }) => {
   );
 });
 
-const UserColors = ({ config, updateConfig }) => {
-  const userColors = Array.isArray(config?.userColors) ? config.userColors : [];
-  const [draft, setDraft] = React.useState(
+type DraftFloatInputProps = {
+  value: number;
+  fallback: number;
+  onCommit: (value: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  className?: string;
+  style?: React.CSSProperties;
+  "data-testid"?: string;
+};
+
+const DraftFloatInput = memo(({ value, fallback, onCommit, ...props }: DraftFloatInputProps) => {
+  const [draft, setDraft] = useState<string | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const skipCommitRef = useRef(false);
+
+  useEffect(() => {
+    if (!isFocused) setDraft(null);
+  }, [isFocused, value]);
+
+  const displayed = draft !== null ? draft : String(value ?? "");
+
+  const commitIfValid = useCallback(
+    (raw: string) => {
+      const s = String(raw);
+      const isIntermediate =
+        s === "" || s === "-" || s === "." || s === "-." || s.endsWith(".") || /e[+-]?$/i.test(s);
+      if (isIntermediate) return;
+      const n = parseFloat(s);
+      if (!Number.isFinite(n)) return;
+      onCommit(n);
+    },
+    [onCommit]
+  );
+
+  const commitOnBlur = useCallback(() => {
+    if (draft === null) return;
+    const s = String(draft);
+    const isIntermediate =
+      s === "" || s === "-" || s === "." || s === "-." || s.endsWith(".") || /e[+-]?$/i.test(s);
+    if (isIntermediate) {
+      onCommit(fallback);
+      return;
+    }
+    const n = parseFloat(s);
+    if (!Number.isFinite(n)) {
+      onCommit(fallback);
+      return;
+    }
+    onCommit(n);
+  }, [draft, fallback, onCommit]);
+
+  return (
+    <NumberInput
+      {...props}
+      value={displayed}
+      onFocus={() => {
+        skipCommitRef.current = false;
+        setIsFocused(true);
+        setDraft(String(value ?? ""));
+      }}
+      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+        const next = e.target.value;
+        setDraft(next);
+        commitIfValid(next);
+      }}
+      onBlur={() => {
+        setIsFocused(false);
+        if (skipCommitRef.current) {
+          skipCommitRef.current = false;
+          return;
+        }
+        commitOnBlur();
+      }}
+      onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") e.currentTarget.blur();
+        if (e.key === "Escape") {
+          skipCommitRef.current = true;
+          setDraft(null);
+          e.currentTarget.blur();
+        }
+      }}
+    />
+  );
+});
+
+type UserColorsProps = {
+  config: { userColors?: string[] };
+  updateConfig: (updates: { userColors: string[] }) => void;
+};
+
+const UserColors = ({ config, updateConfig }: UserColorsProps) => {
+  const userColors = useMemo(
+    () => (Array.isArray(config?.userColors) ? config.userColors : []),
+    [config]
+  );
+  const [draft, setDraft] = useState(
     userColors[0] && isValidHexColor(userColors[0]) ? userColors[0] : "#ffffff"
   );
-  const [draftText, setDraftText] = React.useState(String(draft));
+  const [draftText, setDraftText] = useState(String(draft));
 
-  React.useEffect(() => {
+  useEffect(() => {
     setDraftText(String(draft));
   }, [draft]);
 
-  const addColor = React.useCallback(() => {
+  const addColor = useCallback(() => {
     const normalized = normalizeHexColor(draftText);
     if (!normalized) return;
     const next = Array.from(new Set([...userColors, normalized]));
     updateConfig({ userColors: next });
   }, [draftText, updateConfig, userColors]);
 
-  const removeColor = React.useCallback(
+  const removeColor = useCallback(
     (hex) => {
       const safe = String(hex || "").trim();
       if (!safe) return;
@@ -410,56 +515,62 @@ const UserColors = ({ config, updateConfig }) => {
     [updateConfig, userColors]
   );
 
+  React.useEffect(() => {
+    setDraftText(String(draft));
+  }, [draft]);
+
   return (
-    <div className="flex flex-col gap-3 font-mono border-t border-neutral-800 pt-6">
-      <div className="pl-12">
-        <div className="opacity-50 mb-1 text-[11px]">User Colors:</div>
-        <div className="flex items-center gap-2">
-          <ColorInput
-            value={draft}
-            onChange={(e) => {
-              const next = normalizeHexColor(e.target.value) || "#ffffff";
-              setDraft(next);
-            }}
-          />
-          <TextInput
-            value={draftText}
-            onChange={(e) => setDraftText(e.target.value)}
-            className="w-24 py-0.5"
-          />
-          <Button onClick={addColor} className="flex-1">
-            ADD
-          </Button>
+    <div className="flex flex-col gap-2 font-mono border-t border-neutral-800 pt-6">
+      <div className="pl-6">
+        <div className="mb-1 text-[11px]">
+          <span className="opacity-50">User Colors:</span>
         </div>
-        {userColors.length > 0 ? (
-          <div className="mt-2 flex flex-col gap-1">
-            {userColors.map((hex) => (
-              <div
-                key={hex}
-                className="flex items-center justify-between gap-2 text-[11px] text-neutral-300/80"
-              >
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-3 h-3 border border-neutral-600"
-                    style={{ backgroundColor: hex }}
-                  />
-                  <span>{hex}</span>
-                </div>
+        <div className="pl-6">
+          <div className="flex items-center gap-2">
+            <ColorInput
+              value={draft}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                const next = normalizeHexColor(e.target.value) || "#ffffff";
+                setDraft(next);
+              }}
+            />
+            <TextInput
+              value={draftText}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setDraftText(e.target.value)}
+              className="w-24 py-0.5"
+            />
+            <Button onClick={addColor} className="flex-1">
+              ADD
+            </Button>
+          </div>
+          {userColors.length > 0 ? (
+            <div className="mt-2 flex flex-col gap-1">
+              {userColors.map((hex) => (
                 <div
-                  className="px-1 text-red-500/50 cursor-pointer text-[11px]"
-                  onClick={() => removeColor(hex)}
-                  title="Remove"
+                  key={hex}
+                  className="flex items-center justify-between gap-2 text-[11px] text-neutral-300/80"
                 >
-                  [{"\u00D7"}]
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-3 h-3 border border-neutral-600"
+                      style={{ backgroundColor: hex }}
+                    />
+                    <span>{hex}</span>
+                  </div>
+                  <div
+                    className="px-1 text-red-500/50 cursor-pointer text-[11px]"
+                    onClick={() => removeColor(hex)}
+                    title="Remove"
+                  >
+                    [{"\u00D7"}]
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="mt-2 text-[10px] text-neutral-500">
-            No user colors saved.
-          </div>
-        )}
+              ))}
+            </div>
+          ) : (
+            <div className="mt-2 text-[10px] text-neutral-500">No user colors saved.</div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -477,40 +588,44 @@ const ProjectorSettings = ({
   const showFps = config?.showFps ?? false;
 
   return (
-    <div className="flex flex-col gap-3 font-mono">
-      <div className="pl-12">
-        <div className="mb-1 text-[11px] relative inline-block">
-          <span className="opacity-50">Aspect Ratio:</span>
-          <HelpIcon helpText={HELP_TEXT.aspectRatio} />
+    <div className="flex flex-col gap-2 font-mono">
+      <div className="pl-6">
+        <div className="pl-6">
+          <div className="mb-1 text-[11px] relative inline-block">
+            <span className="opacity-50">Aspect Ratio:</span>
+            <HelpIcon helpText={HELP_TEXT.aspectRatio} />
+          </div>
+          <Select
+            id="aspectRatio"
+            value={aspectRatio}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) => setAspectRatio(e.target.value)}
+            className="py-1 w-full"
+          >
+            {settings.aspectRatios.map((ratio) => (
+              <option key={ratio.id} value={ratio.id} className="bg-[#101010]">
+                {ratio.label}
+              </option>
+            ))}
+          </Select>
         </div>
-        <Select
-          id="aspectRatio"
-          value={aspectRatio}
-          onChange={(e) => setAspectRatio(e.target.value)}
-          className="py-1 w-full"
-        >
-          {settings.aspectRatios.map((ratio) => (
-            <option key={ratio.id} value={ratio.id} className="bg-[#101010]">
-              {ratio.label}
-            </option>
-          ))}
-        </Select>
       </div>
 
-      <div className="pl-12">
-        <div className="opacity-50 mb-1 text-[11px]">Background Color:</div>
-        <Select
-          id="bgColor"
-          value={bgColor}
-          onChange={(e) => setBgColor(e.target.value)}
-          className="py-1 w-full"
-        >
-          {settings.backgroundColors.map((color) => (
-            <option key={color.id} value={color.id} className="bg-[#101010]">
-              {color.label}
-            </option>
-          ))}
-        </Select>
+      <div className="pl-6">
+        <div className="pl-6">
+          <div className="opacity-50 mb-1 text-[11px]">Background Color:</div>
+          <Select
+            id="bgColor"
+            value={bgColor}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) => setBgColor(e.target.value)}
+            className="py-1 w-full"
+          >
+            {settings.backgroundColors.map((color) => (
+              <option key={color.id} value={color.id} className="bg-[#101010]">
+                {color.label}
+              </option>
+            ))}
+          </Select>
+        </div>
       </div>
 
       <div className="pl-12">
@@ -726,6 +841,32 @@ const AudioCaptureSettings = ({ isOpen, config, updateConfig }) => {
   );
 };
 
+type AudioDevice = {
+  id: string;
+  label: string;
+};
+
+type InputConfig = {
+  type?: string;
+  deviceId?: string;
+  deviceName?: string;
+  audioThresholds?: { low?: number; medium?: number; high?: number };
+  audioMinIntervalMs?: number;
+  fileAssetRelPath?: string;
+  fileAssetName?: string;
+  fileThresholds?: { low?: number; medium?: number; high?: number };
+  fileMinIntervalMs?: number;
+  methodTriggerChannel?: number;
+  trackSelectionChannel?: number;
+  noteMatchMode?: string;
+  port?: number;
+};
+
+type AspectRatio = { id: string; label: string };
+type BackgroundColor = { id: string; label: string };
+type MidiDevice = { id: string; name: string };
+type Config = Record<string, unknown>;
+
 const GeneralSettings = ({
   aspectRatio,
   setAspectRatio,
@@ -735,19 +876,53 @@ const GeneralSettings = ({
   inputConfig,
   setInputConfig,
   availableMidiDevices,
+  availableAudioDevices,
+  refreshAudioDevices,
+  audioCaptureState,
+  fileAudioState,
   onOpenMappings,
   config,
   updateConfig,
   workspacePath,
   onSelectWorkspace,
   isOpen,
+}: {
+  aspectRatio: string;
+  setAspectRatio: (v: string) => void;
+  bgColor: string;
+  setBgColor: (v: string) => void;
+  settings: { aspectRatios: AspectRatio[]; backgroundColors: BackgroundColor[] };
+  inputConfig: InputConfig;
+  setInputConfig: (c: InputConfig) => void;
+  availableMidiDevices: MidiDevice[];
+  availableAudioDevices?: AudioDevice[];
+  refreshAudioDevices?: () => Promise<void>;
+  audioCaptureState?: unknown;
+  fileAudioState?: unknown;
+  onOpenMappings: () => void;
+  config: Config;
+  updateConfig: (u: Partial<Config>) => void;
+  workspacePath: string | null;
+  onSelectWorkspace: () => void;
+  isOpen: boolean;
 }) => {
-  const normalizedInputType = inputConfig?.type === "osc" ? "osc" : "midi";
+  const normalizedInputType =
+    inputConfig?.type === "osc"
+      ? "osc"
+      : inputConfig?.type === "audio"
+        ? "audio"
+        : inputConfig?.type === "file"
+          ? "file"
+          : "midi";
   const signalSourceValue = config.sequencerMode
     ? "sequencer"
     : normalizedInputType === "osc"
-    ? "external-osc"
-    : "external-midi";
+      ? "external-osc"
+      : normalizedInputType === "audio"
+        ? "external-audio"
+        : normalizedInputType === "file"
+          ? "file-upload"
+          : "external-midi";
 
   return (
     <div className="flex flex-col gap-6">
@@ -1050,6 +1225,10 @@ export const SettingsModal = ({
   inputConfig,
   setInputConfig,
   availableMidiDevices,
+  availableAudioDevices,
+  refreshAudioDevices,
+  audioCaptureState,
+  fileAudioState,
   onOpenMappings,
   config,
   updateConfig,
@@ -1078,6 +1257,10 @@ export const SettingsModal = ({
           inputConfig={inputConfig}
           setInputConfig={setInputConfig}
           availableMidiDevices={availableMidiDevices}
+          availableAudioDevices={availableAudioDevices}
+          refreshAudioDevices={refreshAudioDevices}
+          audioCaptureState={audioCaptureState}
+          fileAudioState={fileAudio.state}
           onOpenMappings={onOpenMappings}
           config={config}
           updateConfig={updateConfig}

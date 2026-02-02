@@ -511,9 +511,17 @@ npm run dist:win
 
 This creates a portable Windows `.exe` in the `release/` directory.
 
+### Build Linux (AppImage + .deb)
+
+```bash
+npm run dist:linux
+```
+
+This creates Linux artifacts (typically `.AppImage` and `.deb`) in the `release/` directory.
+
 ### Automated Releases
 
-The project uses GitHub Actions to automatically build and attach release artifacts (macOS DMGs for arm64 + x64, plus Windows portable `.exe`):
+The project uses GitHub Actions to automatically build and attach release artifacts (macOS DMGs for arm64 + x64, Windows portable `.exe`, and Linux `.AppImage` + `.deb`). A `SHA256SUMS` file is also attached for verifying downloads:
 
 1. Tag a new version: `git tag v1.0.0`
 2. Push the tag: `git push origin v1.0.0`

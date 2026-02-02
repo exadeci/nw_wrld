@@ -52,6 +52,11 @@ export async function handleTrackSelection(trackName) {
     logger.log("📦 [TRACK] Looking for track with name:", trackName);
   }
 
+  const safeTrackName = trackName != null ? String(trackName).trim() : "";
+  if (safeTrackName) {
+    this.lastRequestedTrackName = safeTrackName;
+  }
+
   if (this.isLoadingTrack) {
     if (this.activeTrack?.name === trackName) {
       if (debugEnabled) {
@@ -274,6 +279,17 @@ export async function handleTrackSelection(trackName) {
         this.handleTrackSelection(pending.trackName);
         return;
       }
+    }
+  }
+
+  if (this.pendingWorkspaceReload === true) {
+    this.pendingWorkspaceReload = false;
+    const nextTrackName =
+      (this.activeTrack && this.activeTrack.name) || this.lastRequestedTrackName || null;
+    if (nextTrackName) {
+      this.deactivateActiveTrack();
+      this.handleTrackSelection(nextTrackName);
+      return;
     }
   }
 
