@@ -48,6 +48,13 @@ function ujiOptionShorts() {
 
 const UJI_SHORTS_OPTIONS = ujiOptionShorts();
 
+const UJI_SETPARAMS_KEYS = [
+  "expansionhori", "expansionverti", "rotationspeed", "initialrotation",
+  "translationhori", "translationverti", "jitter", "thickness", "segments",
+  "iterations", "skipchance", "revealspeed", "fadeoutspeed", "wavinessahori",
+  "wavinessaverti", "radius", "hueshiftspeed"
+];
+
 function parseUjiHash(hash) {
   if (!hash || typeof hash !== "string") return null;
   const regex = /([a-z]+)([0-9.\-]+)/g;
@@ -61,22 +68,6 @@ function parseUjiHash(hash) {
     opts[name] = v;
   }
   return opts;
-}
-
-function ujiShortName(opts) {
-  const s = opts.shape === 2 ? "Square" : opts.shape === 3 ? "Triangle" : opts.shape === 4 ? "Line" : "Circle";
-  const ro = (opts.rotationspeed || 0) !== 0;
-  const ex = (opts.expansionhori || 1) !== 1 || (opts.expansionverti || 1) !== 1;
-  const fa = (opts.fadeoutspeed || -1) > 0;
-  const re = (opts.revealspeed || -1) > 0;
-  const wav = (opts.wavinessahori || 0) !== 0 || (opts.wavinessaverti || 0) !== 0;
-  if (ro && ex) return `${s} spiral`;
-  if (ro) return `${s} rot`;
-  if (ex) return `${s} expand`;
-  if (fa) return `${s} fade`;
-  if (re) return `${s} reveal`;
-  if (wav) return `${s} wave`;
-  return `${s} default`;
 }
 
 const UJI_PRESET_HASHES = {
@@ -122,22 +113,9 @@ const UJI_PRESET_HASHES = {
 };
 
 function buildUjiPresetNames() {
-  const names = [];
-  const seen = {};
-  const keys = Object.keys(UJI_PRESET_HASHES).filter((k) => UJI_PRESET_HASHES[k]);
-  keys.forEach((sym) => {
-    const hash = UJI_PRESET_HASHES[sym];
-    const opts = Object.assign({}, UJI_DEFAULTS, parseUjiHash(hash) || {});
-    let label = ujiShortName(opts);
-    if (seen[label]) {
-      let n = 1;
-      while (seen[label + " " + n]) n++;
-      label = label + " " + n;
-    }
-    seen[label] = true;
-    names.push({ name: label, hash });
-  });
-  return names;
+  return Object.keys(UJI_PRESET_HASHES)
+    .filter((sym) => UJI_PRESET_HASHES[sym])
+    .map((sym) => ({ name: sym, hash: UJI_PRESET_HASHES[sym] }));
 }
 
 const UJI_PRESETS = buildUjiPresetNames();
@@ -179,7 +157,7 @@ function shiftHue(rgb, degrees) {
 
 const UJI_PRESET_VALUES_SAFE = Array.isArray(UJI_PRESET_VALUES) && UJI_PRESET_VALUES.length
   ? UJI_PRESET_VALUES
-  : ["Circle default"];
+  : [Object.keys(UJI_PRESET_HASHES).find((k) => UJI_PRESET_HASHES[k]) || "ⵋ"];
 
 class Uji extends ModuleBase {
   static methods = [
@@ -238,6 +216,39 @@ class Uji extends ModuleBase {
       executeOnLoad: false,
       options: [{ name: "value", defaultVal: 1.5, type: "number", min: 0.1, max: 5 }],
     },
+    {
+      name: "getParams",
+      executeOnLoad: false,
+      options: [],
+    },
+    {
+      name: "setParams",
+      executeOnLoad: false,
+      options: [
+        { name: "expansionhori", defaultVal: 1, type: "number", min: 0.95, max: 1.05 },
+        { name: "expansionverti", defaultVal: 1, type: "number", min: 0.95, max: 1.05 },
+        { name: "rotationspeed", defaultVal: 0, type: "number", min: -5, max: 5 },
+        { name: "initialrotation", defaultVal: 0, type: "number", min: 0, max: 359 },
+        { name: "translationhori", defaultVal: 0, type: "number", min: -10, max: 10 },
+        { name: "translationverti", defaultVal: 0, type: "number", min: -10, max: 10 },
+        { name: "jitter", defaultVal: 1, type: "number", min: 0, max: 10 },
+        { name: "thickness", defaultVal: 1, type: "number", min: 0.1, max: 4 },
+        { name: "segments", defaultVal: 1000, type: "number", min: 100, max: 20000 },
+        { name: "iterations", defaultVal: 500, type: "number", min: 10, max: 2000 },
+        { name: "skipchance", defaultVal: 0, type: "number", min: 0, max: 1 },
+        { name: "revealspeed", defaultVal: -1, type: "number", min: -1, max: 500 },
+        { name: "fadeoutspeed", defaultVal: -1, type: "number", min: -1, max: 1000 },
+        { name: "wavinessahori", defaultVal: 1, type: "number", min: 0, max: 10 },
+        { name: "wavinessaverti", defaultVal: 1, type: "number", min: 0, max: 10 },
+        { name: "radius", defaultVal: 500, type: "number", min: 0, max: 3000 },
+        { name: "hueshiftspeed", defaultVal: 0, type: "number", min: -10, max: 10 },
+      ],
+    },
+    {
+      name: "getParams",
+      executeOnLoad: false,
+      options: [],
+    },
   ];
 
   constructor(container) {
@@ -260,41 +271,52 @@ class Uji extends ModuleBase {
     this.lineColorOverride = null;
     this.drawSpeed = 1;
     this.fontStyleEl = null;
+    this.paramOverridesByPreset = {};
     this.init();
   }
 
   injectIosevkaFont() {
     if (this.fontStyleEl && this.fontStyleEl.parentNode) return;
-    let resolveUrl;
-    try {
-      resolveUrl = (path) => (typeof assetUrl === "function" && assetUrl(path)) || path;
-    } catch (_) {
-      resolveUrl = (path) => path;
-    }
-    const url = resolveUrl;
-    const regularTtf = url("fonts/iosevka-aile-regular.ttf");
-    const italicTtf = url("fonts/iosevka-aile-italic.ttf");
+    const resolveUrl = (path) => {
+      try {
+        if (typeof assetUrl !== "function") return null;
+        const out = assetUrl(path);
+        return out && typeof out === "string" ? out : null;
+      } catch (_) {
+        return null;
+      }
+    };
+    // Prefer Iosevka Aile; fall back to workspace fonts (e.g. Roboto Mono) if missing
+    const regularTtf =
+      resolveUrl("fonts/iosevka-aile-regular.ttf") ??
+      resolveUrl("fonts/RobotoMono-VariableFont_wght.ttf");
+    const italicTtf =
+      resolveUrl("fonts/iosevka-aile-italic.ttf") ??
+      resolveUrl("fonts/RobotoMono-Italic-VariableFont_wght.ttf");
+    if (!regularTtf) return;
+    const family = "Uji Module Font";
     const css = `
 @font-face {
-  font-family: 'Iosevka Aile Web';
+  font-family: '${family}';
   font-display: swap;
   font-weight: 400;
   font-stretch: normal;
   font-style: normal;
   src: url('${regularTtf}') format('truetype');
-}
+}${italicTtf ? `
 @font-face {
-  font-family: 'Iosevka Aile Web';
+  font-family: '${family}';
   font-display: swap;
   font-weight: 400;
   font-stretch: normal;
   font-style: italic;
   src: url('${italicTtf}') format('truetype');
-}`;
+}` : ""}`;
     const el = document.createElement("style");
     el.textContent = css.trim();
     document.head.appendChild(el);
     this.fontStyleEl = el;
+    this._ujiFontFamily = family;
   }
 
   drawBackground(ctx, opts, w, h, r) {
@@ -326,8 +348,11 @@ class Uji extends ModuleBase {
 
   init() {
     if (!this.elem) return;
+    this._ujiFontFamily = null;
     this.injectIosevkaFont();
-    this.elem.style.fontFamily = "'Iosevka Aile Web', sans-serif";
+    this.elem.style.fontFamily = this._ujiFontFamily
+      ? `'${this._ujiFontFamily}', sans-serif`
+      : "sans-serif";
     this.canvas = document.createElement("canvas");
     this.canvas.style.width = "100%";
     this.canvas.style.height = "100%";
@@ -385,7 +410,9 @@ class Uji extends ModuleBase {
     else if (backgroundColor !== undefined && !backgroundColor) this.backgroundColor = null;
     if (lineColor != null) this.lineColorOverride = String(lineColor).trim() || null;
     if (typeof speed === "number" && speed >= 0.25 && speed <= 8) this.drawSpeed = speed;
-    const opts = Object.assign({}, UJI_DEFAULTS, parseUjiHash(hash) || {});
+    const presetOpts = Object.assign({}, UJI_DEFAULTS, parseUjiHash(hash) || {});
+    const overrides = this.paramOverridesByPreset[preset] || {};
+    const opts = Object.assign({}, presetOpts, overrides);
     requestAnimationFrame(() => this.runUji(opts));
   }
 
@@ -599,6 +626,38 @@ class Uji extends ModuleBase {
   setAudioSensitivity(options = {}) {
     const val = Number(options?.value ?? options?.sensitivity ?? this.audioSensitivity);
     this.audioSensitivity = Math.max(0.1, Math.min(5, Number.isFinite(val) ? val : 1.5));
+  }
+
+  setParams(options = {}) {
+    const allowed = new Set(UJI_OPTION_KEYS);
+    const preset = this.currentPreset;
+    if (!preset) return;
+    if (!this.paramOverridesByPreset[preset]) this.paramOverridesByPreset[preset] = {};
+    Object.keys(options).forEach((key) => {
+      if (allowed.has(key) && options[key] !== undefined && options[key] !== null) {
+        const v = Number(options[key]);
+        if (Number.isFinite(v)) this.paramOverridesByPreset[preset][key] = v;
+      }
+    });
+    const hash = UJI_PRESET_BY_NAME[preset];
+    if (hash) {
+      const presetOpts = Object.assign({}, UJI_DEFAULTS, parseUjiHash(hash) || {});
+      const opts = Object.assign({}, presetOpts, this.paramOverridesByPreset[preset]);
+      requestAnimationFrame(() => this.runUji(opts));
+    }
+  }
+
+  getParams() {
+    if (!this.currentPreset) return null;
+    const hash = UJI_PRESET_BY_NAME[this.currentPreset];
+    if (!hash) return null;
+    const presetOpts = Object.assign({}, UJI_DEFAULTS, parseUjiHash(hash) || {});
+    const overrides = this.paramOverridesByPreset[this.currentPreset] || {};
+    const effective = Object.assign({}, presetOpts, overrides);
+    return UJI_SETPARAMS_KEYS.reduce((acc, key) => {
+      acc[key] = effective[key];
+      return acc;
+    }, {});
   }
 
   destroy() {
