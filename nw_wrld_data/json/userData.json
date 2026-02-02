@@ -1712,19 +1712,23 @@
             },
             {
               "id": "inst_1770020802726_ksbquajw4",
-              "type": "LiquidChromeVoid"
+              "type": "LiquidChromeVoid",
+              "disabled": true
             },
             {
               "id": "inst_1770023080192_qipdb62d7",
-              "type": "AudioWaterGradient"
+              "type": "AudioWaterGradient",
+              "disabled": true
             },
             {
               "id": "inst_1769650857272_67ux6tt17",
-              "type": "Corners"
+              "type": "Corners",
+              "disabled": true
             },
             {
               "id": "inst_1769758731545_5h8fdq8lv",
-              "type": "AudioOrbitalPlane"
+              "type": "AudioOrbitalPlane",
+              "disabled": true
             }
           ],
           "modulesData": {
