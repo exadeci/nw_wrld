@@ -477,6 +477,23 @@ const Dashboard = () => {
   }, [userData?.config?.audioReactive, sendToProjector]);
 
   useEffect(() => {
+    const enabled = userData?.config?.audioReactive?.enabled !== false;
+    const audioCapture = userData?.config?.audioCapture || {};
+    const sourceType = audioCapture.sourceType || "input";
+    const deviceId = audioCapture.deviceId || "";
+    const systemAudioId = audioCapture.systemAudioId || "";
+    if (enabled) {
+      const opts =
+        sourceType === "system"
+          ? { type: "system", systemAudioId: systemAudioId || null }
+          : { type: sourceType, deviceId: deviceId || null };
+      sendToProjector("audio-capture-start", opts);
+    } else {
+      sendToProjector("audio-capture-stop", {});
+    }
+  }, [userData?.config?.audioReactive?.enabled, userData?.config?.audioCapture, sendToProjector]);
+
+  useEffect(() => {
     const showFps = userData?.config?.showFps ?? false;
     sendToProjector("setShowFps", { showFps });
   }, [userData?.config?.showFps, sendToProjector]);
@@ -539,6 +556,22 @@ const Dashboard = () => {
   }, [userData?.config?.sequencerMode, inputConfig, invokeIPC]);
 
   useIPCListener("from-projector", (event, data) => {
+    if (data.type === "projector-ready") {
+      const ud = userDataRef.current;
+      if (ud?.config?.audioReactive?.enabled !== false) {
+        const audioCapture = ud?.config?.audioCapture || {};
+        const sourceType = audioCapture.sourceType || "input";
+        const deviceId = audioCapture.deviceId || "";
+        const systemAudioId = audioCapture.systemAudioId || "";
+        const opts =
+          sourceType === "system"
+            ? { type: "system", systemAudioId: systemAudioId || null }
+            : { type: sourceType, deviceId: deviceId || null };
+        setTimeout(() => sendToProjector("audio-capture-start", opts), 150);
+      }
+      return;
+    }
+
     if (data.type === "fps-update") {
       const fps = data.props?.fps ?? 0;
       const rendererType = data.props?.rendererType ?? "WebGL";
@@ -783,7 +816,7 @@ const Dashboard = () => {
         }
       }
 
-      if (workspacePathToUse && data?.config?.audioReactive?.enabled !== false) {
+      if (data?.config?.audioReactive?.enabled !== false) {
         const audioCapture = data?.config?.audioCapture || {};
         const sourceType = audioCapture.sourceType || "input";
         const deviceId = audioCapture.deviceId || "";

@@ -141,7 +141,7 @@ const AudioReactiveSettings = ({ config, updateConfig, isOpen }) => {
           </div>
         </div>
         <div className="mt-2 text-[9px] text-neutral-600">
-          Start audio capture below to see live levels
+          When enabled, audio is captured automatically using the source below
         </div>
       </div>
 
@@ -541,22 +541,19 @@ const AudioCaptureSettings = ({ isOpen, config, updateConfig }) => {
   const audioCaptureConfig = config?.audioCapture || { sourceType: "input", deviceId: "", systemAudioId: "" };
   const [selectedSourceType, setSelectedSourceType] = useState(audioCaptureConfig.sourceType || "input");
   const [selectedDeviceId, setSelectedDeviceId] = useState(audioCaptureConfig.deviceId || "");
-  const [isCapturing, setIsCapturing] = useState(false);
-  const [captureError, setCaptureError] = useState(null);
 
   useEffect(() => {
     if (!isOpen) return;
-    
+
     const loadDevices = async () => {
       const bridge = globalThis.nwWrldBridge;
       if (!bridge?.audio) return;
 
       try {
-        const [inputResult, outputResult, systemResult, statusResult] = await Promise.all([
+        const [inputResult, outputResult, systemResult] = await Promise.all([
           bridge.audio.getInputDevices(),
           bridge.audio.getOutputDevices(),
           bridge.audio.getSystemAudioSources(),
-          bridge.audio.getStatus(),
         ]);
 
         if (inputResult?.ok) {
@@ -568,15 +565,13 @@ const AudioCaptureSettings = ({ isOpen, config, updateConfig }) => {
         if (systemResult?.ok) {
           setSystemAudioSources(systemResult.sources || []);
         }
-
-        setIsCapturing(statusResult?.isCapturing === true);
       } catch (error) {
         console.error("Error loading audio devices:", error);
       }
     };
 
     loadDevices();
-    
+
     const savedConfig = config?.audioCapture || {};
     if (savedConfig.sourceType) {
       setSelectedSourceType(savedConfig.sourceType);
@@ -585,55 +580,6 @@ const AudioCaptureSettings = ({ isOpen, config, updateConfig }) => {
       setSelectedDeviceId(savedConfig.deviceId);
     }
   }, [isOpen, config]);
-
-  const handleStartCapture = async () => {
-    const messaging = globalThis.nwWrldBridge?.messaging;
-    if (!messaging) return;
-
-    setCaptureError(null);
-
-    try {
-      let options = {};
-      
-      if (selectedSourceType === "system") {
-        options = {
-          type: "system",
-          systemAudioId: selectedDeviceId,
-        };
-      } else {
-        options = {
-          type: selectedSourceType,
-          deviceId: selectedDeviceId || null,
-        };
-      }
-
-      messaging.sendToProjector("audio-capture-start", options);
-      
-      setIsCapturing(true);
-      updateConfig({
-        audioCapture: {
-          sourceType: selectedSourceType,
-          deviceId: selectedSourceType === "system" ? "" : selectedDeviceId,
-          systemAudioId: selectedSourceType === "system" ? selectedDeviceId : "",
-        },
-      });
-    } catch (error) {
-      setCaptureError(error.message || "Capture failed");
-    }
-  };
-
-  const handleStopCapture = async () => {
-    const messaging = globalThis.nwWrldBridge?.messaging;
-    if (!messaging) return;
-
-    try {
-      messaging.sendToProjector("audio-capture-stop", {});
-      setIsCapturing(false);
-      setCaptureError(null);
-    } catch (error) {
-      setCaptureError(error.message || "Failed to stop capture");
-    }
-  };
 
   const availableDevices = 
     selectedSourceType === "input"
@@ -770,27 +716,9 @@ const AudioCaptureSettings = ({ isOpen, config, updateConfig }) => {
           </div>
         )}
 
-        <div className="mt-3 flex gap-2">
-          {!isCapturing ? (
-            <Button onClick={handleStartCapture} className="flex-1">
-              START CAPTURE
-            </Button>
-          ) : (
-            <Button onClick={handleStopCapture} className="flex-1">
-              STOP CAPTURE
-            </Button>
-          )}
-        </div>
-
-        {captureError && (
-          <div className="mt-2 text-[10px] text-red-400">
-            Error: {captureError}
-          </div>
-        )}
-
-        {isCapturing && (
-          <div className="mt-2 text-[10px] text-green-400">
-            ✓ Audio capture active - available to modules
+        {config?.audioReactive?.enabled !== false && (
+          <div className="mt-3 text-[10px] text-green-400">
+            ✓ Audio capture active – available to modules
           </div>
         )}
       </div>
