@@ -101,6 +101,12 @@ const nwWrldBridge = {
       ipcRenderer.on("from-projector", wrapped);
       return () => ipcRenderer.removeListener("from-projector", wrapped);
     },
+    onSandboxLog: (handler: IpcHandler) => {
+      if (typeof handler !== "function") return undefined;
+      const wrapped = (event: IpcRendererEvent, data: unknown) => handler(event, data);
+      ipcRenderer.on("sandbox:log", wrapped);
+      return () => ipcRenderer.removeListener("sandbox:log", wrapped);
+    },
     onFromDashboard: (handler: IpcHandler) => {
       if (typeof handler !== "function") return undefined;
       const wrapped = (event: IpcRendererEvent, data: unknown) => handler(event, data);

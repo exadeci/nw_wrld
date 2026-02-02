@@ -509,6 +509,31 @@ export function registerSandboxIpc(): void {
     if (!data || typeof data !== "object") return;
 
     const token = String((data as { token?: unknown })?.token || "").trim();
+    const type = String((data as { type?: unknown })?.type || "").trim();
+
+    // Fire-and-forget module logs: show in main process and forward to dashboard
+    if (type === "module-log") {
+      const mod = String((data as { module?: unknown })?.module || "Module");
+      const message = String((data as { message?: unknown })?.message ?? "");
+      const line = `[${mod}] ${message}`;
+      console.log(line);
+      const dashboard = state.dashboardWindow as {
+        isDestroyed?: () => boolean;
+        webContents?: { isDestroyed?: () => boolean; send?: (ch: string, payload: unknown) => void };
+      } | null;
+      if (
+        dashboard &&
+        typeof dashboard.isDestroyed === "function" &&
+        !dashboard.isDestroyed() &&
+        dashboard.webContents &&
+        typeof dashboard.webContents?.send === "function"
+      ) {
+        try {
+          dashboard.webContents.send("sandbox:log", { module: mod, message });
+        } catch {}
+      }
+      return;
+    }
 
     if ((data as { __nwWrldSandboxPerf?: unknown }).__nwWrldSandboxPerf) {
       if (!token || !state.activeSandboxToken || token !== state.activeSandboxToken) return;

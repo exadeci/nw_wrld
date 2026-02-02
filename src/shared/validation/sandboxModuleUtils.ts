@@ -21,6 +21,7 @@ const WORKSPACE_MODULE_ALLOWED_IMPORTS = new Set([
   "OrbitControls",
   "createNoise2D",
   "createNoise3D",
+  "ShaderArt",
 ]);
 
 export const getTokenFromLocationHash = (hash: unknown): string | null => {

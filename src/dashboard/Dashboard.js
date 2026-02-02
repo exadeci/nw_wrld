@@ -629,6 +629,12 @@ const Dashboard = () => {
     }
   }, [userData?.config?.sequencerMode, inputConfig, invokeIPC]);
 
+  useIPCListener("sandbox:log", (_event, data) => {
+    const mod = data?.module ?? "Module";
+    const msg = data?.message ?? "";
+    console.log(`[${mod}] ${msg}`);
+  });
+
   useIPCListener("from-projector", (event, data) => {
     if (data.type === "projector-ready") {
       const ud = userDataRef.current;

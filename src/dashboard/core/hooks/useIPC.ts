@@ -82,6 +82,8 @@ export const useIPCListener = (
       cleanup = messaging.onWorkspaceModulesChanged?.(handler);
     } else if (channel === "workspace:lostSync") {
       cleanup = messaging.onWorkspaceLostSync?.(handler);
+    } else if (channel === "sandbox:log") {
+      cleanup = messaging.onSandboxLog?.(handler);
     } else {
       return;
     }

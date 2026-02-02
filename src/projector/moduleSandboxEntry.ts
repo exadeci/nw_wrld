@@ -11,6 +11,7 @@ import { PLYLoader } from "three/examples/jsm/loaders/PLYLoader.js";
 import { PCDLoader } from "three/examples/jsm/loaders/PCDLoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
+import { ShaderArt } from "shader-art";
 import { parseNwWrldDocblockMetadata } from "../shared/nwWrldDocblock";
 import {
   buildMethodOptions,
@@ -36,6 +37,9 @@ if (!globalThis.PLYLoader) globalThis.PLYLoader = PLYLoader;
 if (!globalThis.PCDLoader) globalThis.PCDLoader = PCDLoader;
 if (!globalThis.GLTFLoader) globalThis.GLTFLoader = GLTFLoader;
 if (!globalThis.STLLoader) globalThis.STLLoader = STLLoader;
+if (!(globalThis as typeof globalThis & { ShaderArt?: typeof ShaderArt }).ShaderArt) {
+  (globalThis as typeof globalThis & { ShaderArt: typeof ShaderArt }).ShaderArt = ShaderArt;
+}
 
 // Expose simplex-noise helpers for workspace modules
 if (!(globalThis as typeof globalThis & { createNoise2D?: unknown }).createNoise2D) {
