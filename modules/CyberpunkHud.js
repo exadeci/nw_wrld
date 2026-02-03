@@ -1,6 +1,6 @@
 /*
 @nwWrld name: CyberpunkHud
-@nwWrld category: Visual
+@nwWrld category: Overlays
 @nwWrld imports: ModuleBase, p5
 */
 

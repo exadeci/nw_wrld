@@ -1,6 +1,6 @@
 /*
 @nwWrld name: DVD
-@nwWrld category: Visual
+@nwWrld category: Overlays
 @nwWrld imports: BaseThreeJsModule, THREE
 */
 

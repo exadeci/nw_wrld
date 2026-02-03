@@ -1,6 +1,6 @@
 /*
 @nwWrld name: Galaxy
-@nwWrld category: Three.js
+@nwWrld category: 3D
 @nwWrld imports: BaseThreeJsModule, THREE, OrbitControls
 */
 

@@ -301,6 +301,28 @@
                   ]
                 },
                 {
+                  "name": "size",
+                  "options": [
+                    {
+                      "name": "x",
+                      "value": 10
+                    },
+                    {
+                      "name": "y",
+                      "value": 10
+                    }
+                  ]
+                },
+                {
+                  "name": "color",
+                  "options": [
+                    {
+                      "name": "color",
+                      "value": "#ffffff"
+                    }
+                  ]
+                },
+                {
                   "name": "show",
                   "options": [
                     {
@@ -2351,6 +2373,42 @@
                     {
                       "name": "border",
                       "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 75
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "speed",
+                      "value": 1
                     }
                   ]
                 },

@@ -1,6 +1,6 @@
 /*
 @nwWrld name: Video
-@nwWrld category: 2D
+@nwWrld category: Media
 @nwWrld imports: ModuleBase, assetUrl, listAssets
 */
 

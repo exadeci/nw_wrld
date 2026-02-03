@@ -1,6 +1,6 @@
 /*
 @nwWrld name: SpaceGlobe
-@nwWrld category: Three.js
+@nwWrld category: 3D
 @nwWrld imports: BaseThreeJsModule, THREE, OrbitControls, createNoise2D, assetUrl
 */
 
