@@ -1763,6 +1763,10 @@
             {
               "id": "inst_1769650857272_67ux6tt17",
               "type": "Corners"
+            },
+            {
+              "id": "inst_1770099336442_nb7p2h0e8",
+              "type": "DomainWarp"
             }
           ],
           "modulesData": {
@@ -2680,6 +2684,99 @@
                     {
                       "name": "duration",
                       "value": 0
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1770099336442_nb7p2h0e8": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 75
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "sensitivity",
+                      "value": 2
+                    },
+                    {
+                      "name": "speed",
+                      "value": 1
+                    },
+                    {
+                      "name": "baseColor",
+                      "value": "#e70808"
+                    },
+                    {
+                      "name": "accentColor",
+                      "value": "#002061"
+                    },
+                    {
+                      "name": "highlightColor",
+                      "value": "#e6b34d"
+                    }
+                  ]
+                },
+                {
+                  "name": "setAudioReactive",
+                  "options": [
+                    {
+                      "name": "enabled",
+                      "value": false,
+                      "defaultVal": true
                     }
                   ]
                 }
