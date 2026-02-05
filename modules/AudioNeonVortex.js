@@ -30,6 +30,8 @@ class AudioNeonVortex extends BaseThreeJsModule {
           defaultVal: true,
           type: "boolean",
         },
+        { name: "insideColor", defaultVal: "#00ffff", type: "color" },
+        { name: "outsideColor", defaultVal: "#ff00ff", type: "color" },
       ],
     },
     {
@@ -56,6 +58,16 @@ class AudioNeonVortex extends BaseThreeJsModule {
       executeOnLoad: false,
       options: [{ name: "enabled", defaultVal: true, type: "boolean" }],
     },
+    {
+      name: "setInsideColor",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: "#00ffff", type: "color" }],
+    },
+    {
+      name: "setOutsideColor",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: "#ff00ff", type: "color" }],
+    },
   ];
 
   constructor(container) {
@@ -79,16 +91,26 @@ class AudioNeonVortex extends BaseThreeJsModule {
     this.tunnelRadius = 4;
     this.tunnelLength = 100;
     this.directionSign = 1;
+    this.insideColor = "#00ffff";
+    this.outsideColor = "#ff00ff";
 
     this.init();
   }
 
-  async start({ direction = "forward", speed = 0.15, audioReactive = true } = {}) {
+  normalizeHex(val, fallback) {
+    if (val == null || String(val).trim() === "") return fallback;
+    const s = String(val).trim().replace(/^#/, "");
+    return s ? "#" + s : fallback;
+  }
+
+  async start({ direction = "forward", speed = 0.15, audioReactive = true, insideColor = "#00ffff", outsideColor = "#ff00ff" } = {}) {
     this.direction = direction === "backward" ? "backward" : "forward";
     this.directionSign = this.direction === "forward" ? 1 : -1;
     const speedVal = Number(speed);
     this.speed = Math.max(0.02, Math.min(1.0, Number.isFinite(speedVal) ? speedVal : 0.15));
     this.audioReactive = Boolean(audioReactive);
+    this.insideColor = this.normalizeHex(insideColor, "#00ffff");
+    this.outsideColor = this.normalizeHex(outsideColor, "#ff00ff");
     await this.tryInitializeAudio();
     if (!this.audioReady) this.startStreamPolling();
   }
@@ -136,6 +158,35 @@ class AudioNeonVortex extends BaseThreeJsModule {
     this.audioReactive = Boolean(enabled);
   }
 
+  setInsideColor({ value = "#00ffff" } = {}) {
+    this.insideColor = this.normalizeHex(value, "#00ffff");
+    this.updateVortexColors();
+  }
+
+  setOutsideColor({ value = "#ff00ff" } = {}) {
+    this.outsideColor = this.normalizeHex(value, "#ff00ff");
+    this.updateVortexColors();
+  }
+
+  updateVortexColors() {
+    if (!this.starField?.geometry?.attributes?.color) return;
+    const color1 = new THREE.Color(this.insideColor);
+    const color2 = new THREE.Color(this.outsideColor);
+    const positions = this.starField.geometry.attributes.position.array;
+    const colors = this.starField.geometry.attributes.color.array;
+    for (let i = 0; i < this.pointsCount; i++) {
+      const i3 = i * 3;
+      const x = positions[i3];
+      const y = positions[i3 + 1];
+      const angle = Math.atan2(y, x);
+      const mixedColor = color1.clone().lerp(color2, (Math.sin(angle * 2) + 1) / 2);
+      colors[i3] = mixedColor.r;
+      colors[i3 + 1] = mixedColor.g;
+      colors[i3 + 2] = mixedColor.b;
+    }
+    this.starField.geometry.attributes.color.needsUpdate = true;
+  }
+
   init() {
     if (!this.renderer || !this.scene || !this.camera || this.destroyed) return;
 
@@ -151,8 +202,8 @@ class AudioNeonVortex extends BaseThreeJsModule {
     const colorsArray = new Float32Array(this.pointsCount * 3);
     const sizesArray = new Float32Array(this.pointsCount);
 
-    const color1 = new THREE.Color(0x00ffff);
-    const color2 = new THREE.Color(0xff00ff);
+    const color1 = new THREE.Color(this.insideColor);
+    const color2 = new THREE.Color(this.outsideColor);
 
     for (let i = 0; i < this.pointsCount; i++) {
       const i3 = i * 3;

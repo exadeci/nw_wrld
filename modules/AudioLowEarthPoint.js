@@ -31,30 +31,111 @@ const clearThreeGroup = (group) => {
   group.clear();
 };
 
+const hexToNum = (hex) => {
+  if (hex == null || hex === "") return 0x00ffff;
+  const s = String(hex).replace(/^#/, "");
+  return parseInt(s, 16) || 0x00ffff;
+};
+
+const normalizeHex = (val, fallback) => {
+  if (val == null) return fallback;
+  if (typeof val === "number" && Number.isFinite(val)) {
+    const hex = Math.max(0, Math.min(0xffffff, Math.floor(val))).toString(16).padStart(6, "0");
+    return "#" + hex;
+  }
+  if (typeof val === "object" && val !== null && "r" in val && "g" in val && "b" in val) {
+    const r = Math.max(0, Math.min(1, Number(val.r) || 0));
+    const g = Math.max(0, Math.min(1, Number(val.g) || 0));
+    const b = Math.max(0, Math.min(1, Number(val.b) || 0));
+    const hex = ((1 << 24) + (Math.round(r * 255) << 16) + (Math.round(g * 255) << 8) + Math.round(b * 255)).toString(16).slice(1);
+    return "#" + hex;
+  }
+  const s = String(val).trim().replace(/^#/, "");
+  return s ? "#" + s : fallback;
+};
+
+const applyColorToMaterial = (material, hexStr) => {
+  if (!material || !material.color) return;
+  const str = String(hexStr || "").trim();
+  if (str.startsWith("#")) {
+    material.color.setStyle(str);
+  } else {
+    material.color.setHex(hexToNum(hexStr));
+  }
+};
+
 class AudioLowEarthPoint extends BaseThreeJsModule {
   static methods = [
     {
       name: "start",
       executeOnLoad: true,
       options: [
-        { name: "sensitivity", defaultVal: 1.5, type: "number", min: 0.1, max: 5.0 },
-        { name: "particleCount", defaultVal: 500, type: "number", min: 100, max: 2000 },
+        { name: "sensitivity", defaultVal: 1.5, type: "number" },
+        { name: "particleCount", defaultVal: 500, type: "number" },
+        { name: "pointsColor", defaultVal: "#00ffff", type: "color" },
+        { name: "redPointsColor", defaultVal: "#ff0000", type: "color" },
+        { name: "linesColor", defaultVal: "#00ffff", type: "color" },
+        { name: "pulseColor", defaultVal: "#ffffff", type: "color" },
+        { name: "pointsSize", defaultVal: 0.05, type: "number" },
+        { name: "redPointsSize", defaultVal: 0.06, type: "number" },
+        { name: "linesOpacity", defaultVal: 0.2, type: "number" },
+        { name: "linesThickness", defaultVal: 1, type: "number" },
       ],
     },
     {
       name: "setSensitivity",
       executeOnLoad: false,
-      options: [{ name: "value", defaultVal: 1.5, type: "number", min: 0.1, max: 5.0 }],
+      options: [{ name: "value", defaultVal: 1.5, type: "number" }],
     },
     {
       name: "setParticleCount",
       executeOnLoad: false,
-      options: [{ name: "value", defaultVal: 500, type: "number", min: 100, max: 2000 }],
+      options: [{ name: "value", defaultVal: 500, type: "number" }],
     },
     {
       name: "setAudioReactive",
       executeOnLoad: false,
       options: [{ name: "enabled", defaultVal: true, type: "boolean" }],
+    },
+    {
+      name: "setPointsColor",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: "#00ffff", type: "color" }],
+    },
+    {
+      name: "setRedPointsColor",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: "#ff0000", type: "color" }],
+    },
+    {
+      name: "setLinesColor",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: "#00ffff", type: "color" }],
+    },
+    {
+      name: "setPulseColor",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: "#ffffff", type: "color" }],
+    },
+    {
+      name: "setPointsSize",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: 0.05, type: "number" }],
+    },
+    {
+      name: "setRedPointsSize",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: 0.06, type: "number" }],
+    },
+    {
+      name: "setLinesOpacity",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: 0.2, type: "number" }],
+    },
+    {
+      name: "setLinesThickness",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: 1, type: "number" }],
     },
   ];
 
@@ -76,6 +157,14 @@ class AudioLowEarthPoint extends BaseThreeJsModule {
     this.sensitivity = 1.5;
     this.particleCount = 500;
     this.audioReactive = true;
+    this.pointsColor = "#00ffff";
+    this.redPointsColor = "#ff0000";
+    this.linesColor = "#00ffff";
+    this.pulseColor = "#ffffff";
+    this.pointsSize = 0.05;
+    this.redPointsSize = 0.06;
+    this.linesOpacity = 0.2;
+    this.linesThickness = 1;
     this.volume = 0;
     this.bass = 0;
     this.mid = 0;
@@ -87,11 +176,45 @@ class AudioLowEarthPoint extends BaseThreeJsModule {
     this.init();
   }
 
-  async start({ sensitivity = 1.5, particleCount = 500 } = {}) {
-    this.sensitivity = Math.max(0.1, Math.min(5.0, Number(sensitivity) || 1.5));
-    this.particleCount = Math.max(100, Math.min(2000, Number(particleCount) || 500));
+  async start({
+    sensitivity = 1.5,
+    particleCount = 500,
+    pointsColor = "#00ffff",
+    redPointsColor = "#ff0000",
+    linesColor = "#00ffff",
+    pulseColor = "#ffffff",
+    pointsSize = 0.05,
+    redPointsSize = 0.06,
+    linesOpacity = 0.2,
+    linesThickness = 1,
+  } = {}) {
+    this.sensitivity = Number(sensitivity) || 1.5;
+    this.particleCount = Number(particleCount) || 500;
+    this.pointsColor = normalizeHex(pointsColor, "#00ffff");
+    this.redPointsColor = normalizeHex(redPointsColor, "#ff0000");
+    this.linesColor = normalizeHex(linesColor, "#00ffff");
+    this.pulseColor = normalizeHex(pulseColor, "#ffffff");
+    this.pointsSize = Number(pointsSize) ?? 0.05;
+    this.redPointsSize = Number(redPointsSize) ?? 0.06;
+    this.linesOpacity = Number(linesOpacity) ?? 0.2;
+    this.linesThickness = Number(linesThickness) ?? 1;
+    this.applyColorsToMaterials();
+    this.linesGroup.children.forEach((child) => {
+      if (child.material) {
+        child.material.opacity = this.linesOpacity;
+        child.material.linewidth = this.linesThickness;
+      }
+    });
     await this.tryInitializeAudio();
     if (!this.audioReady) this.startStreamPolling();
+  }
+
+  applyColorsToMaterials() {
+    applyColorToMaterial(this.pointCloud?.material, this.pointsColor);
+    applyColorToMaterial(this.redPointCloud?.material, this.redPointsColor);
+    this.linesGroup.children.forEach((child) => {
+      applyColorToMaterial(child.material, this.linesColor);
+    });
   }
 
   async tryInitializeAudio() {
@@ -135,7 +258,7 @@ class AudioLowEarthPoint extends BaseThreeJsModule {
     if (this.destroyed) return;
 
     const geometry = new THREE.BufferGeometry();
-    const material = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.05, transparent: true, opacity: 0.8 });
+    const material = new THREE.PointsMaterial({ color: hexToNum(this.pointsColor), size: this.pointsSize, transparent: true, opacity: 0.8 });
     const positions = [];
 
     for (let i = 0; i < this.particleCount; i++) {
@@ -155,7 +278,7 @@ class AudioLowEarthPoint extends BaseThreeJsModule {
     if (this.destroyed) return;
 
     const redGeometry = new THREE.BufferGeometry();
-    const redMaterial = new THREE.PointsMaterial({ color: 0xff0000, size: 0.06, transparent: true, opacity: 0.9 });
+    const redMaterial = new THREE.PointsMaterial({ color: hexToNum(this.redPointsColor), size: this.redPointsSize, transparent: true, opacity: 0.9 });
     const redPositions = [];
 
     const count = Math.floor(this.particleCount / 2);
@@ -188,7 +311,12 @@ class AudioLowEarthPoint extends BaseThreeJsModule {
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-    const material = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.2 });
+    const material = new THREE.LineBasicMaterial({
+      color: hexToNum(this.linesColor),
+      transparent: true,
+      opacity: this.linesOpacity,
+      linewidth: this.linesThickness,
+    });
     const lines = new THREE.LineSegments(geometry, material);
     this.linesGroup.add(lines);
   }
@@ -215,14 +343,14 @@ class AudioLowEarthPoint extends BaseThreeJsModule {
     if (this.pointCloud) {
       this.pointCloud.rotation.x += rotSpeed;
       this.pointCloud.rotation.y += rotSpeed * 0.7;
-      this.pointCloud.material.size = 0.05 + this.treble * 0.1;
+      this.pointCloud.material.size = this.pointsSize + this.treble * 0.1;
       this.pointCloud.material.opacity = 0.5 + this.volume * 0.5;
     }
 
     if (this.redPointCloud) {
       this.redPointCloud.rotation.x -= rotSpeed * 0.5;
       this.redPointCloud.rotation.y -= rotSpeed * 0.8;
-      this.redPointCloud.material.size = 0.06 + this.bass * 0.15;
+      this.redPointCloud.material.size = this.redPointsSize + this.bass * 0.15;
       
       const scale = 1 + this.bass * 0.5;
       this.redPointCloud.scale.setScalar(scale);
@@ -242,7 +370,7 @@ class AudioLowEarthPoint extends BaseThreeJsModule {
     const selected = sampleN(this.points, 3);
     selected.forEach((point) => {
       const geometry = new THREE.SphereGeometry(0.1, 8, 8);
-      const material = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1 });
+      const material = new THREE.MeshBasicMaterial({ color: hexToNum(this.pulseColor), transparent: true, opacity: 1 });
       const mesh = new THREE.Mesh(geometry, material);
       mesh.position.copy(point);
       mesh.userData.life = 1;
@@ -282,6 +410,51 @@ class AudioLowEarthPoint extends BaseThreeJsModule {
 
   setAudioReactive({ enabled = true } = {}) {
     this.audioReactive = Boolean(enabled);
+  }
+
+  setPointsColor({ value = "#00ffff" } = {}) {
+    this.pointsColor = normalizeHex(value, "#00ffff");
+    applyColorToMaterial(this.pointCloud?.material, this.pointsColor);
+  }
+
+  setRedPointsColor({ value = "#ff0000" } = {}) {
+    this.redPointsColor = normalizeHex(value, "#ff0000");
+    applyColorToMaterial(this.redPointCloud?.material, this.redPointsColor);
+  }
+
+  setLinesColor({ value = "#00ffff" } = {}) {
+    this.linesColor = normalizeHex(value, "#00ffff");
+    this.linesGroup.children.forEach((child) => {
+      applyColorToMaterial(child.material, this.linesColor);
+    });
+  }
+
+  setPulseColor({ value = "#ffffff" } = {}) {
+    this.pulseColor = normalizeHex(value, "#ffffff");
+  }
+
+  setPointsSize({ value = 0.05 } = {}) {
+    this.pointsSize = Number(value) ?? 0.05;
+    if (this.pointCloud?.material) this.pointCloud.material.size = this.pointsSize;
+  }
+
+  setRedPointsSize({ value = 0.06 } = {}) {
+    this.redPointsSize = Number(value) ?? 0.06;
+    if (this.redPointCloud?.material) this.redPointCloud.material.size = this.redPointsSize;
+  }
+
+  setLinesOpacity({ value = 0.2 } = {}) {
+    this.linesOpacity = Number(value) ?? 0.2;
+    this.linesGroup.children.forEach((child) => {
+      if (child.material) child.material.opacity = this.linesOpacity;
+    });
+  }
+
+  setLinesThickness({ value = 1 } = {}) {
+    this.linesThickness = Number(value) ?? 1;
+    this.linesGroup.children.forEach((child) => {
+      if (child.material) child.material.linewidth = this.linesThickness;
+    });
   }
 
   rebuildPoints() {

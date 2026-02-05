@@ -1744,11 +1744,6 @@
               "disabled": true
             },
             {
-              "id": "inst_1770035811909_bmmra92f0",
-              "type": "ShipiboGatewayAscended",
-              "disabled": true
-            },
-            {
               "id": "inst_1770037004829_acdw0op71",
               "type": "Ocean",
               "disabled": true
@@ -1783,12 +1778,17 @@
               "type": "Dvd"
             },
             {
+              "id": "inst_1770099336442_nb7p2h0e8",
+              "type": "DomainWarp"
+            },
+            {
               "id": "inst_1769650857272_67ux6tt17",
               "type": "Corners"
             },
             {
-              "id": "inst_1770099336442_nb7p2h0e8",
-              "type": "DomainWarp"
+              "id": "inst_1770177797225_8oz3lpn2q",
+              "type": "AudioLowEarthPoint",
+              "disabled": true
             }
           ],
           "modulesData": {
@@ -2196,73 +2196,6 @@
                     {
                       "name": "audioReactive",
                       "value": true
-                    }
-                  ]
-                },
-                {
-                  "name": "show",
-                  "options": [
-                    {
-                      "name": "duration",
-                      "value": 0
-                    }
-                  ]
-                }
-              ],
-              "methods": {}
-            },
-            "inst_1770035811909_bmmra92f0": {
-              "constructor": [
-                {
-                  "name": "matrix",
-                  "options": [
-                    {
-                      "name": "matrix",
-                      "value": {
-                        "rows": 1,
-                        "cols": 1,
-                        "excludedCells": []
-                      }
-                    },
-                    {
-                      "name": "border",
-                      "value": false
-                    }
-                  ]
-                },
-                {
-                  "name": "zoomLevel",
-                  "options": [
-                    {
-                      "name": "zoomLevel",
-                      "value": 75
-                    }
-                  ]
-                },
-                {
-                  "name": "viewDirection",
-                  "options": [
-                    {
-                      "name": "viewDirection",
-                      "value": "front"
-                    }
-                  ]
-                },
-                {
-                  "name": "cameraSpeed",
-                  "options": [
-                    {
-                      "name": "cameraSpeed",
-                      "value": 1
-                    }
-                  ]
-                },
-                {
-                  "name": "start",
-                  "options": [
-                    {
-                      "name": "speed",
-                      "value": 1
                     }
                   ]
                 },
@@ -2816,7 +2749,7 @@
                     },
                     {
                       "name": "baseColor",
-                      "value": "#e70808"
+                      "value": "#578208"
                     },
                     {
                       "name": "accentColor",
@@ -2835,6 +2768,109 @@
                       "name": "enabled",
                       "value": false,
                       "defaultVal": true
+                    }
+                  ]
+                }
+              ],
+              "methods": {}
+            },
+            "inst_1770177797225_8oz3lpn2q": {
+              "constructor": [
+                {
+                  "name": "matrix",
+                  "options": [
+                    {
+                      "name": "matrix",
+                      "value": {
+                        "rows": 1,
+                        "cols": 1,
+                        "excludedCells": []
+                      }
+                    },
+                    {
+                      "name": "border",
+                      "value": false
+                    }
+                  ]
+                },
+                {
+                  "name": "show",
+                  "options": [
+                    {
+                      "name": "duration",
+                      "value": 0
+                    }
+                  ]
+                },
+                {
+                  "name": "zoomLevel",
+                  "options": [
+                    {
+                      "name": "zoomLevel",
+                      "value": 28
+                    }
+                  ]
+                },
+                {
+                  "name": "viewDirection",
+                  "options": [
+                    {
+                      "name": "viewDirection",
+                      "value": "front"
+                    }
+                  ]
+                },
+                {
+                  "name": "cameraSpeed",
+                  "options": [
+                    {
+                      "name": "cameraSpeed",
+                      "value": 1
+                    }
+                  ]
+                },
+                {
+                  "name": "start",
+                  "options": [
+                    {
+                      "name": "sensitivity",
+                      "value": 1.5
+                    },
+                    {
+                      "name": "particleCount",
+                      "value": 800
+                    },
+                    {
+                      "name": "pointsColor",
+                      "value": "#df4620"
+                    },
+                    {
+                      "name": "linesColor",
+                      "value": "#009dff"
+                    },
+                    {
+                      "name": "redPointsColor",
+                      "value": "#ff0000"
+                    },
+                    {
+                      "name": "pulseColor",
+                      "value": "#ffffff"
+                    },
+                    {
+                      "name": "pointsSize",
+                      "value": 0.05
+                    },
+                    {
+                      "name": "linesOpacity",
+                      "value": 0.2
+                    },
+                    {
+                      "name": "redPointsSize",
+                      "value": 0.06
+                    },
+                    {
+                      "name": "linesThickness",
+                      "value": 2
                     }
                   ]
                 }

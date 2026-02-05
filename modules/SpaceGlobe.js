@@ -24,7 +24,19 @@ class SpaceGlobe extends BaseThreeJsModule {
         { name: "autoRotateSpeed", defaultVal: 5, type: "number", min: 0, max: 20 },
         { name: "blobScale", defaultVal: 2, type: "number", min: 0.5, max: 5 },
         { name: "nucleusDetail", defaultVal: 28, type: "number", min: 1, max: 30 },
+        { name: "nucleusColor", defaultVal: "#ffffff", type: "color" },
+        { name: "backgroundColor", defaultVal: "#000000", type: "color" },
       ],
+    },
+    {
+      name: "setNucleusColor",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: "#ffffff", type: "color" }],
+    },
+    {
+      name: "setBackgroundColor",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: "#000000", type: "color" }],
     },
   ];
 
@@ -38,6 +50,8 @@ class SpaceGlobe extends BaseThreeJsModule {
     this.autoRotateSpeed = 5;
     this.blobScale = 2;
     this.nucleusDetail = 28;
+    this.nucleusColor = "#ffffff";
+    this.backgroundColor = "#000000";
 
     this.clock = new THREE.Clock();
     this.delta = 0;
@@ -77,14 +91,24 @@ class SpaceGlobe extends BaseThreeJsModule {
     this.destroyed = false;
   }
 
+  normalizeHex(val, fallback) {
+    if (val == null || String(val).trim() === "") return fallback;
+    const s = String(val).trim().replace(/^#/, "");
+    return s ? "#" + s : fallback;
+  }
+
   async start({
     autoRotateSpeed = 5,
     blobScale = 2,
     nucleusDetail = 28,
+    nucleusColor = "#ffffff",
+    backgroundColor = "#000000",
   } = {}) {
     this.autoRotateSpeed = Math.max(0, Math.min(20, Number(autoRotateSpeed) || 5));
     this.blobScale = Math.max(0.5, Math.min(5, Number(blobScale) || 2));
     this.nucleusDetail = Math.max(1, Math.min(30, Math.floor(Number(nucleusDetail) || 28)));
+    this.nucleusColor = this.normalizeHex(nucleusColor, "#ffffff");
+    this.backgroundColor = this.normalizeHex(backgroundColor, "#000000");
 
     if (!this.renderer || !this.scene || !this.camera) {
       console.error("SpaceGlobe: Renderer, scene, or camera not available");
@@ -376,7 +400,7 @@ class SpaceGlobe extends BaseThreeJsModule {
       icosahedronGeometry.attributes.position.array
     );
     const lambertMaterial = new THREE.MeshPhongMaterial({
-      color: 0xffffff,
+      color: this.nucleusColor,
     });
     this.nucleus = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
     this.nucleus.position.set(0, 0, 0);
@@ -385,7 +409,7 @@ class SpaceGlobe extends BaseThreeJsModule {
     const geometrySphereBg = new THREE.SphereGeometry(1000, 64, 64);
     const materialSphereBg = new THREE.MeshBasicMaterial({
       side: THREE.BackSide,
-      color: 0x000000,
+      color: this.backgroundColor,
     });
     this.sphereBg = new THREE.Mesh(geometrySphereBg, materialSphereBg);
     this.sphereBg.position.set(0, 0, 0);
@@ -819,6 +843,16 @@ class SpaceGlobe extends BaseThreeJsModule {
   setBlobScale({ value = 2 } = {}) {
     const val = Number(value);
     this.blobScale = Math.max(0.5, Math.min(5, Number.isFinite(val) ? val : 2));
+  }
+
+  setNucleusColor({ value = "#ffffff" } = {}) {
+    this.nucleusColor = this.normalizeHex(value, "#ffffff");
+    if (this.nucleus?.material) this.nucleus.material.color.set(this.nucleusColor);
+  }
+
+  setBackgroundColor({ value = "#000000" } = {}) {
+    this.backgroundColor = this.normalizeHex(value, "#000000");
+    if (this.sphereBg?.material) this.sphereBg.material.color.set(this.backgroundColor);
   }
 
   destroy() {

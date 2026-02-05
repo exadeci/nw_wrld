@@ -108,8 +108,56 @@ const createQuadraticBezierLineSegments = ({
   return new THREE.LineSegments(geometry, material);
 };
 
+const hexToNum = (hex) => {
+  if (hex == null || hex === "") return 0xffffff;
+  const s = String(hex).replace(/^#/, "");
+  return parseInt(s, 16) || 0xffffff;
+};
+
+const normalizeHex = (val, fallback) => {
+  if (val == null || String(val).trim() === "") return fallback;
+  const s = String(val).trim().replace(/^#/, "");
+  return s ? "#" + s : fallback;
+};
+
 class LowEarthPointModule extends BaseThreeJsModule {
   static methods = [
+    {
+      name: "start",
+      executeOnLoad: true,
+      options: [
+        { name: "pointsColor", defaultVal: "#ffffff", type: "color" },
+        { name: "redPointsColor", defaultVal: "#ff0000", type: "color" },
+        { name: "linesColor", defaultVal: "#ffffff", type: "color" },
+        { name: "redLinesColor", defaultVal: "#ff0000", type: "color" },
+        { name: "pulseColor", defaultVal: "#ffffff", type: "color" },
+      ],
+    },
+    {
+      name: "setPointsColor",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: "#ffffff", type: "color" }],
+    },
+    {
+      name: "setRedPointsColor",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: "#ff0000", type: "color" }],
+    },
+    {
+      name: "setLinesColor",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: "#ffffff", type: "color" }],
+    },
+    {
+      name: "setRedLinesColor",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: "#ff0000", type: "color" }],
+    },
+    {
+      name: "setPulseColor",
+      executeOnLoad: false,
+      options: [{ name: "value", defaultVal: "#ffffff", type: "color" }],
+    },
     {
       name: "primary",
       executeOnLoad: false,
@@ -139,9 +187,30 @@ class LowEarthPointModule extends BaseThreeJsModule {
     this.customGroup.add(this.redLinesGroup);
     this.pointCloud = null;
     this.redPointCloud = null;
+    this.pointsColor = "#ffffff";
+    this.redPointsColor = "#ff0000";
+    this.linesColor = "#ffffff";
+    this.redLinesColor = "#ff0000";
+    this.pulseColor = "#ffffff";
     this.primary = this.primary.bind(this);
     this.setCustomAnimate(this.animateLoop.bind(this));
     this.init();
+  }
+
+  start({ pointsColor = "#ffffff", redPointsColor = "#ff0000", linesColor = "#ffffff", redLinesColor = "#ff0000", pulseColor = "#ffffff" } = {}) {
+    this.pointsColor = normalizeHex(pointsColor, "#ffffff");
+    this.redPointsColor = normalizeHex(redPointsColor, "#ff0000");
+    this.linesColor = normalizeHex(linesColor, "#ffffff");
+    this.redLinesColor = normalizeHex(redLinesColor, "#ff0000");
+    this.pulseColor = normalizeHex(pulseColor, "#ffffff");
+    if (this.pointCloud?.material) this.pointCloud.material.color.set(this.pointsColor);
+    if (this.redPointCloud?.material) this.redPointCloud.material.color.set(this.redPointsColor);
+    this.linesGroup.children.forEach((child) => {
+      if (child.material) child.material.color.set(this.linesColor);
+    });
+    this.redLinesGroup.children.forEach((child) => {
+      if (child.material) child.material.color.set(this.redLinesColor);
+    });
   }
 
   init() {
@@ -158,7 +227,7 @@ class LowEarthPointModule extends BaseThreeJsModule {
 
     const geometry = new THREE.BufferGeometry();
     const material = new THREE.PointsMaterial({
-      color: 0xffffff,
+      color: hexToNum(this.pointsColor),
       size: 0.05,
     });
     const positions = [];
@@ -187,7 +256,7 @@ class LowEarthPointModule extends BaseThreeJsModule {
 
     const redGeometry = new THREE.BufferGeometry();
     const redMaterial = new THREE.PointsMaterial({
-      color: 0xff0000,
+      color: hexToNum(this.redPointsColor),
       size: 0.045,
     });
     const redPositions = [];
@@ -220,7 +289,7 @@ class LowEarthPointModule extends BaseThreeJsModule {
       THREE,
       points: this.points,
       count: halfPointIndex,
-      color: 0xffffff,
+      color: hexToNum(this.linesColor),
       opacity: 0.1,
       midZScale: 1,
     });
@@ -239,7 +308,7 @@ class LowEarthPointModule extends BaseThreeJsModule {
       THREE,
       points: this.redPoints,
       count: halfRedPointIndex,
-      color: 0xff0000,
+      color: hexToNum(this.redLinesColor),
       opacity: 0.15,
       midZScale: 2,
     });
@@ -269,6 +338,34 @@ class LowEarthPointModule extends BaseThreeJsModule {
     this.redLinesGroup.rotation.y += 0.0003 * this.cameraSettings.cameraSpeed;
   }
 
+  setPointsColor({ value = "#ffffff" } = {}) {
+    this.pointsColor = normalizeHex(value, "#ffffff");
+    if (this.pointCloud?.material) this.pointCloud.material.color.set(this.pointsColor);
+  }
+
+  setRedPointsColor({ value = "#ff0000" } = {}) {
+    this.redPointsColor = normalizeHex(value, "#ff0000");
+    if (this.redPointCloud?.material) this.redPointCloud.material.color.set(this.redPointsColor);
+  }
+
+  setLinesColor({ value = "#ffffff" } = {}) {
+    this.linesColor = normalizeHex(value, "#ffffff");
+    this.linesGroup.children.forEach((child) => {
+      if (child.material) child.material.color.set(this.linesColor);
+    });
+  }
+
+  setRedLinesColor({ value = "#ff0000" } = {}) {
+    this.redLinesColor = normalizeHex(value, "#ff0000");
+    this.redLinesGroup.children.forEach((child) => {
+      if (child.material) child.material.color.set(this.redLinesColor);
+    });
+  }
+
+  setPulseColor({ value = "#ffffff" } = {}) {
+    this.pulseColor = normalizeHex(value, "#ffffff");
+  }
+
   primary({ duration } = {}) {
     if (this.destroyed) return;
 
@@ -279,7 +376,7 @@ class LowEarthPointModule extends BaseThreeJsModule {
 
     selected.forEach((point) => {
       const geometry = new THREE.SphereGeometry(0.09, 8, 8);
-      const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const material = new THREE.MeshBasicMaterial({ color: hexToNum(this.pulseColor) });
       const mesh = new THREE.Mesh(geometry, material);
       mesh.position.copy(point);
       this.scene.add(mesh);
