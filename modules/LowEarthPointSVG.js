@@ -1,7 +1,7 @@
 /*
 @nwWrld name: LowEarthPointSVG
 @nwWrld category: 2D
-@nwWrld imports: BaseSVGModule
+@nwWrld imports: ModuleBase
 */
 
 const sampleN = (arr, n) => {
@@ -23,7 +23,7 @@ const rotate2D = (x, y, angle) => {
   return { x: x * c - y * s, y: x * s + y * c };
 };
 
-class LowEarthPointSVG extends BaseSVGModule {
+class LowEarthPointSVG extends ModuleBase {
   static methods = [
     {
       name: "primary",
@@ -36,15 +36,27 @@ class LowEarthPointSVG extends BaseSVGModule {
 
   constructor(container) {
     super(container);
-    this.name = LowEarthPointSVG.name;
+    this.svgNS = "http://www.w3.org/2000/svg";
+    this.svgRoot = null;
+    this.animationId = null;
     this.points = [];
     this.redPoints = [];
     this.rotation = 0;
     this.rotationSpeed = 0.0005;
     this.pulseCircles = [];
+    this.init();
+  }
+
+  init() {
+    this.svgRoot = document.createElementNS(this.svgNS, "svg");
+    this.svgRoot.setAttribute("xmlns", this.svgNS);
+    this.svgRoot.style.cssText =
+      "width: 100%; height: 100%; display: block; background: transparent;";
+    this.elem.appendChild(this.svgRoot);
+
     this.createPoints();
     this.createRedPoints();
-    this.setCustomAnimate(this.animateLoop.bind(this));
+    this.startAnimation();
   }
 
   createPoints() {
@@ -72,6 +84,20 @@ class LowEarthPointSVG extends BaseSVGModule {
       x: width / 2 + r.x * scale,
       y: height / 2 + r.y * scale,
     };
+  }
+
+  startAnimation() {
+    const animate = () => {
+      if (this.destroyed) return;
+      this.rotation += this.rotationSpeed;
+      this.pulseCircles = this.pulseCircles.filter((entry) => {
+        entry.life -= 0.015;
+        return entry.life > 0;
+      });
+      this.drawSVG();
+      this.animationId = requestAnimationFrame(animate);
+    };
+    this.animationId = requestAnimationFrame(animate);
   }
 
   drawSVG() {
@@ -161,15 +187,6 @@ class LowEarthPointSVG extends BaseSVGModule {
     this.svgRoot.appendChild(gPulse);
   }
 
-  animateLoop() {
-    if (this.destroyed) return;
-    this.rotation += this.rotationSpeed;
-    this.pulseCircles = this.pulseCircles.filter((entry) => {
-      entry.life -= 0.015;
-      return entry.life > 0;
-    });
-  }
-
   primary({ duration = 500 } = {}) {
     if (this.destroyed) return;
     const millis = Number(duration) || 500;
@@ -180,7 +197,15 @@ class LowEarthPointSVG extends BaseSVGModule {
   }
 
   destroy() {
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
     this.pulseCircles = [];
+    if (this.svgRoot && this.elem.contains(this.svgRoot)) {
+      this.elem.removeChild(this.svgRoot);
+    }
+    this.svgRoot = null;
     super.destroy();
   }
 }
